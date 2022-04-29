@@ -1,0 +1,31 @@
+{
+  "name": "potatoskastanie",
+  "version": "1.0.0",
+  "description": "none",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/Bot.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DjesonPV/PotatOSKastanie.git"
+  },
+  "keywords": [
+    "Discord",
+    "Bot"
+  ],
+  "author": "Djeson_PV",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DjesonPV/PotatOSKastanie/issues"
+  },
+  "homepage": "https://github.com/DjesonPV/PotatOSKastanie#readme",
+  "dependencies": {
+    "discord.js": "^13.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.30",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.4"
+  }
+}
