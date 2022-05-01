@@ -3,7 +3,7 @@ import {sendOnChannel} from "../Bot.mjs";
 const emojisMove = [":fist:", ":raised_hand:", ":v:"];
 const emojisResult = [":arrow_right:",":left_right_arrow:",":arrow_left:"];
 
-const sntVictory  = ["Aucun aléatoire, que du talent.","Moins d'energie et poutant plus efficace.", "Humain == nul | Patate++"];
+const sntVictory  = ["Aucun aléatoire, que du talent.","Moins d'energie et poutant plus efficace.", "Humain == nul, Patate++"];
 const sntDefeat   = ["Purée...", "Sûrement une erreur de calcul...", "Triche évidente !"];
 const sntEquality = ["Les grands esprits se recontrent.", "Même puissance de calcul, et je suis une patate !", "Je suis quatre univers parllèles devant toi !"]; 
 const snReply = [sntDefeat, sntEquality, sntVictory];
