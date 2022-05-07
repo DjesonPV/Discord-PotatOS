@@ -1,5 +1,5 @@
-import {sendOnChannel} from "../Bot.mjs";
+import {printTextOnChannel} from "../Bot.mjs";
 
 export function hello(args, msg){
-    sendOnChannel(msg.channel, `Salut`, 10);
+    printTextOnChannel(msg.channel, `Salut`, 10);
 }

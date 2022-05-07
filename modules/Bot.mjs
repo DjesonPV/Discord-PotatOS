@@ -1,4 +1,4 @@
-import {Client, MessageEmbed, MessageAttachment} from "discord.js";
+import {Client, MessageEmbed, MessageAttachment, MessageActionRow, MessageButton} from "discord.js";
 import {Intents} from "discord.js";
 import * as Commands from "./Commands.mjs";
 
@@ -25,7 +25,7 @@ const client = new Client({
  * the 'botToken' stored in `secret.json`
  */
 export function start(){
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
         const secret = require("../secret.json");
 
         client.on("ready", async () => {
@@ -42,6 +42,11 @@ export function start(){
         });
 
         client.login(secret.botToken);
+        //client.login((await import("../secret.json", { assert: { type: "json" }})).botToken);
+
+        client.once('ready', () => {
+            console.log(`Prêt !`);
+        })
 
     });
 
@@ -69,98 +74,161 @@ client.on('messageCreate', messageHandler);
  * @param msg Represents a message on Discord
  */
 function messageHandler(msg){
+    if (msg.author.bot) return;
+    if (!msg.content.startsWith(cmdSign)) return;
 
-    if (msg.content.startsWith(cmdSign)){
-        msg.delete().then(() => {
-                let args = msg.content.substring(1).split(/\s+/g);
-                let cmdName = args[0];
-                args.shift();
-                let command = Commands[cmdName];
+    msg.delete().then(() => {
+            let args = msg.content.substring(1).split(/\s+/g);
+            let cmdName = args[0];
+            args.shift();
+            let command = Commands[cmdName];
 
-                if (command){
-                    command(args, msg);
-                } else {
+            if (command){
+                command(args, msg);
+            } else {
 
-                    let wrongCommand = new MessageEmbed()
-                    .setColor('#FF006E')
-                    .setAuthor({
-                        name: `La commande [ ${cmdSign}${cmdName} ] est invalide`,
-                        iconURL : `https://cdn.discordapp.com/attachments/329613279204999170/970413892792623204/Error_icon.png`,
+               /* let wrongCommand = new MessageEmbed()
+                .setColor('#FF006E')
+                .setAuthor({
+                    name: `La commande [ ${cmdSign}${cmdName} ] est invalide`,
+                    iconURL : `https://cdn.discordapp.com/attachments/329613279204999170/970413892792623204/Error_icon.png`,
 
-                    });
-                    
-                    sendOnChannel(msg.channel, wrongCommand, 10);
-                }
+                });
                 
-
+                printEmbedOnChannel(msg.channel, wrongCommand, 10);*/
+                printAlertOnChannel(msg.channel, `La commande [ ${cmdSign}${cmdName} ] est invalide`, 10);
             }
-        ).catch(console.log);
-    }
+            
+
+        }
+    ).catch(console.log);
+    
 
 }
 
 
+client.on('interactionCreate', interaction => {
+	if (!interaction.isButton()) return;
+    
+    if (interaction.customId == 'deleteNotif'){
+        interaction.message.delete();
+    }
+    
+});
+
 /**
- * Write content `cnt` on the Discord channel `chnl`
  * 
- * This message can be deleted automatically 
- * after a given amount of time (up to 180 seconds), or not by 
- * setting `time` to 0
- * @param chnl Represents a channel on Discord
- * @param cnt Content you want to print, can be a text or an embed
- * @param time Time limit in seconds
+ * @param chnl Represent a Discord TextChannel
+ * @param text Content to send `String`
+ * @param embeds Content to send `MessageEmbed`
+ * @param attachments Content to send `MessageAttachement`
+ * @param time Time the message will be displayed (in seconds)
  */
-export function sendOnChannel(chnl, cnt, time = 0){
+function printOnChannel(chnl, text="", embeds=[], url = "", time = 0){
     if (chnl == channelsText.get(chnl.name)){
-        if (typeof cnt != null){
 
-            time = Math.min(180, time);
+        time = Math.min(180, time);
 
-            function deleteResponse(msg){
-                if (time > 0){
-                    setTimeout(
-                        () => {
-                            msg.delete().catch(()=>{});
-                        },
-                        time * 1000);
-                }
-            };
-
-            let timeEmbed = new MessageEmbed()
-                .setColor('#FFFFFF')
-                .setAuthor({
-                    name: `Ce message s'autodétruira dans ${time} secondes`,
-                    iconURL : `https://cdn.discordapp.com/attachments/329613279204999170/970415622984966154/Delete_icon.png`,
-                });
-
-            
-            let embeds = [];
-            let content;
-
-            if(typeof cnt == `string`){
-                content = cnt;
-            }else
-            if(cnt instanceof MessageEmbed){
-                embeds.push(cnt)
+        function deleteResponse(msg){
+            if (time > 0){
+                setTimeout(
+                    () => {
+                        if (msg)
+                        msg.delete().catch(()=>{});
+                    },
+                    time * 1000);
             }
-            else{
-                return false;
-            }
+        };
 
-            if (time >0) embeds.push(timeEmbed);
+       /* const timeEmbed = new MessageEmbed()
+        .setColor('#FFFFFF')
+        .setAuthor({
+            name: `Ce message s'autodétruira dans ${time} secondes`,
+            iconURL : `https://cdn.discordapp.com/attachments/329613279204999170/970415622984966154/Delete_icon.png`,
+        });*/
 
-            
+        let timeRow;
 
-            let toSend;
-            if (content) toSend = {content : content ,embeds : embeds};
-            else toSend = {embeds : embeds}; 
+        if (time >0) {//embeds.push(timeEmbed);
+            timeRow = new MessageActionRow()
+			.addComponents(
+				new MessageButton()
+                    .setCustomId('deleteNotif')
+					.setLabel(`Ce message s'autodétruira dans ${time} secondes`)
+					.setStyle('SECONDARY')
+                    //.setDisabled(true)
+                    .setEmoji('🚮')
+			);
+        
+        }
 
-           // console.log(toSend);
+        let toSend = {};
+        if (text.length   != 0) toSend.content = text;
+        if (embeds.length != 0) toSend.embeds  = embeds;
+        if (url.length  != 0) toSend.files   = [{attachment : url}];
+        if (timeRow) toSend.components = [timeRow];
 
-            chnl.send(toSend).then(deleteResponse).catch(console.log);
+        //console.log(toSend);
 
+        chnl.send(toSend).then(deleteResponse).catch(console.log);
+
+    }
+}
+
+/**
+ * 
+ * @param chnl Represent a Discord TextChannel
+ * @param txt Text to send
+ * @param time Time the message will be displayed (in seconds)
+ */
+export function printTextOnChannel(chnl, txt, time){
+    if(typeof txt == "string")
+    printOnChannel(chnl,txt,[],[],time);
+}
+
+/**
+ * 
+ * @param chnl Represent a Discord TextChannel
+ * @param embed MessageEmbed to send
+ * @param time Time the message will be displayed (in seconds)
+ */
+export function printEmbedOnChannel(chnl, embed, time){
+    if(embed instanceof MessageEmbed)
+    printOnChannel(chnl,[],[embed],[],time);
+}
+
+/**
+ * 
+ * @param chnl Represent a Discord TextChannel
+ * @param url URL link to the picture to display
+ * @param time Time the message will be displayed (in seconds)
+ */
+export function printLinkOnChannel(chnl, url, time){
+    if(typeof url == "string"){
+        if (url.match(/^(https?|http):\/\/(-\.)?([^\s\/?\.#]+\.?)+(\/[^\s]*)?$/g)){
+            //console.log(url);
+            //let link = new MessageAttachment(toString(url));
+            printOnChannel(chnl,[],[],url,time);
         }
     }
+    
+}
+
+/**
+ * 
+ * @param chnl Represent a Discord TextChannel
+ * @param txt Text to send in the alert
+ * @param time Time the alert will be displayed (in seconds)
+ */
+export function printAlertOnChannel(chnl, txt, time){
+    let alertEmbed = new MessageEmbed()
+    .setColor('#FF006E')
+    .setAuthor({
+        name: `${txt}`,
+        iconURL : `https://cdn.discordapp.com/attachments/329613279204999170/970413892792623204/Error_icon.png`,
+    });
+
+    printEmbedOnChannel(chnl, alertEmbed, time);
 }
 
 

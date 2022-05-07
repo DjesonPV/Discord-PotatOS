@@ -3,3 +3,7 @@
 
 export {ping} from "./commands/standard.mjs";
 export {pierre, feuille, ciseaux, papier} from "./commands/shifumi.mjs";
+export * from "./commands/sassy.mjs";
+export * from "./commands/math_constants.mjs";
+
+export {play, stop, skip, current} from "./voice/Voice.mjs";
