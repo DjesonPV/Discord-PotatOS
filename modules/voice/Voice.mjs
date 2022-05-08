@@ -132,7 +132,7 @@ export function current(args, msg){
                 .setTimestamp(data.uploadDate)
                 .setThumbnail(data.videoThumbnail)
                 .setFooter({
-                    text : durationToString(data.duration),
+                    text : `${durationToString(data.duration)} • ${viewsToString(data.viewCount)}`,
                     iconURL : "https://cdn.discordapp.com/attachments/329613279204999170/972624319819698237/youtubelogo.png",
                 })
             
@@ -155,6 +155,52 @@ function durationToString(duration){
     string+=(`${seconds<10?'0':''}${seconds}`)
     return string;
 }
+
+function viewsToString(viewCount){
+
+    let views = [
+        viewCount % 1e3,
+        (Math.floor(viewCount/1e3))%1e3,
+        (Math.floor(viewCount/1e6))%1e3,
+        (Math.floor(viewCount/1e9)),
+    ];
+
+    let num = 0;
+    let dec = 0;
+    let suf = "";
+
+    if(views[3] > 0) {
+        num = views[3];
+        dec = Math.floor(views[2]/1e2);
+        if (num > 10) dec = false;
+
+        suf = " Md de";
+    } else if (views[2] > 0){
+        num = views[2];
+        dec = Math.floor(views[1]/1e2);
+
+        if (num > 10) dec = false;
+        suf = " M de";
+    } else if (views[1] > 0){
+        num = views[1];
+        dec = Math.floor(views[0]/1e2);
+
+        if (num > 10) dec = false;
+        suf = " k";
+    } else {
+        num = views[0];
+        dec = false;
+        suf = "";
+    }
+
+
+
+    let string = `${num}`;
+    if (dec !== false) string+=`,${dec}`;
+    string+=`${suf} vues`;
+    return string;
+}
+
 
 export async function stop(args, msg){
 

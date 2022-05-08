@@ -70,6 +70,7 @@ export class Track{
     static async from(url, methods){
 
         const metadata = {
+            isYoutube       :false, 
             title           : "Inconnu",
             author          : "Inconnu",
             duration        : 0,
@@ -78,6 +79,7 @@ export class Track{
             authorPicture   : "",
             authorURL       : "",
             uploadDate      : "",
+            viewCount       : "",
         };
 
         const info = await ytdlCore.getInfo(url);
@@ -90,6 +92,8 @@ export class Track{
         metadata.authorURL = info.videoDetails.author.channel_url;
         metadata.duration = info.videoDetails.lengthSeconds;
         metadata.uploadDate = info.videoDetails.uploadDate;
+        metadata.viewCount = info.videoDetails.viewCount;
+        metadata.isYoutube = true;
 
 
         const wrappedMethods = {
