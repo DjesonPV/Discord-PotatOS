@@ -1,14 +1,26 @@
+// DEPENDANCES
 import {Client, MessageEmbed, MessageAttachment, MessageActionRow, MessageButton} from "discord.js";
 import {Intents} from "discord.js";
-import * as Commands from "./Commands.mjs";
 
+// REQUIRE FOR DYNAMIC JSON IMPORT only used for botToken
 import {createRequire} from "module";
 const require = createRequire(import.meta.url);
 
+// DISCORD BOT COMMANDS
+import * as Commands from "./Commands.mjs";
+import * as ButtonInteractions from "./ButtonInteractions.mjs";
+
+
+// BOT RESSOURCES
 
 const cmdSign = '§';
-const potatOSicon = new MessageAttachment("./assets/PotatOS_icon.png");
-const errorIcon = new MessageAttachment("./assets/Error_icon.png");
+const errorIcon = `https://cdn.discordapp.com/attachments/329613279204999170/970413892792623204/Error_icon.png`;
+
+/* 
+##
+##  BOT STARTUP
+##
+*/
 
 const client = new Client({
     intents:[
@@ -52,7 +64,6 @@ export function start(){
 
 }
 
-
 const channelsText  = new Map();
 const channelsVoice = new Map();
 
@@ -67,6 +78,12 @@ function exploreChannels(){
     });
 }
 
+/* 
+##
+##  MESSAGE HANDLING FOR COMMANDS
+##
+*/
+
 client.on('messageCreate', messageHandler);
 /**
  * Handle a new `msg` starting with the character used as
@@ -74,47 +91,56 @@ client.on('messageCreate', messageHandler);
  * @param msg Represents a message on Discord
  */
 function messageHandler(msg){
-    if (msg.author.bot) return;
+    if (msg.author.bot) {
+        if (msg.content==="§§") msg.delete();
+        else return;
+    }
     if (!msg.content.startsWith(cmdSign)) return;
 
     msg.delete().then(() => {
             let args = msg.content.substring(1).split(/\s+/g);
-            let cmdName = args[0];
-            args.shift();
+            
+            let cmdName = args.shift();
             let command = Commands[cmdName];
 
-            if (command){
-                command(args, msg);
-            } else {
-
-               /* let wrongCommand = new MessageEmbed()
-                .setColor('#FF006E')
-                .setAuthor({
-                    name: `La commande [ ${cmdSign}${cmdName} ] est invalide`,
-                    iconURL : `https://cdn.discordapp.com/attachments/329613279204999170/970413892792623204/Error_icon.png`,
-
-                });
-                
-                printEmbedOnChannel(msg.channel, wrongCommand, 10);*/
-                printAlertOnChannel(msg.channel, `La commande [ ${cmdSign}${cmdName} ] est invalide`, 10);
-            }
-            
+            if (command) command(args, msg);
+            else printAlertOnChannel(msg.channel, `La commande [ ${cmdSign}${cmdName} ] est invalide`, 10);            
 
         }
     ).catch(console.log);
-    
 
 }
 
 
-client.on('interactionCreate', interaction => {
-	if (!interaction.isButton()) return;
-    
-    if (interaction.customId == 'deleteNotif'){
-        interaction.message.delete();
+/* 
+##
+##  INTERACTION HANDLING FOR COMMANDS
+##
+*/
+
+client.on('interactionCreate', interactionHandler);
+
+function interactionHandler(itr){ if (itr.message.author === client.user){
+
+    let itrName = itr.customId;
+    if (itr.isButton()){
+        let buttonInteraction = ButtonInteractions[itrName];
+        if (buttonInteraction) buttonInteraction(itr);
+        else itr.deferUpdate();//replyAlertOnInterarction(itr, `Ce bouton [ ${itrName} ] n'est pas géré`);
+
     }
+    if (itr.isSelectMenu()){
+        itr.deferUpdate();
+    }
+
     
-});
+}}
+
+/* 
+##
+##  MESSAGE REPLIES AND PRINT COMMANDS
+##
+*/
 
 /**
  * 
@@ -140,13 +166,6 @@ function printOnChannel(chnl, text="", embeds=[], url = "", time = 0){
             }
         };
 
-       /* const timeEmbed = new MessageEmbed()
-        .setColor('#FFFFFF')
-        .setAuthor({
-            name: `Ce message s'autodétruira dans ${time} secondes`,
-            iconURL : `https://cdn.discordapp.com/attachments/329613279204999170/970415622984966154/Delete_icon.png`,
-        });*/
-
         let timeRow;
 
         if (time >0) {//embeds.push(timeEmbed);
@@ -156,7 +175,6 @@ function printOnChannel(chnl, text="", embeds=[], url = "", time = 0){
                     .setCustomId('deleteNotif')
 					.setLabel(`Ce message s'autodétruira dans ${time} secondes`)
 					.setStyle('SECONDARY')
-                    //.setDisabled(true)
                     .setEmoji('🚮')
 			);
         
@@ -167,8 +185,6 @@ function printOnChannel(chnl, text="", embeds=[], url = "", time = 0){
         if (embeds.length != 0) toSend.embeds  = embeds;
         if (url.length  != 0) toSend.files   = [{attachment : url}];
         if (timeRow) toSend.components = [timeRow];
-
-        //console.log(toSend);
 
         chnl.send(toSend).then(deleteResponse).catch(console.log);
 
@@ -206,8 +222,6 @@ export function printEmbedOnChannel(chnl, embed, time){
 export function printLinkOnChannel(chnl, url, time){
     if(typeof url == "string"){
         if (url.match(/^(https?|http):\/\/(-\.)?([^\s\/?\.#]+\.?)+(\/[^\s]*)?$/g)){
-            //console.log(url);
-            //let link = new MessageAttachment(toString(url));
             printOnChannel(chnl,[],[],url,time);
         }
     }
@@ -225,11 +239,55 @@ export function printAlertOnChannel(chnl, txt, time){
     .setColor('#FF006E')
     .setAuthor({
         name: `${txt}`,
-        iconURL : `https://cdn.discordapp.com/attachments/329613279204999170/970413892792623204/Error_icon.png`,
+        iconURL : errorIcon,
     });
 
     printEmbedOnChannel(chnl, alertEmbed, time);
 }
 
+/* 
+##
+##  INTERACTION REPLY
+##
+*/
+
+ export function replyAlertOnInterarction(itr, txt){
+    let reply = {};
+    
+    let alertEmbed = new MessageEmbed()
+    .setColor('#FF006E')
+    .setAuthor({
+        name: `${txt}`,
+        iconURL : errorIcon,
+    });
+
+    reply.embeds = [alertEmbed];
+    reply.ephemeral = true;
+
+   itr.reply(reply);
+}
+
+export function testbutton(chnl){
+
+    if (chnl == channelsText.get(chnl.name)){
+
+       
+        let testRow = new MessageActionRow()
+			.addComponents(
+				new MessageButton()
+                    .setCustomId('testFollowup')
+					.setLabel(`Coucou la famille`)
+					.setStyle('SUCCESS')
+                    .setEmoji('⚙')
+			);
+      
+
+        let toSend = {};
+        toSend.content = "setset";
+        toSend.components = [testRow];
 
 
+        chnl.send(toSend).catch(console.log);
+
+    }
+}

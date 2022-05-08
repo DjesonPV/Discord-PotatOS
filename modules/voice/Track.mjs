@@ -15,9 +15,13 @@ export class Track{
         this.onError = onError;
     }
 
+    // Don't ask me it's a copy of 
     createAudioResource(){
         return new Promise((resolve, reject) => {
             if(this.url.startsWith('http')) {
+                /**
+                 * URL is a link
+                 */
                 const process = ytdl.exec(
                     this.url,
                     {
@@ -26,13 +30,14 @@ export class Track{
                         f: 'bestaudio[ext=webm+acodec=opus+asr=48000]/bestaudio',
                         r: '100K',
                     },
-                    { stdio: ['ignore', 'pipe', 'ignore'] },
+                    { stdio: ['ignore', 'pipe', 'ignore']},
                 );
                 if (!process.stdout) {
                     reject(new Error('No stdout'));
                     return;
                 }
                 const stream = process.stdout;
+
                 const onError = (error) => {
                     if (!process.killed) process.kill();
                     stream.resume();
@@ -41,11 +46,20 @@ export class Track{
                 process
                     .once('spawn', () => {
                         demuxProbe(stream)
-                            .then((probe) => resolve(createAudioResource(probe.stream, { metadata: this, inputType: probe.type, inlineVolume: true })))
+                            .then((probe) => resolve(
+                                createAudioResource(probe.stream, { 
+                                    metadata: this, 
+                                    inputType: probe.type, 
+                                    inlineVolume: true 
+                                })
+                            ))
                             .catch(onError);
                     })
                     .catch(onError);
             } else {
+                /**
+                 * URL is an API file
+                 */
                 try {
                     demuxProbe(createReadStream(this.url)).then(({ stream, type }) => {
                         const resource = createAudioResource(stream, {
@@ -84,9 +98,11 @@ export class Track{
 
         const info = await ytdlCore.getInfo(url);
 
+        //console.log(info.videoDetails.thumbnails);
+
         metadata.title = info.videoDetails.title;
         metadata.author = info.videoDetails.ownerChannelName;
-        metadata.videoThumbnail = `https://i.ytimg.com/vi_webp/${info.videoDetails.videoId}/maxresdefault.webp`;
+        metadata.videoThumbnail = ((info.videoDetails.thumbnails[0].url).split('?'))[0];//`https://i.ytimg.com/vi_webp/${info.videoDetails.videoId}/maxresdefault.webp`;
         metadata.videoURL = info.videoDetails.video_url;
         metadata.authorPicture = ((info.videoDetails.author.thumbnails[0].url).split('='))[0];
         metadata.authorURL = info.videoDetails.author.channel_url;
@@ -95,6 +111,7 @@ export class Track{
         metadata.viewCount = info.videoDetails.viewCount;
         metadata.isYoutube = true;
 
+        //console.log(metadata);
 
         const wrappedMethods = {
             onStart() {

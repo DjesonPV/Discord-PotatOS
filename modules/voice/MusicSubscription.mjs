@@ -36,7 +36,7 @@ export class MusicSubscription{
 
                     }
 
-                } else if (this.voiceConnection.rejoinAttempts < 5){
+                } else if (this.voiceConnection.rejoinAttempts < 10){
                         // The disconneced can be recoverable, and we didnt try to reconnect to much, so we'll reconnect
                         await wait((this.voiceConnection.rejoinAttempts + 1)* 5000);
                         this.voiceConnection.rejoin();
@@ -57,7 +57,7 @@ export class MusicSubscription{
                  */
                 this.readyLock = true;
                 try {
-                    await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20000);
+                    await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 30_000);
                 } catch{
                     if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed){
                         this.voiceConnection.destroy();
