@@ -2,6 +2,7 @@
 import {Client, MessageEmbed, MessageAttachment, MessageActionRow, MessageButton} from "discord.js";
 import {Intents} from "discord.js";
 
+
 // REQUIRE FOR DYNAMIC JSON IMPORT only used for botToken
 import {createRequire} from "module";
 const require = createRequire(import.meta.url);
@@ -9,7 +10,8 @@ const require = createRequire(import.meta.url);
 // DISCORD BOT COMMANDS
 import * as Commands from "./Commands.mjs";
 import * as ButtonInteractions from "./ButtonInteractions.mjs";
-
+import {MP3Files, MP3Path} from "./voice/MP3Files.mjs";
+import {playMP3} from "./voice/Voice.mjs";
 
 // BOT RESSOURCES
 
@@ -102,8 +104,10 @@ function messageHandler(msg){
             
             let cmdName = args.shift();
             let command = Commands[cmdName];
+            let mp3play = MP3Files[cmdName];
 
             if (command) command(args, msg);
+            else if (mp3play) playMP3(msg, `${MP3Path}${mp3play.file}`, mp3play.volume);
             else printAlertOnChannel(msg.channel, `La commande [ ${cmdSign}${cmdName} ] est invalide`, 10);            
 
         }
@@ -220,12 +224,18 @@ export function printEmbedOnChannel(chnl, embed, time){
  * @param time Time the message will be displayed (in seconds)
  */
 export function printLinkOnChannel(chnl, url, time){
-    if(typeof url == "string"){
-        if (url.match(/^(https?|http):\/\/(-\.)?([^\s\/?\.#]+\.?)+(\/[^\s]*)?$/g)){
-            printOnChannel(chnl,[],[],url,time);
+    if (isItAnHTTPURL(url)){
+        printOnChannel(chnl,[],[],url,time);
+    }    
+}
+
+export function isItAnHTTPURL(text){
+    if(typeof text == "string"){
+        if (text.match(/^(https?|http):\/\/(-\.)?([^\s\/?\.#]+\.?)+(\/[^\s]*)?$/g)){
+        return true;    
         }
     }
-    
+    return false;
 }
 
 /**
@@ -265,29 +275,4 @@ export function printAlertOnChannel(chnl, txt, time){
     reply.ephemeral = true;
 
    itr.reply(reply);
-}
-
-export function testbutton(chnl){
-
-    if (chnl == channelsText.get(chnl.name)){
-
-       
-        let testRow = new MessageActionRow()
-			.addComponents(
-				new MessageButton()
-                    .setCustomId('testFollowup')
-					.setLabel(`Coucou la famille`)
-					.setStyle('SUCCESS')
-                    .setEmoji('⚙')
-			);
-      
-
-        let toSend = {};
-        toSend.content = "setset";
-        toSend.components = [testRow];
-
-
-        chnl.send(toSend).catch(console.log);
-
-    }
 }

@@ -114,6 +114,7 @@ export class MusicSubscription{
 
         try {
             const resource = await nextTrack.createAudioResource();
+            resource.volume.setVolume(nextTrack.volume);
             this.audioPlayer.play(resource);
             this.queueLock = false;
         } catch (error) {

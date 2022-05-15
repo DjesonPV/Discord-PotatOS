@@ -54,3 +54,30 @@ export function viewsToString(viewCount){
     string+=`${suf} vues`;
     return string;
 }
+
+export function dateToString(timestamp){
+    let date = new Date(timestamp);
+
+    const months = [
+        "janv.",
+        "févr.",
+        "mars",
+        "avr.",
+        "mai",
+        "juin",
+        "juill.",
+        "août",
+        "sept.",
+        "oct.",
+        "nov.",
+        "déc."
+    ];
+    
+    let day   = date.getUTCDate();
+    let month = date.getUTCMonth();
+    let year  = date.getUTCFullYear();
+
+    let string = `${day} ${months[month]} ${year}`;
+    return string;
+}
+

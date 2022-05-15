@@ -6,7 +6,7 @@ import {
 import {Track} from "./Track.mjs";
 import {MusicSubscription} from "./MusicSubscription.mjs";
 
-import {printAlertOnChannel, printEmbedOnChannel} from "../Bot.mjs";
+import {printAlertOnChannel, printEmbedOnChannel, isItAnHTTPURL} from "../Bot.mjs";
 import {MessageEmbed} from "discord.js";
 
 const subscriptions = new Map();
@@ -52,7 +52,7 @@ function createSubcription(msg){
 }
 
 
-import {durationToString, viewsToString} from "./valueToString.mjs"
+import {durationToString, viewsToString, dateToString} from "./valueToString.mjs"
 
 
 // Track Display
@@ -60,7 +60,7 @@ export function current(args, msg){
     const subscription = getSubscription(msg);
     if (subscription && msg.member.voice.channel){
         const data = subscription.currentTrack.metadata;
-        if (data){
+        if (data && data.isYoutube){
             const customEmbed = new MessageEmbed()
                 .setColor('#FF0000')
                 .setTitle(data.title)
@@ -70,11 +70,38 @@ export function current(args, msg){
                     iconURL : data.authorPicture,
                     url : data.authorURL,
                 })
-                .setTimestamp(data.uploadDate)
+                //.setTimestamp(data.uploadDate)
                 .setThumbnail(data.videoThumbnail)
                 .setFooter({
-                    text : `${durationToString(data.duration)} • ${viewsToString(data.viewCount)}`,
-                    iconURL : "https://cdn.discordapp.com/attachments/329613279204999170/972624319819698237/youtubelogo.png",
+                    text : `${durationToString(data.duration)} • ${viewsToString(data.viewCount)} • ${dateToString(data.uploadDate)}`,
+                    iconURL : "https://media.discordapp.net/attachments/329613279204999170/972624319819698237/youtubelogo.png",
+                })
+            
+            printEmbedOnChannel(msg.channel, customEmbed, 20);
+        }
+        else if (data && data.isFile){
+            const customEmbed = new MessageEmbed()
+                .setColor('#FFB46B')
+                .setTitle(data.title)
+                .setFooter({
+                    text : `Appelé avec la commande [${data.key}]`,
+                    iconURL : "https://media.discordapp.net/attachments/329613279204999170/970392014296338432/PotatOS_logo.png",
+                })
+            
+            printEmbedOnChannel(msg.channel, customEmbed, 20);
+        }
+        else if (data){
+            const customEmbed = new MessageEmbed()
+                .setColor('#20B6E7')
+                .setTitle(data.file)
+                .setAuthor({
+                    name : data.source,
+                    url : `https://${data.source}`,
+                })
+                .setURL(data.url)
+                .setFooter({
+                    text : `Lien Internet`,
+                    iconURL : "https://media.discordapp.net/attachments/329613279204999170/975538715223003176/logoWWW.png",
                 })
             
             printEmbedOnChannel(msg.channel, customEmbed, 20);
@@ -118,20 +145,22 @@ export function skip(args, msg){
     }
 }
 
-export async function stop(args, msg){
-    const subscription = getSubscription(msg);
+export function stop(args, msg){
+    killVoice(msg);
+}
 
-    if (subscription && msg.member.voice.channel){
-        if (subscription.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) await subscription.voiceConnection.destroy();
-        subscription.stop();
-        subscriptions.delete(msg.guildId);
+export function play(args, msg){
+
+    if (isItAnHTTPURL(args[0])){
+        console.log(`${args[0]} est valide`);
+        streamVoice(msg, args[0], 0.2);
+    } else {
+        console.log(`Non : ${args[0]}`);
     }
 
 }
 
-export async function play(args, msg){
-
-    const url = args[0];
+async function streamVoice(msg, url, volume){
 
     let subscription = getNewSubscription(msg);
 
@@ -150,12 +179,12 @@ export async function play(args, msg){
     }
 
     try{
-        const track = await Track.from(url, {
+        const track = await Track.fetchData(url, {
             onStart(){
                // printTextOnChannel(msg.channel, `Je joue de la musique`, 10);
             },
             onFinish(){
-               if(subscription.queue.length === 0) stop(args, msg);
+               if(subscription.queue.length === 0) killVoice(msg);
                // printTextOnChannel(msg.channel, `J'ai fini' la musique`, 10);
             },
             onError(error){
@@ -163,6 +192,8 @@ export async function play(args, msg){
                 printAlertOnChannel(msg.channel, `Erreur : ${error}`, 20);
             }
         });
+
+        track.setVolume(volume);
 
         subscription.enqueue(track);
         //await printTextOnChannel(msg.channel, `Ajouté **${track.title}**`, 10);
@@ -172,6 +203,21 @@ export async function play(args, msg){
         printAlertOnChannel(msg.channel, `J'ai pas reussi a jouer ton morceau`, 10);
     }
 
+}
+
+async function killVoice(msg){
+    const subscription = getSubscription(msg);
+
+    if (subscription && msg.member.voice.channel){
+        if (subscription.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) await subscription.voiceConnection.destroy();
+        subscription.stop();
+        subscriptions.delete(msg.guildId);
+    }
+
+}
+
+export function playMP3(msg, mp3url, mp3vol){
+    streamVoice(msg, mp3url, mp3vol);
 }
 
 

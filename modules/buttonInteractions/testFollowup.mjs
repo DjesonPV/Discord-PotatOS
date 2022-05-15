@@ -111,8 +111,27 @@ itr.deferUpdate();
 
 }
 
-import {testbutton} from "../Bot.mjs";
 export function test(args, msg){
-    testbutton(msg.channel);
+    if (msg.channel == channelsText.get(msg.channel.name)){
+
+       
+        let testRow = new MessageActionRow()
+			.addComponents(
+				new MessageButton()
+                    .setCustomId('testFollowup')
+					.setLabel(`Coucou la famille`)
+					.setStyle('SUCCESS')
+                    .setEmoji('⚙')
+			);
+      
+
+        let toSend = {};
+        toSend.content = "setset";
+        toSend.components = [testRow];
+
+
+        msg.channel.send(toSend).catch(console.log);
+
+    }
 }
 
