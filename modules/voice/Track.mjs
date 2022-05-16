@@ -10,7 +10,7 @@ import {MP3Files, MP3Path} from "./MP3Files.mjs";
 const noop = () => {};
 
 export class Track{
-    constructor({url, metadata, onStart, onFinish, onError}){
+    constructor({url, metadata = {isYoutube : false, isFile : false}, onStart, onFinish, onError}){
         this.url = url;
         this.metadata = metadata;
         this.volume = 1.0;
@@ -142,6 +142,7 @@ function fromFile(url, methods){
 
         // Data use in the MusicPlayer Embed
         title : MP3Files[mp3Key].title,
+        description : MP3Files[mp3Key].description,
         key   : mp3Key,
     };
 

@@ -11,7 +11,10 @@ import { promisify } from 'node:util';
 const wait = promisify(setTimeout);
 
 export class MusicSubscription{
-   constructor(voiceChannel){
+
+    static subscriptions = new Map();
+
+    constructor(voiceChannel){
        this.voiceConnection = joinVoiceChannel({
             channelId: voiceChannel.id,
             guildId: voiceChannel.guildId,
@@ -22,6 +25,7 @@ export class MusicSubscription{
        this.queueLock = false;
        this.readyLock = false;
        this.currentTrack;
+       
 
     // Voice Connection
         this.voiceConnection.on('stateChange', async (_, newState) => {
@@ -89,8 +93,14 @@ export class MusicSubscription{
 
     }
 
-    enqueue (track){
+    enqueue(track){
         this.queue.push(track);
+        this.processQueue();
+    }
+
+    enskip(track){
+        this.queue.unshift(track);
+        this.audioPlayer.stop(true);
         this.processQueue();
     }
 
@@ -122,6 +132,54 @@ export class MusicSubscription{
             this.queueLock = false;
             return this.processQueue()
         }
+    }
+
+
+    static getNewSubscription(msg){
+        if (!msg.member.voice.channelId){
+            return false;
+        } else {
+            let subscription = this.getSubscription(msg);
+            if (subscription) {
+                return subscription;
+            } else {
+                return this.createSubcription(msg);
+            }
+        }
+    
+    }
+
+    static getSubscription(msg){
+        if (!msg.member.voice.channel){
+            return false;
+        } else {
+            let subscription = this.subscriptions.get(msg.guildId);
+            if (subscription) {
+                return subscription;
+            } else {
+                return false;
+            }   
+        }
+        
+    }
+
+    static createSubcription(msg){
+        let subscription = new MusicSubscription(msg.member.voice.channel);
+        subscription.voiceConnection.on('error', console.warn);
+        this.subscriptions.set(msg.guildId, subscription);
+        return this.subscriptions.get(msg.guildId);
+    }
+
+    static async killVoice(msg){
+        const subscription = this.getSubscription(msg);
+    
+        if (subscription && msg.member.voice.channel){
+            if (subscription.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) subscription.voiceConnection.destroy();
+
+            subscription.stop();
+            this.subscriptions.delete(msg.guildId);
+        }
+    
     }
 
 }
