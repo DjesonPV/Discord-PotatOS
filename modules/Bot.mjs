@@ -2,7 +2,6 @@
 import {Client, MessageEmbed, MessageAttachment, MessageActionRow, MessageButton} from "discord.js";
 import {Intents} from "discord.js";
 
-
 // REQUIRE FOR DYNAMIC JSON IMPORT only used for botToken
 import {createRequire} from "module";
 const require = createRequire(import.meta.url);
@@ -40,8 +39,6 @@ const client = new Client({
  */
 export function start(){
     return new Promise(async (resolve) => {
-        const secret = require("../secret.json");
-
         client.on("ready", async () => {
             if (!client.user || !client.application) {
                 return;
@@ -55,13 +52,19 @@ export function start(){
             resolve();
         });
 
+        const secret = require("../secret.json");
         client.login(secret.botToken);
         //client.login((await import("../secret.json", { assert: { type: "json" }})).botToken);
 
         client.once('ready', () => {
+
+            client.guilds.cache.forEach(guild => {
+              if (guild.me.voice) guild.me.voice.disconnect();
+
+            });
+
             console.log(`Prêt !`);
         })
-
     });
 
 }
@@ -124,9 +127,11 @@ function messageHandler(msg){
 
 client.on('interactionCreate', interactionHandler);
 
-function interactionHandler(itr){ if (itr.message.author === client.user){
-
+function interactionHandler(itr){ 
+    
+    if (itr.message && (itr.message.author === client.user)){
     let itrName = itr.customId;
+
     if (itr.isButton()){
         let buttonInteraction = ButtonInteractions[itrName];
         if (buttonInteraction) buttonInteraction(itr);
@@ -152,9 +157,10 @@ function interactionHandler(itr){ if (itr.message.author === client.user){
  * @param text Content to send `String`
  * @param embeds Content to send `MessageEmbed`
  * @param attachments Content to send `MessageAttachement`
+ * @param components Content to send `MessageActionRow`
  * @param time Time the message will be displayed (in seconds)
  */
-function printOnChannel(chnl, text="", embeds=[], url = "", time = 0){
+function printOnChannel(chnl, text="", embeds=[], url = "", components=[], time = 0){
     if (chnl == channelsText.get(chnl.name)){
 
         time = Math.min(180, time);
@@ -188,7 +194,9 @@ function printOnChannel(chnl, text="", embeds=[], url = "", time = 0){
         if (text.length   != 0) toSend.content = text;
         if (embeds.length != 0) toSend.embeds  = embeds;
         if (url.length  != 0) toSend.files   = [{attachment : url}];
-        if (timeRow) toSend.components = [timeRow];
+        if ((components.length != 0) || timeRow) toSend.components = [...components, timeRow];
+
+        
 
         chnl.send(toSend).then(deleteResponse).catch(console.log);
 
@@ -203,7 +211,7 @@ function printOnChannel(chnl, text="", embeds=[], url = "", time = 0){
  */
 export function printTextOnChannel(chnl, txt, time){
     if(typeof txt == "string")
-    printOnChannel(chnl,txt,[],[],time);
+    printOnChannel(chnl,txt,[],[],[],[],time);
 }
 
 /**
@@ -214,7 +222,7 @@ export function printTextOnChannel(chnl, txt, time){
  */
 export function printEmbedOnChannel(chnl, embed, time){
     if(embed instanceof MessageEmbed)
-    printOnChannel(chnl,[],[embed],[],time);
+    printOnChannel(chnl,[],[embed],[],[],time);
 }
 
 /**
@@ -225,7 +233,7 @@ export function printEmbedOnChannel(chnl, embed, time){
  */
 export function printLinkOnChannel(chnl, url, time){
     if (isItAnHTTPURL(url)){
-        printOnChannel(chnl,[],[],url,time);
+        printOnChannel(chnl,[],[],url,[],time);
     }    
 }
 

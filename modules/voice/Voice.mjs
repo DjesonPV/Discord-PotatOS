@@ -9,24 +9,26 @@ import {MusicSubscription} from "./MusicSubscription.mjs";
 import {printAlertOnChannel, printEmbedOnChannel, isItAnHTTPURL} from "../Bot.mjs";
 
 export function skip(args, msg){
-    const subscription = MusicSubscription.getSubscription(msg);
+    if (!msg.member.voice.channel) return;
 
-    if (subscription && msg.member.voice.channel){
-        subscription.audioPlayer.stop();
-    }
+    const subscription = MusicSubscription.getSubscription(msg.guild.id);
+    if (subscription) subscription.audioPlayer.stop();
 }
 
 export function stop(args, msg){
-    MusicSubscription.killVoice(msg);
+    if (!msg.member.voice.channel) return;
+
+    const subscription = MusicSubscription.getSubscription(msg.guild.id);
+    if (subscription) subscription.destroy();
 }
 
 export function play(args, msg){
+    if (!msg.member.voice.channel) return;
 
     if (isItAnHTTPURL(args[0])){
-        //console.log(`${args[0]} est valide`);
         streamVoice(msg, args[0], 0.2);
     } else {
-       // console.log(`Non : ${args[0]}`);
+       // YOUTUBE SEARCH
     }
 
 }
@@ -55,7 +57,7 @@ async function streamVoice(msg, url, volume){
                // printTextOnChannel(msg.channel, `Je joue de la musique`, 10);
             },
             onFinish(){
-               if(subscription.queue.length === 0) MusicSubscription.killVoice(msg);
+               if(subscription.queue.length === 0) subscription.destroy();
                // printTextOnChannel(msg.channel, `J'ai fini' la musique`, 10);
             },
             onError(error){

@@ -6,7 +6,9 @@ import {printEmbedOnChannel} from "../Bot.mjs";
 
 // Track Display
 export function current(args, msg){
-    const subscription = MusicSubscription.getSubscription(msg);
+    if (!msg.member.voice.channel) return;
+    
+    const subscription = MusicSubscription.getSubscription(msg.guild.id);
     
     if (subscription){
         const playerEmbed = new MessageEmbed();

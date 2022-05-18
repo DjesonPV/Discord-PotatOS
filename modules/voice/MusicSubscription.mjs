@@ -17,7 +17,7 @@ export class MusicSubscription{
     constructor(voiceChannel){
        this.voiceConnection = joinVoiceChannel({
             channelId: voiceChannel.id,
-            guildId: voiceChannel.guildId,
+            guildId: voiceChannel.guild.id,
             adapterCreator: voiceChannel.guild.voiceAdapterCreator,
         }),
        this.audioPlayer = createAudioPlayer();
@@ -25,6 +25,8 @@ export class MusicSubscription{
        this.queueLock = false;
        this.readyLock = false;
        this.currentTrack;
+       this.voiceChannelId = voiceChannel.id;
+       this.guildId = voiceChannel.guild.id;
        
 
     // Voice Connection
@@ -139,7 +141,7 @@ export class MusicSubscription{
         if (!msg.member.voice.channelId){
             return false;
         } else {
-            let subscription = this.getSubscription(msg);
+            let subscription = this.getSubscription(msg.guild.id);
             if (subscription) {
                 return subscription;
             } else {
@@ -149,37 +151,29 @@ export class MusicSubscription{
     
     }
 
-    static getSubscription(msg){
-        if (!msg.member.voice.channel){
-            return false;
+    static getSubscription(guildId){
+        let subscription = this.subscriptions.get(guildId);
+        if (subscription) {
+            return subscription;
         } else {
-            let subscription = this.subscriptions.get(msg.guildId);
-            if (subscription) {
-                return subscription;
-            } else {
-                return false;
-            }   
-        }
+            return false;
+        }   
         
     }
 
     static createSubcription(msg){
         let subscription = new MusicSubscription(msg.member.voice.channel);
         subscription.voiceConnection.on('error', console.warn);
-        this.subscriptions.set(msg.guildId, subscription);
-        return this.subscriptions.get(msg.guildId);
+        this.subscriptions.set(msg.guild.id, subscription);
+        return this.subscriptions.get(msg.guild.id);
     }
 
-    static async killVoice(msg){
-        const subscription = this.getSubscription(msg);
-    
-        if (subscription && msg.member.voice.channel){
-            if (subscription.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) subscription.voiceConnection.destroy();
+    async destroy(){   
+        if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
 
-            subscription.stop();
-            this.subscriptions.delete(msg.guildId);
-        }
-    
+        this.stop();
+        MusicSubscription.subscriptions.delete(this.guildId);
     }
+    
 
 }
