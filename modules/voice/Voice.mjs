@@ -6,34 +6,9 @@ import {
 import {Track} from "./Track.mjs";
 import {MusicSubscription} from "./MusicSubscription.mjs";
 
-import {printAlertOnChannel, printEmbedOnChannel, isItAnHTTPURL} from "../Bot.mjs";
+import {printAlertOnChannel} from "../Bot.mjs";
 
-export function skip(args, msg){
-    if (!msg.member.voice.channel) return;
-
-    const subscription = MusicSubscription.getSubscription(msg.guild.id);
-    if (subscription) subscription.audioPlayer.stop();
-}
-
-export function stop(args, msg){
-    if (!msg.member.voice.channel) return;
-
-    const subscription = MusicSubscription.getSubscription(msg.guild.id);
-    if (subscription) subscription.destroy();
-}
-
-export function play(args, msg){
-    if (!msg.member.voice.channel) return;
-
-    if (isItAnHTTPURL(args[0])){
-        streamVoice(msg, args[0], 0.2);
-    } else {
-       // YOUTUBE SEARCH
-    }
-
-}
-
-async function streamVoice(msg, url, volume){
+export async function streamVoice(msg, url, volume){
 
     let subscription = MusicSubscription.getNewSubscription(msg);
 
