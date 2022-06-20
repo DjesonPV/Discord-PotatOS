@@ -7,6 +7,7 @@ import {
 	VoiceConnectionStatus,
 } from '@discordjs/voice';
 import { promisify } from 'node:util';
+import { displayMusicDisplayer } from '../MusicDisplayer.mjs';
 
 const wait = promisify(setTimeout);
 
@@ -14,20 +15,22 @@ export class MusicSubscription{
 
     static subscriptions = new Map();
 
-    constructor(voiceChannel){
+    constructor(msg){
        this.voiceConnection = joinVoiceChannel({
-            channelId: voiceChannel.id,
-            guildId: voiceChannel.guild.id,
-            adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+            channelId: msg.member.voice.channel.id,
+            guildId: msg.guild.id,
+            adapterCreator: msg.guild.voiceAdapterCreator,
         }),
        this.audioPlayer = createAudioPlayer();
        this.queue = [];
        this.queueLock = false;
        this.readyLock = false;
        this.currentTrack;
-       this.voiceChannelId = voiceChannel.id;
-       this.guildId = voiceChannel.guild.id;
-       
+       this.voiceChannel = msg.member.voice.channel;
+       this.guildId = msg.guild.id;
+       this.guildName = msg.guild.name;
+       this.originalTextChannel = msg.channel;
+       this.message = false;
 
     // Voice Connection
         this.voiceConnection.on('stateChange', async (_, newState) => {
@@ -87,6 +90,7 @@ export class MusicSubscription{
             }
         });
 
+
         this.audioPlayer.on('error', (error)=> {
             error.resource.metadata.onError(error);
         });
@@ -112,6 +116,14 @@ export class MusicSubscription{
        this.audioPlayer.stop(true);
     }
 
+    skip(){
+        this.audioPlayer.stop();
+     }
+
+    setMessage(msg){
+        this.message = msg;
+    }
+
     async processQueue() {
         if (this.queueLock || 
             this.audioPlayer.state.status !== AudioPlayerStatus.Idle ||
@@ -128,11 +140,13 @@ export class MusicSubscription{
             const resource = await nextTrack.createAudioResource();
             resource.volume.setVolume(nextTrack.volume);
             this.audioPlayer.play(resource);
+            displayMusicDisplayer(this.originalTextChannel);
             this.queueLock = false;
         } catch (error) {
             nextTrack.onError(error);
+            displayMusicDisplayer(this.originalTextChannel);
             this.queueLock = false;
-            return this.processQueue()
+            return this.processQueue();
         }
     }
 
@@ -162,7 +176,7 @@ export class MusicSubscription{
     }
 
     static createSubcription(msg){
-        let subscription = new MusicSubscription(msg.member.voice.channel);
+        let subscription = new MusicSubscription(msg);
         subscription.voiceConnection.on('error', console.warn);
         this.subscriptions.set(msg.guild.id, subscription);
         return this.subscriptions.get(msg.guild.id);
@@ -170,7 +184,7 @@ export class MusicSubscription{
 
     async destroy(){   
         if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
-
+        this.message.delete().catch(()=>{});
         this.stop();
         MusicSubscription.subscriptions.delete(this.guildId);
     }

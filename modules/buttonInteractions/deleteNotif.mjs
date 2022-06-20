@@ -1,3 +1,3 @@
 export function deleteNotif(itr){
-    itr.message.delete();
+    itr.message.delete().catch(()=>{});
 }

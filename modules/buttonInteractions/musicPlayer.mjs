@@ -1,5 +1,6 @@
 
 import {MessageActionRow, MessageButton, Client} from "discord.js";
+import { displayMusicDisplayer } from "../MusicDisplayer.mjs";
 import {MusicSubscription} from "../voice/MusicSubscription.mjs";
 
 export function PotatOSMusicPlayerStop(itr){
@@ -12,19 +13,19 @@ export function PotatOSMusicPlayerStop(itr){
     .addComponents(
         new MessageButton()
         .setCustomId('PotatOSMusicPlayerStopYESSTOPIT')
-        .setLabel(`Arrêter et supprimer la playlist en cours wesh`)
+        .setLabel(`Arrêter et supprimer la playlist en cours`)      //##LANG : Stop and deleted the current playlist
         .setStyle('DANGER')
         .setEmoji('❕')
     ).addComponents(
         new MessageButton()
         .setCustomId('PotatOSMusicPlayerStopDONT')
-        .setLabel(`Laisser la musique`)
+        .setLabel(`Laisser la musique`)     //##LANG : Keep the music running
         .setStyle('SECONDARY')
         .setEmoji('🎧')
     );
 
     let toSend = {};
-        toSend.content = `Es-tu sûr de vouloir arrêter le lecteur de musique ?`;
+        toSend.content = `Es-tu sûr de vouloir arrêter le lecteur de musique ?`;    //##LANG : Are you sure you want to stop the Music Player?
         toSend.components = [stopRow];
         toSend.ephemeral = true;
 
@@ -37,15 +38,18 @@ export function PotatOSMusicPlayerStop(itr){
         collector.on('collect', async i => {
             if (i.customId === 'PotatOSMusicPlayerStopYESSTOPIT') YesStopIt(i);
 
-            i.update({ content: 'Requête prise en compte !', components : []});       
+            i.update({ content: 'Requête prise en compte !', components : []});      //##LANG : Reply received!
         });
 
 }
 
 function isConnectedToAMusicPlayer(itr){
-    if ((itr.member.voice.channel.id === MusicSubscription.getSubscription(itr.member.guild.id).voiceChannelId) && (itr.member.guild.id === itr.guild.id) )
+    const subscription = MusicSubscription.getSubscription(itr.member.guild.id);
+    if (subscription) {
+    if ((itr.member.voice.channel.id === subscription.voiceChannel.id) && (itr.member.guild.id === itr.guild.id) )
     // If GuildMember is in the same VoiceChannel as a MusicSubscription and the command comes from the right server
     return true;
+    }
     return false;
 }
 
@@ -54,7 +58,33 @@ function YesStopIt(itr){
         return;
     }
     if(isConnectedToAMusicPlayer(itr)) {
-        MusicSubscription.getSubscription(itr.member.guild.id).destroy();
+        const subscription = MusicSubscription.getSubscription(itr.member.guild.id);
+        if (subscription) subscription.destroy();
         return;
     }
+}
+
+export function PotatOSMusicPlayerSkip(itr){
+    if(!isConnectedToAMusicPlayer(itr)) {
+        itr.deferUpdate();
+        return;
+    }
+
+    const subscription = MusicSubscription.getSubscription(itr.member.guild.id);
+    if (subscription) {
+        subscription.skip();
+        itr.deferUpdate();
+    }
+
+}
+
+export function PotatOSMusicPlayer(itr){
+    const subscription = MusicSubscription.getSubscription(itr.member.guild.id);
+    if (!subscription) {
+        itr.message.delete().catch(()=>{});
+        return;
+    }
+        displayMusicDisplayer(itr.message.channel);
+        itr.deferUpdate();
+
 }

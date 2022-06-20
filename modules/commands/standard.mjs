@@ -20,7 +20,7 @@ export function ping(args, msg){
  * @param msg Represents a message on Discord
  */
  export function shy(args, msg){
-    msg.author.send("Coucou toi.");
+    msg.author.send("Coucou toi."); //##LANG : Hi there.
 }
 
 

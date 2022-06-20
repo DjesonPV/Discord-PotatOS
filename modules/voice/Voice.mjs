@@ -7,6 +7,7 @@ import {Track} from "./Track.mjs";
 import {MusicSubscription} from "./MusicSubscription.mjs";
 
 import {printAlertOnChannel} from "../Bot.mjs";
+import { displayMusicDisplayer } from '../MusicDisplayer.mjs';
 
 export async function streamVoice(msg, url, volume){
 
@@ -21,7 +22,7 @@ export async function streamVoice(msg, url, volume){
             await entersState(subscription.voiceConnection, VoiceConnectionStatus.Ready, 20e3);
         } catch (error) {
             console.warn(error);
-            printAlertOnChannel(msg.channel, `Je n'ai pas réussi à me connecter, reessaie plus tard !`, 10);
+            printAlertOnChannel(msg.channel, `Je n'ai pas réussi à me connecter, reessaie plus tard !`, 10);    //##LANG : Can't connect now, retry later!
             return;
         }
     }
@@ -29,11 +30,10 @@ export async function streamVoice(msg, url, volume){
     try{
         const track = await Track.fetchData(url, {
             onStart(){
-               // printTextOnChannel(msg.channel, `Je joue de la musique`, 10);
+                displayMusicDisplayer(msg.channel);
             },
             onFinish(){
                if(subscription.queue.length === 0) subscription.destroy();
-               // printTextOnChannel(msg.channel, `J'ai fini' la musique`, 10);
             },
             onError(error){
                 console.warn(error);
@@ -48,7 +48,7 @@ export async function streamVoice(msg, url, volume){
 
     } catch (error){
         console.warn(error);
-        printAlertOnChannel(msg.channel, `J'ai pas reussi a jouer ton morceau`, 10);
+        printAlertOnChannel(msg.channel, `J'ai pas reussi a jouer ton morceau`, 10);  //##LANG : Couldn't play your song
     }
 
 }

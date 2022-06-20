@@ -44,10 +44,10 @@ export function start(){
                 return;
             }
     
-            console.log(`${client.user.username} est en ligne`);
+            console.log(`${client.user.username} est en ligne`);   //##LANG : PotatOS is online
             
             exploreChannels();
-            console.log(`${channelsText.size} cannaux textuels et ${channelsVoice.size} cannaux vocaux trouvés`);
+            console.log(`${channelsText.size} cannaux textuels et ${channelsVoice.size} cannaux vocaux trouvés`);  //##LANG : Found x textChannels and x voiceChannels
 
             resolve();
         });
@@ -63,7 +63,7 @@ export function start(){
 
             });
 
-            console.log(`Prêt !`);
+            console.log(`Prêt !`);  //##LANG : Ready!
         })
     });
 
@@ -111,7 +111,7 @@ function messageHandler(msg){
 
             if (command) command(args, msg);
             else if (mp3play) playMP3(msg, `${MP3Path}${mp3play.file}`, mp3play.volume);
-            else printAlertOnChannel(msg.channel, `La commande [ ${cmdSign}${cmdName} ] est invalide`, 10);            
+            else printAlertOnChannel(msg.channel, `La commande [ ${cmdSign}${cmdName} ] est invalide`, 10);  //##LANG : Wrong command [cmd]
 
         }
     ).catch(console.log);
@@ -135,7 +135,8 @@ function interactionHandler(itr){
     if (itr.isButton()){
         let buttonInteraction = ButtonInteractions[itrName];
         if (buttonInteraction) buttonInteraction(itr);
-        else itr.deferUpdate();//replyAlertOnInterarction(itr, `Ce bouton [ ${itrName} ] n'est pas géré`);
+        else itr.deferUpdate();
+        //replyAlertOnInterarction(itr, `Ce bouton [ ${itrName} ] n'est pas géré`); //##LANG : Not handled Button [buttonID]
 
     }
     if (itr.isSelectMenu()){
@@ -183,7 +184,7 @@ function printOnChannel(chnl, text="", embeds=[], url = "", components=[], time 
 			.addComponents(
 				new MessageButton()
                     .setCustomId('deleteNotif')
-					.setLabel(`Ce message s'autodétruira dans ${time} secondes`)
+					.setLabel(`Ce message s'autodétruira dans ${time} secondes`)  //##LANG : This message will be deleted in x secondes
 					.setStyle('SECONDARY')
                     .setEmoji('🚮')
 			);
@@ -198,8 +199,18 @@ function printOnChannel(chnl, text="", embeds=[], url = "", components=[], time 
 
         
 
-        chnl.send(toSend).then(deleteResponse).catch(console.log);
+        sendOnChannel(chnl, toSend).then(deleteResponse).catch(console.log);
 
+    }
+}
+
+export function sendOnChannel(chnl, messageObject){
+    if (chnl == channelsText.get(chnl.name)){
+    return chnl.send(messageObject);
+    }
+    else {
+        console.log(`Ce TextChannel [${chnl.name}] de la Guild [${chnl.guild.name}] n'est pas géré !!`)  //##LANG : The [channelName] textChannel of [guildName] Guild is not supported !!
+        return;
     }
 }
 
