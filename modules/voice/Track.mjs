@@ -1,15 +1,15 @@
-import ytdlCore from 'ytdl-core';
-import { createAudioResource, demuxProbe } from '@discordjs/voice';
-import {createReadStream} from 'fs';
-import ytdl from 'youtube-dl-exec';
+import * as DiscordJsVoice              from '@discordjs/voice';
+import * as fs                          from 'fs';
+import ytdl                             from 'youtube-dl-exec';
+import ytdlCore                         from 'ytdl-core';
 
-import {MP3Files, MP3Path} from "./MP3Files.mjs";
+import * as MP3Files                    from "./MP3Files.mjs";
 
 
 // empty function
 const noop = () => {};
 
-export class Track{
+export default class Track{
     constructor({url, metadata = {isYoutube : false, isFile : false}, onStart, onFinish, onError}){
         this.url = url;
         this.metadata = metadata;
@@ -50,9 +50,9 @@ export class Track{
                 };
                 process
                     .once('spawn', () => {
-                        demuxProbe(stream)
+                        DiscordJsVoice.demuxProbe(stream)
                             .then((probe) => resolve(
-                                createAudioResource(probe.stream, { 
+                                DiscordJsVoice.createAudioResource(probe.stream, { 
                                     metadata: this, 
                                     inputType: probe.type, 
                                     inlineVolume: true 
@@ -66,8 +66,8 @@ export class Track{
                  * URL is a file
                  */
                 try {
-                    demuxProbe(createReadStream(this.url)).then(({ stream, type }) => {
-                        const resource = createAudioResource(stream, {
+                    DiscordJsVoice.demuxProbe(fs.createReadStream(this.url)).then(({ stream, type }) => {
+                        const resource = DiscordJsVoice.createAudioResource(stream, {
                             inputType: type,
                             metadata: this,
                             inlineVolume: true
@@ -94,7 +94,7 @@ export class Track{
         if (isItAYTLink(url))
         return fromYoutube(url, methods);
        
-        if (url.startsWith(MP3Path))
+        if (url.startsWith(MP3Files.path))
         return fromFile(url, methods);
         
         return fromInternet(url, methods);
@@ -141,8 +141,8 @@ function fromFile(url, methods){
         isFile          : true,     // for code stability
 
         // Data use in the MusicPlayer Embed
-        title : MP3Files[mp3Key].title,
-        description : MP3Files[mp3Key].description,
+        title : MP3Files.files[mp3Key].title,
+        description : MP3Files.files[mp3Key].description,
         key   : mp3Key,
     };
 
@@ -210,8 +210,8 @@ function isItAYTLink(url){
 }
 
 function getMP3KeyFromURL(url){
-    const key = Object.keys(MP3Files).filter(function(k) {
-        return MP3Files[k].file === url.slice(MP3Path.length);
+    const key = Object.keys(MP3Files.files).filter(function(k) {
+        return MP3Files.files[k].file === url.slice(MP3Files.path.length);
       })[0];
 
       return key;

@@ -1,6 +1,6 @@
-import {MessageEmbed, MessageActionRow, MessageSelectMenu, MessageButton} from "discord.js";
-import {sendOnChannel} from "./Bot.mjs";
-import {MusicSubscription} from "./voice/MusicSubscription.mjs";
+import * as DiscordJs                   from "discord.js";
+import * as MessagePrintReply           from "../botModules/MessagePrintReply.mjs";
+import MusicSubscription                from "../voice/MusicSubscription.mjs";
 
 function durationToString(duration){
     let seconds = duration%60;
@@ -87,7 +87,7 @@ function dateToString(timestamp){
 
 //***************************************** */
 
-export function displayMusicDisplayer(channel){
+export default function displayMusicDisplayer(channel){
 
     let sub = MusicSubscription.getSubscription(channel.guild.id);
 
@@ -105,7 +105,7 @@ export function displayMusicDisplayer(channel){
         musicDisplayer = updateMusicDisplayer(sub);
     } 
 
-    if (musicDisplayer) sendOnChannel(channel, musicDisplayer).then((msg) => {
+    if (musicDisplayer) MessagePrintReply.sendOnChannel(channel, musicDisplayer).then((msg) => {
         sub.setMessage(msg)});
 
 }
@@ -129,21 +129,21 @@ function buildMusicDisplayer(sub){
     const displayerEmbed = constructDisplayerEmbed(sub);
     const playlistRow = constructPlaylistRow([sub.currentTrack,...sub.queue]);
 
-    const buttonActionRow = new MessageActionRow()
+    const buttonActionRow = new DiscordJs.MessageActionRow()
     .addComponents(
-        new MessageButton()
+        new DiscordJs.MessageButton()
         .setCustomId('PotatOSMusicPlayer')
         .setLabel(`PotatOS Music Player`)
         .setStyle('SECONDARY')
         .setEmoji('🎧')
     ).addComponents(
-        new MessageButton()
+        new DiscordJs.MessageButton()
         .setCustomId('PotatOSMusicPlayerSkip')
         .setLabel(`Skip`)
         .setStyle('PRIMARY')
         .setEmoji('⏭')
     ).addComponents(
-        new MessageButton()
+        new DiscordJs.MessageButton()
         .setCustomId('PotatOSMusicPlayerStop')
         .setLabel(`Stop`)
         .setStyle('DANGER')
@@ -158,7 +158,7 @@ function buildMusicDisplayer(sub){
 
 function constructDisplayerEmbed(sub){
 
-    const displayerEmbed = new MessageEmbed();
+    const displayerEmbed = new DiscordJs.MessageEmbed();
     
     if (!sub.currentTrack){
         return false;
@@ -199,9 +199,9 @@ function constructPlaylistRow(trackList){
         options.push(option);
     });
 
-    let playlistRow = new MessageActionRow()
+    let playlistRow = new DiscordJs.MessageActionRow()
     .addComponents(
-        new MessageSelectMenu()
+        new DiscordJs.MessageSelectMenu()
             .setCustomId('PotatOSMusicPlayerPlaylist')
             .setPlaceholder("Playlist")
             .setMaxValues(1)
@@ -292,7 +292,7 @@ function emojiForPlaylist(i){
 }
 
 function waitDisplayer(sub){
-    const displayerEmbed = new MessageEmbed();
+    const displayerEmbed = new DiscordJs.MessageEmbed();
 
     displayerEmbed
         .setColor("#ffb46b")
@@ -318,9 +318,9 @@ function waitDisplayer(sub){
         .setFooter({text : `__________________________________________\nPotatOS • ${sub.guildName} > ${sub.voiceChannel.name}`,});
     ;
 
-    const buttonActionRow = new MessageActionRow()
+    const buttonActionRow = new DiscordJs.MessageActionRow()
     .addComponents(
-        new MessageButton()
+        new DiscordJs.MessageButton()
         .setCustomId('PotatOSMusicPlayer')
         .setLabel(`PotatOS Music Player`)
         .setStyle('SECONDARY')

@@ -1,4 +1,4 @@
-import {printTextOnChannel} from "../Bot.mjs";
+import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
 /*
  *  Commands for Rock Paper Scissors / Shifumi / Roshambo
  *
@@ -32,7 +32,7 @@ function game(playerMove, msg){
     let result = tableMath[(3*playerMove+botMove)];
     let botResponse = Math.floor(Math.random()*3);
 
-    printTextOnChannel(msg.channel,`:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} :potato:  <@${msg.author.id}>  ${snReply[result][botResponse]}`);
+    MessagePrintReply.printTextOnChannel(msg.channel,`:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} :potato:  <@${msg.author.id}>  ${snReply[result][botResponse]}`);
 }
 
 /**

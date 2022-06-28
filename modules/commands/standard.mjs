@@ -1,4 +1,4 @@
-import {printTextOnChannel} from "../Bot.mjs";
+import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
 
 
 export function help(args, msg){

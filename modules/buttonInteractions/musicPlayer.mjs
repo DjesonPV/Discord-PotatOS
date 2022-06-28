@@ -1,7 +1,6 @@
-
-import {MessageActionRow, MessageButton, Client} from "discord.js";
-import { displayMusicDisplayer } from "../MusicDisplayer.mjs";
-import {MusicSubscription} from "../voice/MusicSubscription.mjs";
+import * as DiscordJs                   from "discord.js";
+import displayMusicDisplayer            from "../botModules/MusicDisplayer.mjs";
+import MusicSubscription                from "../voice/MusicSubscription.mjs";
 
 export function PotatOSMusicPlayerStop(itr){
     if(!isConnectedToAMusicPlayer(itr)) {
@@ -9,15 +8,15 @@ export function PotatOSMusicPlayerStop(itr){
         return;
     }
 
-    let stopRow = new MessageActionRow()
+    let stopRow = new DiscordJs.MessageActionRow()
     .addComponents(
-        new MessageButton()
+        new DiscordJs.MessageButton()
         .setCustomId('PotatOSMusicPlayerStopYESSTOPIT')
         .setLabel(`Arrêter et supprimer la playlist en cours`)      //##LANG : Stop and deleted the current playlist
         .setStyle('DANGER')
         .setEmoji('❕')
     ).addComponents(
-        new MessageButton()
+        new DiscordJs.MessageButton()
         .setCustomId('PotatOSMusicPlayerStopDONT')
         .setLabel(`Laisser la musique`)     //##LANG : Keep the music running
         .setStyle('SECONDARY')

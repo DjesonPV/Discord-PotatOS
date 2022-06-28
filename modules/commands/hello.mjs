@@ -1,5 +1,5 @@
-import {printTextOnChannel} from "../Bot.mjs";
+import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
 
 export function hello(args, msg){
-    printTextOnChannel(msg.channel, `Salut`, 10); //##LANG : Hello World!
+    MessagePrintReply.printTextOnChannel(msg.channel, `Salut`, 10); //##LANG : Hello World!
 }

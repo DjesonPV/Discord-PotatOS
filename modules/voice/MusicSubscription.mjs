@@ -1,27 +1,20 @@
-import {
-	AudioPlayerStatus,
-	createAudioPlayer,
-	entersState,
-    joinVoiceChannel,
-	VoiceConnectionDisconnectReason,
-	VoiceConnectionStatus,
-} from '@discordjs/voice';
-import { promisify } from 'node:util';
-import { displayMusicDisplayer } from '../MusicDisplayer.mjs';
+import * as DiscordJsVoice              from '@discordjs/voice';
+import * as NodeUtil                    from 'node:util';
+import displayMusicDisplayer            from '../botModules/MusicDisplayer.mjs';
 
-const wait = promisify(setTimeout);
+const wait = NodeUtil.promisify(setTimeout);
 
-export class MusicSubscription{
+export default class MusicSubscription{
 
     static subscriptions = new Map();
 
     constructor(msg){
-       this.voiceConnection = joinVoiceChannel({
+       this.voiceConnection = DiscordJsVoice.joinVoiceChannel({
             channelId: msg.member.voice.channel.id,
             guildId: msg.guild.id,
             adapterCreator: msg.guild.voiceAdapterCreator,
         }),
-       this.audioPlayer = createAudioPlayer();
+       this.audioPlayer = DiscordJsVoice.createAudioPlayer();
        this.queue = [];
        this.queueLock = false;
        this.readyLock = false;
@@ -34,10 +27,10 @@ export class MusicSubscription{
 
     // Voice Connection
         this.voiceConnection.on('stateChange', async (_, newState) => {
-            if (newState.status === VoiceConnectionStatus.Disconnected){
-                if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014){
+            if (newState.status === DiscordJsVoice.VoiceConnectionStatus.Disconnected){
+                if (newState.reason === DiscordJsVoice.VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014){
                     try {
-                        await entersState(this.voiceConnection, VoiceConnectionStatus.Connecting, 5000);
+                        await DiscordJsVoice.entersState(this.voiceConnection, DiscordJsVoice.VoiceConnectionStatus.Connecting, 5000);
                         // Probably moved voice channel
                     } catch {
                         this.voiceConnection.destroy();
@@ -55,20 +48,20 @@ export class MusicSubscription{
                         this.voiceConnection.destroy();
                     }
             
-            } else if (newState.status === VoiceConnectionStatus.Destroyed){
+            } else if (newState.status === DiscordJsVoice.VoiceConnectionStatus.Destroyed){
                 this.stop();
             } else if (
                 !this.readyLock &&
-                (newState.status === VoiceConnectionStatus.Connecting || newState.status === VoiceConnectionStatus.Signalling)
+                (newState.status === DiscordJsVoice.VoiceConnectionStatus.Connecting || newState.status === DiscordJsVoice.VoiceConnectionStatus.Signalling)
             ) {
                 /**
                  * destroy the connection if it's in a unwanted idle state for more than 20 sec 
                  */
                 this.readyLock = true;
                 try {
-                    await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 30_000);
+                    await DiscordJsVoice.entersState(this.voiceConnection, DiscordJsVoice.VoiceConnectionStatus.Ready, 30_000);
                 } catch{
-                    if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed){
+                    if (this.voiceConnection.state.status !== DiscordJsVoice.VoiceConnectionStatus.Destroyed){
                         this.voiceConnection.destroy();
                     }
                 } finally {
@@ -81,10 +74,10 @@ export class MusicSubscription{
 
     // Audio Player
         this.audioPlayer.on('stateChange', (oldState, newState) => {
-            if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle){
+            if (newState.status === DiscordJsVoice.AudioPlayerStatus.Idle && oldState.status !== DiscordJsVoice.AudioPlayerStatus.Idle){
                 oldState.resource.metadata.onFinish();
                 this.processQueue();
-            } else if (newState.status === AudioPlayerStatus.Playing){
+            } else if (newState.status === DiscordJsVoice.AudioPlayerStatus.Playing){
                 // If a started playing, then start the new track
                 newState.resource.metadata.onStart();
             }
@@ -126,7 +119,7 @@ export class MusicSubscription{
 
     async processQueue() {
         if (this.queueLock || 
-            this.audioPlayer.state.status !== AudioPlayerStatus.Idle ||
+            this.audioPlayer.state.status !== DiscordJsVoice.AudioPlayerStatus.Idle ||
             this.queue.length === 0){
                 return;
         }
@@ -183,7 +176,7 @@ export class MusicSubscription{
     }
 
     async destroy(){   
-        if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
+        if (this.voiceConnection.state.status !== DiscordJsVoice.VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
         this.message.delete().catch(()=>{});
         this.stop();
         MusicSubscription.subscriptions.delete(this.guildId);

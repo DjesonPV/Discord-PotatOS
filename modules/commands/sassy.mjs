@@ -1,4 +1,4 @@
-import {printTextOnChannel, printLinkOnChannel} from "../Bot.mjs";
+import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
 /*
  * Commands that write specific private jokes to bother people
  *
@@ -17,7 +17,7 @@ export function pc(args, msg){ //##LANG Function Name : pc short for Personal Co
 
     let rng = Math.floor(Math.random() * sntc.length);
 
-    printTextOnChannel(msg.channel, sntc[rng]);
+    MessagePrintReply.printTextOnChannel(msg.channel, sntc[rng]);
 }
 
 /**
@@ -25,7 +25,7 @@ export function pc(args, msg){ //##LANG Function Name : pc short for Personal Co
  * and a random woman in a train hall
  */
 export function pk(args, msg){ //##LANG Function Name : pk short for WHY in French and a word play between previous function pc and nickname starting with K 
-    printTextOnChannel(msg.channel, `Quel est le chemin le plus court pour aller vers ton coeur ?`); //##LANG Private Joke : What's the shortest path to your heart?
+    MessagePrintReply.printTextOnChannel(msg.channel, `Quel est le chemin le plus court pour aller vers ton coeur ?`); //##LANG Private Joke : What's the shortest path to your heart?
 }
 
 /**
@@ -33,7 +33,7 @@ export function pk(args, msg){ //##LANG Function Name : pk short for WHY in Fren
  * "PUTAIN" is refering the french interjection of rage
  */
 export function PUTAIN(args, msg){ //##LANG Function Name : DAMNIT
-    printLinkOnChannel(msg.channel, "https://c.tenor.com/Xk5yKpCr96sAAAAd/christmas-tree-hit.gif", 10)
+    MessagePrintReply.printLinkOnChannel(msg.channel, "https://c.tenor.com/Xk5yKpCr96sAAAAd/christmas-tree-hit.gif", 10)
 }
 
 

@@ -1,21 +1,18 @@
-// DEPENDANCES
-import {Client, MessageEmbed, MessageAttachment, MessageActionRow, MessageButton} from "discord.js";
-import {Intents} from "discord.js";
 
-// REQUIRE FOR DYNAMIC JSON IMPORT only used for botToken
-import {createRequire} from "module";
+import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
 
-// DISCORD BOT COMMANDS
-import * as Commands from "./Commands.mjs";
-import * as ButtonInteractions from "./ButtonInteractions.mjs";
-import {MP3Files, MP3Path} from "./voice/MP3Files.mjs";
-import {playMP3} from "./voice/Voice.mjs";
+import * as DiscordJs                   from 'discord.js';
+import * as Commands                    from "./Commands.mjs";
+import * as ButtonInteractions          from "./ButtonInteractions.mjs";
 
-// BOT RESSOURCES
+import * as MessagePrintReply           from "./botModules/MessagePrintReply.mjs";
+import * as MP3Files                    from "./voice/MP3Files.mjs";
+import playMP3                          from "./voice/Voice.mjs";
+
+import ExploreChannels                  from "./botModules/ExploreChannels.mjs";
 
 const cmdSign = '§';
-const errorIcon = `https://cdn.discordapp.com/attachments/329613279204999170/970413892792623204/Error_icon.png`;
 
 /* 
 ##
@@ -23,12 +20,12 @@ const errorIcon = `https://cdn.discordapp.com/attachments/329613279204999170/970
 ##
 */
 
-const client = new Client({
+const client = new DiscordJs.Client({
     intents:[
-        Intents.FLAGS.GUILDS,
-        Intents.FLAGS.GUILD_MESSAGES,
-        Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-        Intents.FLAGS.GUILD_VOICE_STATES
+        DiscordJs.Intents.FLAGS.GUILDS,
+        DiscordJs.Intents.FLAGS.GUILD_MESSAGES,
+        DiscordJs.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+        DiscordJs.Intents.FLAGS.GUILD_VOICE_STATES
     ]
 });
 
@@ -46,8 +43,8 @@ export function start(){
     
             console.log(`${client.user.username} est en ligne`);   //##LANG : PotatOS is online
             
-            exploreChannels();
-            console.log(`${channelsText.size} cannaux textuels et ${channelsVoice.size} cannaux vocaux trouvés`);  //##LANG : Found x textChannels and x voiceChannels
+            ExploreChannels.explore(client);
+            console.log(`${ExploreChannels.text.size} cannaux textuels et ${ExploreChannels.voice.size} cannaux vocaux trouvés`);  //##LANG : Found x textChannels and x voiceChannels
 
             resolve();
         });
@@ -67,20 +64,6 @@ export function start(){
         })
     });
 
-}
-
-const channelsText  = new Map();
-const channelsVoice = new Map();
-
-function exploreChannels(){
-    client.channels.cache.forEach( channel => {
-        if (channel.type == `GUILD_TEXT`){
-            channelsText.set(channel.name, channel);
-        } else
-        if (channel.type === `GUILD_VOICE`){
-            channelsVoice.set(channel.name, channel);
-        }
-    });
 }
 
 /* 
@@ -107,11 +90,11 @@ function messageHandler(msg){
             
             let cmdName = args.shift();
             let command = Commands[cmdName];
-            let mp3play = MP3Files[cmdName];
+            let mp3play = MP3Files.files[cmdName];
 
             if (command) command(args, msg);
-            else if (mp3play) playMP3(msg, `${MP3Path}${mp3play.file}`, mp3play.volume);
-            else printAlertOnChannel(msg.channel, `La commande [ ${cmdSign}${cmdName} ] est invalide`, 10);  //##LANG : Wrong command [cmd]
+            else if (mp3play) playMP3(msg, `${MP3Files.path}${mp3play.file}`, mp3play.volume);
+            else MessagePrintReply.printAlertOnChannel(msg.channel, `La commande [ ${cmdSign}${cmdName} ] est invalide`, 10);  //##LANG : Wrong command [cmd]
 
         }
     ).catch(console.log);
@@ -136,7 +119,7 @@ function interactionHandler(itr){
         let buttonInteraction = ButtonInteractions[itrName];
         if (buttonInteraction) buttonInteraction(itr);
         else itr.deferUpdate();
-        //replyAlertOnInterarction(itr, `Ce bouton [ ${itrName} ] n'est pas géré`); //##LANG : Not handled Button [buttonID]
+        //MessagePrintReply.replyAlertOnInterarction(itr, `Ce bouton [ ${itrName} ] n'est pas géré`); //##LANG : Not handled Button [buttonID]
 
     }
     if (itr.isSelectMenu()){
@@ -146,152 +129,4 @@ function interactionHandler(itr){
     
 }}
 
-/* 
-##
-##  MESSAGE REPLIES AND PRINT COMMANDS
-##
-*/
 
-/**
- * 
- * @param chnl Represent a Discord TextChannel
- * @param text Content to send `String`
- * @param embeds Content to send `MessageEmbed`
- * @param attachments Content to send `MessageAttachement`
- * @param components Content to send `MessageActionRow`
- * @param time Time the message will be displayed (in seconds)
- */
-function printOnChannel(chnl, text="", embeds=[], url = "", components=[], time = 0){
-    if (chnl == channelsText.get(chnl.name)){
-
-        time = Math.min(180, time);
-
-        function deleteResponse(msg){
-            if (time > 0){
-                setTimeout(
-                    () => {
-                        if (msg)
-                        msg.delete().catch(()=>{});
-                    },
-                    time * 1000);
-            }
-        };
-
-        let timeRow;
-
-        if (time >0) {//embeds.push(timeEmbed);
-            timeRow = new MessageActionRow()
-			.addComponents(
-				new MessageButton()
-                    .setCustomId('deleteNotif')
-					.setLabel(`Ce message s'autodétruira dans ${time} secondes`)  //##LANG : This message will be deleted in x secondes
-					.setStyle('SECONDARY')
-                    .setEmoji('🚮')
-			);
-        
-        }
-
-        let toSend = {};
-        if (text.length   != 0) toSend.content = text;
-        if (embeds.length != 0) toSend.embeds  = embeds;
-        if (url.length  != 0) toSend.files   = [{attachment : url}];
-        if ((components.length != 0) || timeRow) toSend.components = [...components, timeRow];
-
-        
-
-        sendOnChannel(chnl, toSend).then(deleteResponse).catch(console.log);
-
-    }
-}
-
-export function sendOnChannel(chnl, messageObject){
-    if (chnl == channelsText.get(chnl.name)){
-    return chnl.send(messageObject);
-    }
-    else {
-        console.log(`Ce TextChannel [${chnl.name}] de la Guild [${chnl.guild.name}] n'est pas géré !!`)  //##LANG : The [channelName] textChannel of [guildName] Guild is not supported !!
-        return;
-    }
-}
-
-/**
- * 
- * @param chnl Represent a Discord TextChannel
- * @param txt Text to send
- * @param time Time the message will be displayed (in seconds)
- */
-export function printTextOnChannel(chnl, txt, time){
-    if(typeof txt == "string")
-    printOnChannel(chnl,txt,[],[],[],[],time);
-}
-
-/**
- * 
- * @param chnl Represent a Discord TextChannel
- * @param embed MessageEmbed to send
- * @param time Time the message will be displayed (in seconds)
- */
-export function printEmbedOnChannel(chnl, embed, time){
-    if(embed instanceof MessageEmbed)
-    printOnChannel(chnl,[],[embed],[],[],time);
-}
-
-/**
- * 
- * @param chnl Represent a Discord TextChannel
- * @param url URL link to the picture to display
- * @param time Time the message will be displayed (in seconds)
- */
-export function printLinkOnChannel(chnl, url, time){
-    if (isItAnHTTPURL(url)){
-        printOnChannel(chnl,[],[],url,[],time);
-    }    
-}
-
-export function isItAnHTTPURL(text){
-    if(typeof text == "string"){
-        if (text.match(/^(https?|http):\/\/([a-zA-Z0-9\-]{1,64}\.){0,}([a-zA-Z0-9\-]{2,63})(\.(xn--)?[a-zA-Z0-9]{2,})(\:[0-9]{1,5})?\/([^\s]*)?$/)){
-        return true;    
-        }
-    }
-    return false;
-}
-
-/**
- * 
- * @param chnl Represent a Discord TextChannel
- * @param txt Text to send in the alert
- * @param time Time the alert will be displayed (in seconds)
- */
-export function printAlertOnChannel(chnl, txt, time){
-    let alertEmbed = new MessageEmbed()
-    .setColor('#FF006E')
-    .setAuthor({
-        name: `${txt}`,
-        iconURL : errorIcon,
-    });
-
-    printEmbedOnChannel(chnl, alertEmbed, time);
-}
-
-/* 
-##
-##  INTERACTION REPLY
-##
-*/
-
- export function replyAlertOnInterarction(itr, txt){
-    let reply = {};
-    
-    let alertEmbed = new MessageEmbed()
-    .setColor('#FF006E')
-    .setAuthor({
-        name: `${txt}`,
-        iconURL : errorIcon,
-    });
-
-    reply.embeds = [alertEmbed];
-    reply.ephemeral = true;
-
-   itr.reply(reply);
-}
