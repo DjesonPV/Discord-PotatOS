@@ -1,4 +1,4 @@
-import {printTextOnChannel} from "../Bot.mjs";
+import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
 
 /*
  * Commands that print math constants
@@ -10,7 +10,7 @@ import {printTextOnChannel} from "../Bot.mjs";
  * PI : THE FIRST FOUND TRANSENDANTAL CONSTANT
  */
 export function pi(args, msg){
-    printTextOnChannel(msg.channel, `π = ${Math.PI}`);
+    MessagePrintReply.printTextOnChannel(msg.channel, `π = ${Math.PI}`);
 }
 
 export function π(args, msg){
@@ -21,7 +21,7 @@ export function π(args, msg){
  * TAU : THE CIRCLE DIAMETER CONSTANT
  */
 export function tau(args,msg){
-    printTextOnChannel(msg.channel, `τ = ${2*Math.PI}`);
+    MessagePrintReply.printTextOnChannel(msg.channel, `τ = ${2*Math.PI}`);
 }
 
 export function τ(args,msg){
@@ -42,7 +42,7 @@ export function phi(args, msg){
     
     let metallicMean = (n + Math.sqrt(Math.pow(n,2) + 4))/2;
 
-    printTextOnChannel(msg.channel, `φ(${n}) = ${metallicMean}`);
+    MessagePrintReply.printTextOnChannel(msg.channel, `φ(${n}) = ${metallicMean}`);
 }
 
 export function φ(args, msg){
@@ -60,7 +60,7 @@ export function exp(args, msg){
         if ((args[0]) && (args[0].charAt(0) == '-')) n = -n;
     }
 
-    printTextOnChannel(msg.channel, `e^(${n}) = ${Math.exp(n)}`);
+    MessagePrintReply.printTextOnChannel(msg.channel, `e^(${n}) = ${Math.exp(n)}`);
 }
 
 export function e(args,msg){

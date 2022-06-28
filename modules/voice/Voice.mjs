@@ -1,15 +1,14 @@
-import {
-	entersState,
-	VoiceConnectionStatus,
-} from '@discordjs/voice';
+import * as DiscordJsVoice              from '@discordjs/voice';
 
-import {Track} from "./Track.mjs";
-import {MusicSubscription} from "./MusicSubscription.mjs";
+import * as MessagePrintReply           from "../botModules/MessagePrintReply.mjs";
+import Track                            from "./Track.mjs";
+import MusicSubscription                from "./MusicSubscription.mjs";
+import displayMusicDisplayer            from '../botModules/MusicDisplayer.mjs';
 
-import {printAlertOnChannel} from "../Bot.mjs";
-import { displayMusicDisplayer } from '../MusicDisplayer.mjs';
 
-export async function streamVoice(msg, url, volume){
+
+
+export default async function streamVoice(msg, url, volume){
 
     let subscription = MusicSubscription.getNewSubscription(msg);
 
@@ -17,12 +16,12 @@ export async function streamVoice(msg, url, volume){
         return;
     }
 
-    if (subscription.voiceConnection.state.status !== VoiceConnectionStatus.Ready){
+    if (subscription.voiceConnection.state.status !== DiscordJsVoice.VoiceConnectionStatus.Ready){
         try{
-            await entersState(subscription.voiceConnection, VoiceConnectionStatus.Ready, 20e3);
+            await DiscordJsVoice.entersState(subscription.voiceConnection, DiscordJsVoice.VoiceConnectionStatus.Ready, 20e3);
         } catch (error) {
             console.warn(error);
-            printAlertOnChannel(msg.channel, `Je n'ai pas réussi à me connecter, reessaie plus tard !`, 10);    //##LANG : Can't connect now, retry later!
+            MessagePrintReply.printAlertOnChannel(msg.channel, `Je n'ai pas réussi à me connecter, reessaie plus tard !`, 10);    //##LANG : Can't connect now, retry later!
             return;
         }
     }
@@ -37,7 +36,7 @@ export async function streamVoice(msg, url, volume){
             },
             onError(error){
                 console.warn(error);
-                printAlertOnChannel(msg.channel, `Erreur : ${error}`, 20);
+                MessagePrintReply.printAlertOnChannel(msg.channel, `Erreur : ${error}`, 20);
             }
         });
 
@@ -48,14 +47,9 @@ export async function streamVoice(msg, url, volume){
 
     } catch (error){
         console.warn(error);
-        printAlertOnChannel(msg.channel, `J'ai pas reussi a jouer ton morceau`, 10);  //##LANG : Couldn't play your song
+        MessagePrintReply.printAlertOnChannel(msg.channel, `J'ai pas reussi a jouer ton morceau`, 10);  //##LANG : Couldn't play your song
     }
 
-}
-
-
-export function playMP3(msg, mp3url, mp3vol){
-    streamVoice(msg, mp3url, mp3vol);
 }
 
 

@@ -1,5 +1,5 @@
-export const MP3Path = "./assets/mp3voice/";
-export const MP3Files = {
+export const path = "./assets/mp3voice/";
+export const files = {
 
     kfc :{
         file  : "11-tenders-kfc-pour-seulement-695eur-le-mardi.mp3",    //##LANG Transcript of a TV Ad :
