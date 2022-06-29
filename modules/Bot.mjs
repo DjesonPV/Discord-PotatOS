@@ -8,16 +8,17 @@ import * as ButtonInteractions          from "./ButtonInteractions.mjs";
 
 import * as MessagePrintReply           from "./botModules/MessagePrintReply.mjs";
 import * as MP3Files                    from "./voice/MP3Files.mjs";
-import playMP3                          from "./voice/Voice.mjs";
+import * as Voice                       from "./voice/Voice.mjs";
 
 import ExploreChannels                  from "./botModules/ExploreChannels.mjs";
+import MessageSafeDelete                from './botModules/MessageSafeDelete.mjs';
 
 const cmdSign = '§';
 
 /* 
-##
-##  BOT STARTUP
-##
+#
+#  BOT STARTUP
+#
 */
 
 const client = new DiscordJs.Client({
@@ -45,6 +46,8 @@ export function start(){
             
             ExploreChannels.explore(client);
             console.log(`${ExploreChannels.text.size} cannaux textuels et ${ExploreChannels.voice.size} cannaux vocaux trouvés`);  //##LANG : Found x textChannels and x voiceChannels
+            
+            MessageSafeDelete.botUserId = client.user.id;
 
             resolve();
         });
@@ -52,6 +55,7 @@ export function start(){
         const secret = require("../secret.json");
         client.login(secret.botToken);
         //client.login((await import("../secret.json", { assert: { type: "json" }})).botToken);
+
 
         client.once('ready', () => {
 
@@ -67,9 +71,9 @@ export function start(){
 }
 
 /* 
-##
-##  MESSAGE HANDLING FOR COMMANDS
-##
+#
+#  MESSAGE HANDLING FOR COMMANDS
+#
 */
 
 client.on('messageCreate', messageHandler);
@@ -79,13 +83,9 @@ client.on('messageCreate', messageHandler);
  * @param msg Represents a message on Discord
  */
 function messageHandler(msg){
-    if (msg.author.bot) {
-        if (msg.content==="§§") msg.delete();
-        else return;
-    }
     if (!msg.content.startsWith(cmdSign)) return;
 
-    msg.delete().then(() => {
+    MessageSafeDelete.deleteThisMessageEvenSoItSNotMine(msg).then(() => {    //##DEL
             let args = msg.content.substring(1).split(/\s+/g);
             
             let cmdName = args.shift();
@@ -93,7 +93,7 @@ function messageHandler(msg){
             let mp3play = MP3Files.files[cmdName];
 
             if (command) command(args, msg);
-            else if (mp3play) playMP3(msg, `${MP3Files.path}${mp3play.file}`, mp3play.volume);
+            else if (mp3play) Voice.streamVoice(msg, `${MP3Files.path}${mp3play.file}`, mp3play.volume);
             else MessagePrintReply.printAlertOnChannel(msg.channel, `La commande [ ${cmdSign}${cmdName} ] est invalide`, 10);  //##LANG : Wrong command [cmd]
 
         }
@@ -103,9 +103,9 @@ function messageHandler(msg){
 
 
 /* 
-##
-##  INTERACTION HANDLING FOR COMMANDS
-##
+#
+#  INTERACTION HANDLING FOR COMMANDS
+#
 */
 
 client.on('interactionCreate', interactionHandler);

@@ -6,5 +6,5 @@ export {pierre, feuille, ciseaux, papier} from "./commands/shifumi.mjs";
 export * from "./commands/sassy.mjs";
 export * from "./commands/mathConstants.mjs";
 
-export {play, stop, skip} from "./commands/musicPlayer.mjs";
+export {play, stop, skip, pause, resume} from "./commands/musicPlayer.mjs";
 
