@@ -1,6 +1,7 @@
 import * as DiscordJs                   from "discord.js";
 import * as MessagePrintReply           from "../botModules/MessagePrintReply.mjs";
 import MusicSubscription                from "../voice/MusicSubscription.mjs";
+import MessageSafeDelete                from "./MessageSafeDelete.mjs";
 
 function durationToString(duration){
     let seconds = duration%60;
@@ -95,7 +96,7 @@ export default function displayMusicDisplayer(channel){
         return false;
     }
 
-    if((sub.currentTrack.metadata.isFile === true) && (!sub.message)){
+    if((sub.currentTrack.metadata.isFile === true) && (!sub.message) && (sub.queue.length === 0)){
         return;
     }
 
@@ -109,19 +110,19 @@ export default function displayMusicDisplayer(channel){
         musicDisplayer = updateMusicDisplayer(sub);
     } */
 
-    let musicDisplayer = updateMusicDisplayer(sub);
+    let musicDisplayer = (sub.message)?updateMusicDisplayer(sub):updateMusicDisplayer(sub,true);
 
     if (musicDisplayer) MessagePrintReply.sendOnChannel(channel, musicDisplayer).then((msg) => {
         sub.setMessage(msg)});
 
 }
 
-function updateMusicDisplayer(sub){
+function updateMusicDisplayer(sub, isLoading = false){
 
-    const musicDisplayer = buildMusicDisplayer(sub);
+    const musicDisplayer = buildMusicDisplayer(sub, isLoading);
 
     if (sub.message) {
-        if (!sub.message.author.bot)
+        if (!MessageSafeDelete.isMessageMine(sub.message))
         return false;
 
         sub.message.edit(musicDisplayer).then((msg) => {
@@ -132,11 +133,13 @@ function updateMusicDisplayer(sub){
     return musicDisplayer;
 }
 
-function buildMusicDisplayer(sub){
+function buildMusicDisplayer(sub, isLoading){
 
     // Build the Music Player
-    const displayerEmbed = constructDisplayerEmbed(sub);
+    const displayerEmbed = isLoading?constructLoadingEmbed(sub):constructDisplayerEmbed(sub);
     const playlistRow = constructPlaylistRow([sub.currentTrack,...sub.queue]);
+
+    let messageContent = {};
 
     const buttonActionRow = new DiscordJs.MessageActionRow()
     .addComponents(
@@ -147,22 +150,33 @@ function buildMusicDisplayer(sub){
         .setEmoji('🎧')
     ).addComponents(
         new DiscordJs.MessageButton()
+        .setCustomId('PotatOSMusicPlayerPlayPause')
+        .setLabel(`${sub.isPaused()?"Jouer":"Pause"}`)           //##LANG Music : "Play":"Pause"
+        .setStyle(`${sub.isPaused()?'SUCCESS':'SECONDARY'}`)
+        .setEmoji(`${sub.isPaused()?'▶':'⏸'}`)
+        .setDisabled(isLoading)
+    ).addComponents(
+        new DiscordJs.MessageButton()
         .setCustomId('PotatOSMusicPlayerSkip')
-        .setLabel(`Skip`)
+        .setLabel(`Skip`)           //##LANG Music : Skip
         .setStyle('PRIMARY')
+        //.setStyle(`${sub.queue.length>0?'PRIMARY':'DANGER'}`)
         .setEmoji('⏭')
     ).addComponents(
         new DiscordJs.MessageButton()
         .setCustomId('PotatOSMusicPlayerStop')
-        .setLabel(`Stop`)
+        .setLabel(`Stop`)           //##LANG Music : Stop
         .setStyle('DANGER')
         .setEmoji('◻')
+        .setDisabled(`${sub.queue.length>0?false:true}`)
     );
 
-    return {
-        embeds : [displayerEmbed],
-        components : [playlistRow, buttonActionRow],
-    }
+        messageContent.embeds = [displayerEmbed];
+        messageContent.components = [buttonActionRow];
+        if (sub.queue.length > 0) messageContent.components.unshift(playlistRow);
+       
+
+    return messageContent;
 }
 
 function constructDisplayerEmbed(sub){
@@ -202,7 +216,6 @@ function constructPlaylistRow(trackList){
             description : (`${data.playlistDesc}`).substring(0, 100),
             value : `${i}`,
             emoji : emojiForPlaylist(i),
-            //default : i==0?true:false,
         };
 
         options.push(option);
@@ -212,7 +225,7 @@ function constructPlaylistRow(trackList){
     .addComponents(
         new DiscordJs.MessageSelectMenu()
             .setCustomId('PotatOSMusicPlayerPlaylist')
-            .setPlaceholder("Afficher la playlist")     //##LANG : Show playlist
+            .setPlaceholder(`Afficher la playlist [${trackList.length-1}]`)     //##LANG : Show playlist [2]
             .setMaxValues(1)
             .setMinValues(1)
             .addOptions(options)
@@ -300,10 +313,10 @@ function emojiForPlaylist(i){
 
 }
 
-/*function waitDisplayer(sub){
-    const displayerEmbed = new DiscordJs.MessageEmbed();
+function constructLoadingEmbed(sub){
+    const loadingEmbed = new DiscordJs.MessageEmbed();
 
-    displayerEmbed
+    loadingEmbed
         .setColor("#ffb46b")
         .setTitle(`C h a r g e m e n t . . .`)  //##LANG : L o a d i n g . . .
         .setDescription(`\`\`\`
@@ -327,14 +340,5 @@ function emojiForPlaylist(i){
         .setFooter({text : `__________________________________________\nPotatOS • ${sub.guildName} > ${sub.voiceChannel.name}`,});
     ;
 
-    const buttonActionRow = new DiscordJs.MessageActionRow()
-    .addComponents(
-        new DiscordJs.MessageButton()
-        .setCustomId('PotatOSMusicPlayer')
-        .setLabel(`PotatOS Music Player`)
-        .setStyle('SECONDARY')
-        .setEmoji('🎧')
-    );
-
-    return {embeds : [displayerEmbed], components : [buttonActionRow]};
-}*/
+    return loadingEmbed;
+}

@@ -1,12 +1,13 @@
 import * as DiscordJs                   from "discord.js";
 import ExploreChannels                  from "../botModules/ExploreChannels.mjs";
+import MessageSafeDelete                from "./MessageSafeDelete.mjs";
 
 const errorIcon = `https://cdn.discordapp.com/attachments/329613279204999170/970413892792623204/Error_icon.png`;
 
 /* 
-##
-##  MESSAGE REPLIES AND PRINT COMMANDS
-##
+#
+#  MESSAGE REPLIES AND PRINT COMMANDS
+#
 */
 
 /**
@@ -27,9 +28,7 @@ const errorIcon = `https://cdn.discordapp.com/attachments/329613279204999170/970
             if (time > 0){
                 setTimeout(
                     () => {
-                        if (msg)
-                            if (msg.author.bot)
-                                msg.delete().catch(()=>{});
+                        MessageSafeDelete.deleteMessage(msg);
                     },
                     time * 1000);
             }
@@ -133,9 +132,9 @@ export function printAlertOnChannel(chnl, txt, time){
 }
 
 /* 
-##
-##  INTERACTION REPLY
-##
+#
+#  INTERACTION REPLY
+#
 */
 
 export function replyAlertOnInterarction(itr, txt){

@@ -1,21 +1,33 @@
-
-
 export default class MessageSafeDelete{
 
-    static botUser;
+    static botUserId;
 
 
     static deleteMessage(message) {
+        if (!message) return false;
 
-        if (message.author === botUser){
+        if (this.isMessageMine(message) && message.deletable){
             message.delete().catch(()=>{});
-        }
-        else {
-            console.warn(`I tried to delete someone else message, but I cought myself trying`);
+            return true;
         }
         
+        return false;
     }
 
+    static deleteThisMessageEvenSoItSNotMine(message) {
+        if (!message) return false;
+
+        console.log(`${Date.now()} : I DELETED SOMEONE ELSE MESSAGE`);
+
+        return message.delete()
+    }
+
+    
+    static isMessageMine(message){
+        if (message && ((message.author.id === this.botUserId) && message.author.bot)) return true;
+
+        return false;
+    }
 
 
 }

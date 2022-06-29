@@ -25,23 +25,32 @@ export function play(args, msg){
 
     if (MessagePrintReply.isItAnHTTPURL(args[0])){
         Voice.streamVoice(msg, args[0], 0.2);
-    } else {
+    } else if (`${args}` === ""){
+        playPause(msg, false);
+    }
+    else{
        // YOUTUBE SEARCH
     }
 
 }
 
 export function pause(args, msg){
-    if (!msg.member.voice.channel) return;
-
-    const subscription = MusicSubscription.getSubscription(msg.guild.id);
-    if (subscription) subscription.pause();
+    playPause(msg,true);
 }
 
 export function resume(args, msg){
+    playPause(msg,false);
+}
+
+function playPause(msg,wannaPause){
     if (!msg.member.voice.channel) return;
 
     const subscription = MusicSubscription.getSubscription(msg.guild.id);
-    if (subscription) subscription.resume();
+    if (subscription) {
+        if(wannaPause) subscription.pause();
+        else subscription.resume();
+        displayMusicDisplayer(msg.channel);
+    }
+
 }
 

@@ -1,4 +1,5 @@
+import MessageSafeDelete from "../botModules/MessageSafeDelete.mjs";
+
 export function deleteNotif(itr){
-    if(itr.message.author.bot)
-        itr.message.delete().catch(()=>{});
+        MessageSafeDelete.deleteMessage(itr.message);
 }

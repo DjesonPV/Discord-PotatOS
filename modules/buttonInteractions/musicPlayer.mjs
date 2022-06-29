@@ -1,4 +1,5 @@
 import * as DiscordJs                   from "discord.js";
+import MessageSafeDelete                from "../botModules/MessageSafeDelete.mjs";
 import displayMusicDisplayer            from "../botModules/MusicDisplayer.mjs";
 import MusicSubscription                from "../voice/MusicSubscription.mjs";
 
@@ -80,11 +81,26 @@ export function PotatOSMusicPlayerSkip(itr){
 export function PotatOSMusicPlayer(itr){
     const subscription = MusicSubscription.getSubscription(itr.member.guild.id);
     if (!subscription) {
-        if(itr.message.author.bot)
-        itr.message.delete().catch(()=>{});
+        MessageSafeDelete.deleteMessage(itr.message);
         return;
     }
         displayMusicDisplayer(itr.message.channel);
         itr.deferUpdate();
+
+}
+
+export function PotatOSMusicPlayerPlayPause(itr){
+    if(!isConnectedToAMusicPlayer(itr)) {
+        itr.deferUpdate();
+        return;
+    }
+
+    const subscription = MusicSubscription.getSubscription(itr.member.guild.id);
+    if (subscription) {
+        if (subscription.isPaused()) subscription.resume(); 
+        else subscription.pause();
+        displayMusicDisplayer(itr.message.channel);
+        itr.deferUpdate();
+    }
 
 }

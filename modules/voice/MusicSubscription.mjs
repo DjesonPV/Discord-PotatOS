@@ -1,5 +1,6 @@
 import * as DiscordJsVoice              from '@discordjs/voice';
 import * as NodeUtil                    from 'node:util';
+import MessageSafeDelete                from '../botModules/MessageSafeDelete.mjs';
 
 const wait = NodeUtil.promisify(setTimeout);
 
@@ -109,6 +110,7 @@ export default class MusicSubscription{
 
     skip(){
         this.audioPlayer.stop();
+        this.resume();
      }
 
     setMessage(msg){
@@ -121,6 +123,10 @@ export default class MusicSubscription{
 
     resume(){
         this.audioPlayer.unpause();
+    }
+
+    isPaused(){
+        return (this.audioPlayer.state.status === DiscordJsVoice.AudioPlayerStatus.Paused);
     }
 
     async processQueue() {
@@ -181,13 +187,8 @@ export default class MusicSubscription{
 
     async destroy(){   
         if (this.voiceConnection.state.status !== DiscordJsVoice.VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
-        if (this.message) {
-            if (this.message.author.bot)
-                this.message.delete().catch(()=>{});
-        }
+        MessageSafeDelete.deleteMessage(this.message);
         this.stop();
         MusicSubscription.subscriptions.delete(this.guildId);
     }
-    
-
 }
