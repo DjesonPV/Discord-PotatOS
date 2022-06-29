@@ -95,7 +95,11 @@ export default function displayMusicDisplayer(channel){
         return false;
     }
 
-    let musicDisplayer = false;
+    if((sub.currentTrack.metadata.isFile === true) && (!sub.message)){
+        return;
+    }
+
+    /*let musicDisplayer = false;
 
     if (!sub.message){
 
@@ -103,7 +107,9 @@ export default function displayMusicDisplayer(channel){
     }
     else {
         musicDisplayer = updateMusicDisplayer(sub);
-    } 
+    } */
+
+    let musicDisplayer = updateMusicDisplayer(sub);
 
     if (musicDisplayer) MessagePrintReply.sendOnChannel(channel, musicDisplayer).then((msg) => {
         sub.setMessage(msg)});
@@ -115,6 +121,9 @@ function updateMusicDisplayer(sub){
     const musicDisplayer = buildMusicDisplayer(sub);
 
     if (sub.message) {
+        if (!sub.message.author.bot)
+        return false;
+
         sub.message.edit(musicDisplayer).then((msg) => {
             sub.setMessage(msg)});
         return false;
@@ -189,11 +198,11 @@ function constructPlaylistRow(trackList){
     trackList.forEach((track, i) => {
         const data = dataToDisplay(track.metadata);
         let option = {
-            label : `${data.playlistTitle}`,
-            description : `${data.playlistDesc}`,
+            label : (`${data.playlistTitle}`).substring(0, 100),
+            description : (`${data.playlistDesc}`).substring(0, 100),
             value : `${i}`,
             emoji : emojiForPlaylist(i),
-            default : i==0?true:false,
+            //default : i==0?true:false,
         };
 
         options.push(option);
@@ -203,7 +212,7 @@ function constructPlaylistRow(trackList){
     .addComponents(
         new DiscordJs.MessageSelectMenu()
             .setCustomId('PotatOSMusicPlayerPlaylist')
-            .setPlaceholder("Playlist")
+            .setPlaceholder("Afficher la playlist")     //##LANG : Show playlist
             .setMaxValues(1)
             .setMinValues(1)
             .addOptions(options)
@@ -291,7 +300,7 @@ function emojiForPlaylist(i){
 
 }
 
-function waitDisplayer(sub){
+/*function waitDisplayer(sub){
     const displayerEmbed = new DiscordJs.MessageEmbed();
 
     displayerEmbed
@@ -328,4 +337,4 @@ function waitDisplayer(sub){
     );
 
     return {embeds : [displayerEmbed], components : [buttonActionRow]};
-}
+}*/

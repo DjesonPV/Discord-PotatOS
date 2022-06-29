@@ -80,6 +80,7 @@ export function PotatOSMusicPlayerSkip(itr){
 export function PotatOSMusicPlayer(itr){
     const subscription = MusicSubscription.getSubscription(itr.member.guild.id);
     if (!subscription) {
+        if(itr.message.author.bot)
         itr.message.delete().catch(()=>{});
         return;
     }

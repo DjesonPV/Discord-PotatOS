@@ -8,28 +8,19 @@ import displayMusicDisplayer            from '../botModules/MusicDisplayer.mjs';
 
 
 
-export default async function streamVoice(msg, url, volume){
+export async function streamVoice(msg, url, volume){
 
-    let subscription = MusicSubscription.getNewSubscription(msg);
+    let subscription = MusicSubscription.getSubscription(msg.guild.id);
+    if (!subscription) subscription = await connectVoice(msg);
 
     if (!subscription) {
         return;
     }
 
-    if (subscription.voiceConnection.state.status !== DiscordJsVoice.VoiceConnectionStatus.Ready){
-        try{
-            await DiscordJsVoice.entersState(subscription.voiceConnection, DiscordJsVoice.VoiceConnectionStatus.Ready, 20e3);
-        } catch (error) {
-            console.warn(error);
-            MessagePrintReply.printAlertOnChannel(msg.channel, `Je n'ai pas réussi à me connecter, reessaie plus tard !`, 10);    //##LANG : Can't connect now, retry later!
-            return;
-        }
-    }
-
     try{
         const track = await Track.fetchData(url, {
             onStart(){
-                displayMusicDisplayer(msg.channel);
+                displayMusicDisplayer(subscription.message.channel);
             },
             onFinish(){
                if(subscription.queue.length === 0) subscription.destroy();
@@ -45,10 +36,35 @@ export default async function streamVoice(msg, url, volume){
         if (track.metadata.isFile) subscription.enskip(track);
         else subscription.enqueue(track);
 
+        displayMusicDisplayer(msg.channel);
+
     } catch (error){
         console.warn(error);
         MessagePrintReply.printAlertOnChannel(msg.channel, `J'ai pas reussi a jouer ton morceau`, 10);  //##LANG : Couldn't play your song
     }
+
+}
+
+async function connectVoice(msg){
+
+    let subscription = MusicSubscription.getNewSubscription(msg);
+
+    if (!subscription) {
+        console.error(`Bug in /voice/Voice.mjs/connectVoice()`);
+        return;
+    }
+
+    if (subscription.voiceConnection.state.status !== DiscordJsVoice.VoiceConnectionStatus.Ready){
+        try{
+            await DiscordJsVoice.entersState(subscription.voiceConnection, DiscordJsVoice.VoiceConnectionStatus.Ready, 20e3);
+        } catch (error) {
+            console.warn(error);
+            MessagePrintReply.printAlertOnChannel(msg.channel, `Je n'ai pas réussi à me connecter, reessaie plus tard !`, 10);    //##LANG : Can't connect now, retry later!
+            return;
+        }
+    }
+
+    return subscription;
 
 }
 

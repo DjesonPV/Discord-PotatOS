@@ -1,6 +1,5 @@
 import * as DiscordJsVoice              from '@discordjs/voice';
 import * as NodeUtil                    from 'node:util';
-import displayMusicDisplayer            from '../botModules/MusicDisplayer.mjs';
 
 const wait = NodeUtil.promisify(setTimeout);
 
@@ -22,7 +21,6 @@ export default class MusicSubscription{
        this.voiceChannel = msg.member.voice.channel;
        this.guildId = msg.guild.id;
        this.guildName = msg.guild.name;
-       this.originalTextChannel = msg.channel;
        this.message = false;
 
     // Voice Connection
@@ -117,6 +115,14 @@ export default class MusicSubscription{
         this.message = msg;
     }
 
+    pause(){
+        this.audioPlayer.pause();
+    }
+
+    resume(){
+        this.audioPlayer.unpause();
+    }
+
     async processQueue() {
         if (this.queueLock || 
             this.audioPlayer.state.status !== DiscordJsVoice.AudioPlayerStatus.Idle ||
@@ -133,11 +139,9 @@ export default class MusicSubscription{
             const resource = await nextTrack.createAudioResource();
             resource.volume.setVolume(nextTrack.volume);
             this.audioPlayer.play(resource);
-            displayMusicDisplayer(this.originalTextChannel);
             this.queueLock = false;
         } catch (error) {
             nextTrack.onError(error);
-            displayMusicDisplayer(this.originalTextChannel);
             this.queueLock = false;
             return this.processQueue();
         }
@@ -177,7 +181,10 @@ export default class MusicSubscription{
 
     async destroy(){   
         if (this.voiceConnection.state.status !== DiscordJsVoice.VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
-        this.message.delete().catch(()=>{});
+        if (this.message) {
+            if (this.message.author.bot)
+                this.message.delete().catch(()=>{});
+        }
         this.stop();
         MusicSubscription.subscriptions.delete(this.guildId);
     }

@@ -8,7 +8,7 @@ import * as ButtonInteractions          from "./ButtonInteractions.mjs";
 
 import * as MessagePrintReply           from "./botModules/MessagePrintReply.mjs";
 import * as MP3Files                    from "./voice/MP3Files.mjs";
-import playMP3                          from "./voice/Voice.mjs";
+import * as Voice                       from "./voice/Voice.mjs";
 
 import ExploreChannels                  from "./botModules/ExploreChannels.mjs";
 
@@ -93,7 +93,7 @@ function messageHandler(msg){
             let mp3play = MP3Files.files[cmdName];
 
             if (command) command(args, msg);
-            else if (mp3play) playMP3(msg, `${MP3Files.path}${mp3play.file}`, mp3play.volume);
+            else if (mp3play) Voice.streamVoice(msg, `${MP3Files.path}${mp3play.file}`, mp3play.volume);
             else MessagePrintReply.printAlertOnChannel(msg.channel, `La commande [ ${cmdSign}${cmdName} ] est invalide`, 10);  //##LANG : Wrong command [cmd]
 
         }

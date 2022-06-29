@@ -1,3 +1,4 @@
 export function deleteNotif(itr){
-    itr.message.delete().catch(()=>{});
+    if(itr.message.author.bot)
+        itr.message.delete().catch(()=>{});
 }

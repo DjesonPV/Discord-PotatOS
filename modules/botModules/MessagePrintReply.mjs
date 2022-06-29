@@ -28,7 +28,8 @@ const errorIcon = `https://cdn.discordapp.com/attachments/329613279204999170/970
                 setTimeout(
                     () => {
                         if (msg)
-                        msg.delete().catch(()=>{});
+                            if (msg.author.bot)
+                                msg.delete().catch(()=>{});
                     },
                     time * 1000);
             }
