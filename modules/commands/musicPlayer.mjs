@@ -1,3 +1,6 @@
+import {createRequire} from 'module';
+const require = createRequire(import.meta.url);
+import youtubeSearch                    from "youtube-search";
 import * as MessagePrintReply           from "../botModules/MessagePrintReply.mjs";
 import * as Voice                       from "../voice/Voice.mjs";
 import MusicSubscription                from "../voice/MusicSubscription.mjs";
@@ -20,7 +23,7 @@ export function stop(args, msg){
     if (subscription) subscription.destroy();
 }
 
-export function play(args, msg){
+export async function play(args, msg){
     if (!msg.member.voice.channel) return;
 
     if (MessagePrintReply.isItAnHTTPURL(args[0])){
@@ -28,8 +31,19 @@ export function play(args, msg){
     } else if (`${args}` === ""){
         playPause(msg, false);
     }
-    else{
-       // YOUTUBE SEARCH
+    else { // YOUTUBE SEARCH
+        const songSearch = `${args.join(' ')}`;
+        const secret = require("../../secret.json");
+        const opts = {
+            maxResults : 1,
+            key : secret.youtubeAPIKey,
+            type : 'video',
+        };
+
+        let result = await youtubeSearch(songSearch, opts).catch((err)=>{MessagePrintReply.printAlertOnChannel(msg.channel, "Problème lors de la recherche", 10)}); //##LANG : There was a problem while searching for a video
+
+        if (result.results.length !== 1) MessagePrintReply.printAlertOnChannel(msg.channel, `Aucune vidéo trouvée pour {${songSearch}}`, 10); //##LANG : No video found for {}
+        else Voice.streamVoice(msg, `${result.results[0].link}`,0.2);
     }
 
 }
