@@ -24,7 +24,9 @@ const snReply = [sntDefeat, sntDraw, sntVictory];
  */
 const tableMath = [ 1, 2, 0, 0, 1, 2, 2, 0, 1];
 
-function game(playerMove, msg){
+function command(interaction){
+
+    const playerMove = interaction.options.getInteger('play');
     
     // 0, 1, 2
     let botMove     = Math.floor(Math.random()*3);
@@ -32,33 +34,28 @@ function game(playerMove, msg){
     let result = tableMath[(3*playerMove+botMove)];
     let botResponse = Math.floor(Math.random()*3);
 
-    MessagePrintReply.printTextOnChannel(msg.channel,`:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} :potato:  <@${msg.author.id}>  ${snReply[result][botResponse]}`);
+    interaction.reply(`:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} :potato:  ${snReply[result][botResponse]}`);
 }
 
-/**
- * Rock-Paper-Scissors game | Rock
- */
-export function pierre(args, msg){ //##LANG Function Name : rock
-    game(0,msg);
-}
 
-/**
- * Rock-Paper-Scissors game | Paper
- */
-export function feuille(args, msg){ //##LANG Function Name : paper
-    game(1,msg);
-}
+import {SlashCommandBuilder} from '@discordjs/builders';
 
-/**
- * Rock-Paper-Scissors game | Paper
- */
-export function papier(args, msg){  //##LANG Function Name : paper DUPLICATE
-    feuille(args, msg);
-}
+const slash = new SlashCommandBuilder()
+    .setName('shifumi')
+    .setDescription('Joue à Pierre-Feuille-Ciseaux contre PotatOS') //##LANG Command description : Play Rock-Paper-Scissors against PotatOS
+    .addIntegerOption(option => option
+        .setName('play')
+        .setDescription('Pierre, Feuille, ou Ciseaux') //##LANG : Rock, Paper, or Scissors
+        .setRequired(true)
+        .addChoices([
+            ['✊ Pierre',  0], //##LANG : Rock
+            ['✋ Feuille', 1], //##LANG : Paper
+            ['✌ Ciseaux', 2]  //##LANG : Scissors
+        ])
+        .setMinValue(0)
+        .setMaxValue(2)   
+    )
+;
 
-/**
- * Rock-Paper-Scissors game | Scissors
- */
-export function ciseaux(args, msg){ //##LANG Fucntion Name : scissors
-    game(2,msg);
-}
+export const shifumi = {slash : slash, command: command};
+

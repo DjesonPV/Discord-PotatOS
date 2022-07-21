@@ -24,6 +24,7 @@
   "homepage": "https://github.com/DjesonPV/PotatOSKastanie#readme",
   "dependencies": {
     "@discordjs/opus": "^0.8.0",
+    "@discordjs/rest": "^1.0.0",
     "@discordjs/voice": "^0.9.0",
     "discord-api-types": "^0.32.1",
     "discord.js": "^13.6.0",

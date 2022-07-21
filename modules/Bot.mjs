@@ -5,10 +5,12 @@ const require = createRequire(import.meta.url);
 import * as DiscordJs                   from 'discord.js';
 import * as Commands                    from "./Commands.mjs";
 import * as ButtonInteractions          from "./ButtonInteractions.mjs";
+import * as SlashCommandsUpdate         from "./botModules/SlashCommands.mjs";
 
 import * as MessagePrintReply           from "./botModules/MessagePrintReply.mjs";
 import * as MP3Files                    from "./voice/MP3Files.mjs";
 import * as Voice                       from "./voice/Voice.mjs";
+
 
 import ExploreChannels                  from "./botModules/ExploreChannels.mjs";
 import MessageSafeDelete                from './botModules/MessageSafeDelete.mjs';
@@ -32,7 +34,7 @@ const client = new DiscordJs.Client({
 
 
 /**
- * Start the PotatOSKasatnie core and connect it to Discord with
+ * Start the PotatOS core and connect it to Discord with
  * the 'botToken' stored in `secret.json`
  */
 export function start(){
@@ -54,15 +56,16 @@ export function start(){
 
         const secret = require("../secret.json");
         client.login(secret.botToken);
-        //client.login((await import("../secret.json", { assert: { type: "json" }})).botToken);
 
 
-        client.once('ready', () => {
+        client.once('ready', async () => {
 
             client.guilds.cache.forEach(guild => {
               if (guild.me.voice) guild.me.voice.disconnect();
 
             });
+
+            await SlashCommandsUpdate.updateSlashCommands();
 
             console.log(`Prêt !`);  //##LANG : Ready!
         })
@@ -76,12 +79,14 @@ export function start(){
 #
 */
 
-client.on('messageCreate', messageHandler);
+
+//client.on('messageCreate', messageHandler);
 /**
  * Handle a new `msg` starting with the character used as
  * command identifier, to call the wanted PotatOS command
  * @param msg Represents a message on Discord
  */
+/*
 function messageHandler(msg){
     if (!msg.content.startsWith(cmdSign)) return;
 
@@ -100,6 +105,7 @@ function messageHandler(msg){
     ).catch(console.log);
 
 }
+//*/
 
 
 /* 
@@ -110,23 +116,26 @@ function messageHandler(msg){
 
 client.on('interactionCreate', interactionHandler);
 
-function interactionHandler(itr){ 
+async function interactionHandler(itr){ 
     
     if (itr.message && (itr.message.author === client.user)){
-    let itrName = itr.customId;
+        let itrName = itr.customId;
 
-    if (itr.isButton()){
-        let buttonInteraction = ButtonInteractions[itrName];
-        if (buttonInteraction) buttonInteraction(itr);
-        else itr.deferUpdate();
-        //MessagePrintReply.replyAlertOnInterarction(itr, `Ce bouton [ ${itrName} ] n'est pas géré`); //##LANG : Not handled Button [buttonID]
+        if (itr.isButton()){
+            let buttonInteraction = ButtonInteractions[itrName];
+            if (buttonInteraction) buttonInteraction(itr);
+            else itr.deferUpdate();
+            //MessagePrintReply.replyAlertOnInterarction(itr, `Ce bouton [ ${itrName} ] n'est pas géré`); //##LANG : Not handled Button [buttonID]
 
+        }
+        if (itr.isSelectMenu()){
+            itr.deferUpdate();
+        }    
     }
-    if (itr.isSelectMenu()){
-        itr.deferUpdate();
+    else if (itr.isCommand()){
+        await Commands[itr.commandName].command(itr);
     }
 
-    
-}}
+}
 
 
