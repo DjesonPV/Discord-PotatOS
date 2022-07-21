@@ -2,6 +2,7 @@ import * as MessagePrintReply           from "../botModules/MessagePrintReply.mj
 import * as Voice                       from "../voice/Voice.mjs";
 import MusicSubscription                from "../voice/MusicSubscription.mjs";
 import displayMusicDisplayer            from "../botModules/MusicDisplayer.mjs";
+import * as SurfYT from "surfyt-api";
 
 // ________________________________________________________________
 // Track Display
@@ -20,7 +21,7 @@ export function stop(args, msg){
     if (subscription) subscription.destroy();
 }
 
-export function play(args, msg){
+export async function play(args, msg){
     if (!msg.member.voice.channel) return;
 
     if (MessagePrintReply.isItAnHTTPURL(args[0])){
@@ -28,10 +29,12 @@ export function play(args, msg){
     } else if (`${args}` === ""){
         playPause(msg, false);
     }
-    else{
-       // YOUTUBE SEARCH
-    }
+    else{ // YOUTUBE SEARCH
+        let searchResult = await SurfYT.searchYoutubeFor(`${args.join(' ')}`, {showVideos: true, location: 'FR', language: 'fr'}).catch((err)=>{MessagePrintReply.printAlertOnChannel(msg.channel, "Problème lors de la recherche", 10)}); //##LANG : There was a problem while searching for a video;
 
+        if (!searchResult[0] && !searchResult[0].url) MessagePrintReply.printAlertOnChannel(msg.channel, `Aucune vidéo trouvée pour {${songSearch}}`, 10); //##LANG : No video found for {}
+        else Voice.streamVoice(msg, searchResult[0].url, 0.2);
+    }
 }
 
 export function pause(args, msg){
