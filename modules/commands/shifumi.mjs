@@ -1,9 +1,7 @@
-import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
-/*
- *  Commands for Rock Paper Scissors / Shifumi / Roshambo
- *
- */
-
+//PotatOS - Commands
+// > ROCK PAPER SCISSORS / SHIFUMI / ROSHAMBO
+//  • • • • • • • • • • • • • • • • • • • • • • • •
+import {SlashCommandBuilder} from '@discordjs/builders';
 
 const emojisMove = [":fist:", ":raised_hand:", ":v:"];
 const emojisResult = [":arrow_right:",":regional_indicator_i:",":arrow_left:"];
@@ -29,16 +27,13 @@ function command(interaction){
     const playerMove = interaction.options.getInteger('play');
     
     // 0, 1, 2
-    let botMove     = Math.floor(Math.random()*3);
+    let botMove     = Math.floor(Math.random()*3);  // Bot Move
+    let botResponse = Math.floor(Math.random()*3);  // Repartee
 
-    let result = tableMath[(3*playerMove+botMove)];
-    let botResponse = Math.floor(Math.random()*3);
+    let result = tableMath[(3*playerMove+botMove)]; // Evaluate win
 
     interaction.reply(`:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} :potato:  ${snReply[result][botResponse]}`);
 }
-
-
-import {SlashCommandBuilder} from '@discordjs/builders';
 
 const slash = new SlashCommandBuilder()
     .setName('shifumi')
@@ -57,5 +52,4 @@ const slash = new SlashCommandBuilder()
     )
 ;
 
-export const shifumi = {slash : slash, command: command};
-
+export const shifumi = {slash: slash, command: command};
