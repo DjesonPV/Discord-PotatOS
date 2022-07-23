@@ -122,7 +122,7 @@ client.on('interactionCreate', interactionHandler);
 
 async function interactionHandler(itr){ 
     
-    if (itr.message && (itr.message.author === client.user)){
+    if (itr.message && (itr.message.author.id === client.user.id)){
         let itrName = itr.customId;
 
         if (itr.isButton()){

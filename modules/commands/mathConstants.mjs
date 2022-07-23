@@ -54,8 +54,8 @@ export function exp(args, msg){
     let nbr;
 
     if (args[0]) {
-        nbr = args[0].match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [];
-        nbr = parseFloat(nbr[0]);
+        nbr = args[0].match(/\d+\.\d+|\d+\b|\d+(?=\w)/)[0] ?? 0;
+        nbr = parseFloat(nbr);
         if (nbr >= 0) n = nbr;
         if ((args[0]) && (args[0].charAt(0) == '-')) n = -n;
     }

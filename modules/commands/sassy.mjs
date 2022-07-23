@@ -1,7 +1,4 @@
-//PotatOS - Commands
-// > SPECIFIC PRIVATE JOKES
-//  • • • • • • • • • • • • • • • • • • • • • • • •
-import {SlashCommandBuilder} from '@discordjs/builders';
+import { SlashCommandBuilder } from '@discordjs/builders';
 import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
 import MessageSafeDelete from '../botModules/MessageSafeDelete.mjs';
 
@@ -50,8 +47,7 @@ export const pk = {slash: slashPk, command: cmdPk};
  * "PUTAIN" is refering the french interjection of rage
  */
 async function cmdPUTAIN(interaction){ 
-    MessageSafeDelete.noReply(interaction); 
-    MessagePrintReply.printLinkOnChannel(interaction.channel, "https://c.tenor.com/Xk5yKpCr96sAAAAd/christmas-tree-hit.gif", 10);
+    MessagePrintReply.replyToAnInteraction(interaction, "https://c.tenor.com/Xk5yKpCr96sAAAAd/christmas-tree-hit.gif", 3);
 }
 
 const slashPUTAIN = new SlashCommandBuilder()

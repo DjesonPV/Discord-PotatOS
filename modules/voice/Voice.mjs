@@ -8,10 +8,10 @@ import displayMusicDisplayer            from '../botModules/MusicDisplayer.mjs';
 
 
 
-export async function streamVoice(msg, url, volume){
+export async function streamVoice(interaction, url, volume){
 
-    let subscription = MusicSubscription.getSubscription(msg.guild.id);
-    if (!subscription) subscription = await connectVoice(msg);
+    let subscription = MusicSubscription.getSubscription(interaction.guild.id);
+    if (!subscription) subscription = await connectVoice(interaction);
 
     if (!subscription) {
         return;
@@ -20,14 +20,14 @@ export async function streamVoice(msg, url, volume){
     try{
         const track = await Track.fetchData(url, {
             onStart(){
-                displayMusicDisplayer(subscription.message.channel || msg.channel);
+                displayMusicDisplayer(subscription.message.channel || interaction.channel);
             },
             onFinish(){
                if(subscription.queue.length === 0) subscription.destroy();
             },
             onError(error){
                 console.warn(error);
-                MessagePrintReply.printAlertOnChannel(msg.channel, `Erreur : ${error}`, 20);
+                MessagePrintReply.replyAlertOnInterarction(interaction, `Erreur : ${error}`); //##LANG : Error: $...
             }
         });
 
@@ -36,18 +36,18 @@ export async function streamVoice(msg, url, volume){
         if (track.metadata.isFile) subscription.enskip(track);
         else subscription.enqueue(track);
 
-        displayMusicDisplayer(msg.channel);
+        displayMusicDisplayer(interaction.channel);
 
     } catch (error){
         console.warn(error);
-        MessagePrintReply.printAlertOnChannel(msg.channel, `J'ai pas reussi a jouer ton morceau`, 10);  //##LANG : Couldn't play your song
+        MessagePrintReply.replyAlertOnInterarction(interaction, `J'ai pas reussi a jouer ton morceau`);  //##LANG : Couldn't play your song
     }
 
 }
 
-async function connectVoice(msg){
+async function connectVoice(interaction){
 
-    let subscription = MusicSubscription.getNewSubscription(msg);
+    let subscription = MusicSubscription.getNewSubscription(interaction);
 
     if (!subscription) {
         console.error(`Bug in /voice/Voice.mjs/connectVoice()`);
@@ -59,7 +59,7 @@ async function connectVoice(msg){
             await DiscordJsVoice.entersState(subscription.voiceConnection, DiscordJsVoice.VoiceConnectionStatus.Ready, 20e3);
         } catch (error) {
             console.warn(error);
-            MessagePrintReply.printAlertOnChannel(msg.channel, `Je n'ai pas réussi à me connecter, reessaie plus tard !`, 10);    //##LANG : Can't connect now, retry later!
+            MessagePrintReply.replyAlertOnInterarction(interaction, `Je n'ai pas réussi à me connecter, reessaie plus tard !`);    //##LANG : Can't connect now, retry later!
             return;
         }
     }

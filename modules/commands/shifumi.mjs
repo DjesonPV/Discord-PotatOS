@@ -1,7 +1,8 @@
 //PotatOS - Commands
 // > ROCK PAPER SCISSORS / SHIFUMI / ROSHAMBO
 //  • • • • • • • • • • • • • • • • • • • • • • • •
-import {SlashCommandBuilder} from '@discordjs/builders';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
 
 const emojisMove = [":fist:", ":raised_hand:", ":v:"];
 const emojisResult = [":arrow_right:",":regional_indicator_i:",":arrow_left:"];
@@ -32,7 +33,7 @@ function command(interaction){
 
     let result = tableMath[(3*playerMove+botMove)]; // Evaluate win
 
-    interaction.reply(`:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} :potato:  ${snReply[result][botResponse]}`);
+    MessagePrintReply.replyToAnInteraction(interaction, `:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} :potato:  ${snReply[result][botResponse]}`);
 }
 
 const slash = new SlashCommandBuilder()

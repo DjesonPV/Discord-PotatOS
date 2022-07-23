@@ -24,7 +24,7 @@ export default class MessageSafeDelete{
 
     
     static isMessageMine(message){
-        if (message && ((message.author.id === this.botUserId) && message.author.bot)) return true;
+        if (message && message.author &&((message.author.id === this.botUserId) && message.author.bot)) return true;
 
         return false;
     }
