@@ -30,10 +30,9 @@ export default class Track {
                 const process = ytdl.exec(
                     this.url,
                     {
-                        o: '-',
-                        q: '',
-                        f: 'bestaudio[ext=webm+acodec=opus+asr=48000]/bestaudio',
-                        r: '100K',
+                        output: '-',
+                        format: 'bestaudio/best',
+                        quiet: true,
                     },
                     { stdio: ['ignore', 'pipe', 'ignore'] }
 
@@ -44,7 +43,6 @@ export default class Track {
                     return;
                 }
                 const stream = process.stdout;
-                console.log(stream);
 
                 const onError = (error) => {
                     if (!process.killed) process.kill();

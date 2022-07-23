@@ -32,8 +32,8 @@ export async function play(args, msg){
     else{ // YOUTUBE SEARCH
         let searchResult = await SurfYT.searchYoutubeFor(`${args.join(' ')}`, {showVideos: true, location: 'FR', language: 'fr'}).catch((err)=>{MessagePrintReply.printAlertOnChannel(msg.channel, "Problème lors de la recherche", 10)}); //##LANG : There was a problem while searching for a video;
 
-        if (!searchResult[0] && !searchResult[0].url) MessagePrintReply.printAlertOnChannel(msg.channel, `Aucune vidéo trouvée pour {${songSearch}}`, 10); //##LANG : No video found for {}
-        else Voice.streamVoice(msg, searchResult[0].url, 0.2);
+        if (searchResult[0] && searchResult[0].url) Voice.streamVoice(msg, searchResult[0].url, 0.2);
+        else MessagePrintReply.printAlertOnChannel(msg.channel, `Aucune vidéo trouvée pour {${songSearch}}`, 10); //##LANG : No video found for {}
     }
 }
 
