@@ -29,5 +29,12 @@ export default class MessageSafeDelete{
         return false;
     }
 
+    /** Refuse a CommandInteraction reply  
+     * By defer-ing it then deleting the defered message 
+    */
+    static noReply(interaction){
+       interaction.deferReply({fetchReply :true}).then((msg) =>MessageSafeDelete.deleteMessage(msg)).catch((err)=>{console.log(err)});
+    }
+
 
 }

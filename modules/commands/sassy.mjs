@@ -3,6 +3,7 @@
 //  • • • • • • • • • • • • • • • • • • • • • • • •
 import {SlashCommandBuilder} from '@discordjs/builders';
 import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
+import MessageSafeDelete from '../botModules/MessageSafeDelete.mjs';
 
 
 /**
@@ -17,7 +18,7 @@ function cmdPc(interaction){
 
     let rng = Math.floor(Math.random() * sntc.length);
 
-    interaction.deferReply();  // No reply, send a new message to anonymise the sender
+    MessageSafeDelete.noReply(interaction); 
     MessagePrintReply.printTextOnChannel(interaction.channel, sntc[rng]);
 }
 
@@ -33,7 +34,7 @@ export const pc = {slash: slashPc, command: cmdPc};
  * and a random woman in a train hall
  */
 function cmdPk(interaction){ 
-    interaction.deferReply(); // No reply, send a new message to anonymise the sender
+    MessageSafeDelete.noReply(interaction); 
     MessagePrintReply.printTextOnChannel(interaction.channel, `Quel est le chemin le plus court pour aller vers ton coeur ?`); //##LANG Private Joke : What's the shortest path to your heart?
 }
 
@@ -49,11 +50,8 @@ export const pk = {slash: slashPk, command: cmdPk};
  * "PUTAIN" is refering the french interjection of rage
  */
 async function cmdPUTAIN(interaction){ 
-
+    MessageSafeDelete.noReply(interaction); 
     MessagePrintReply.printLinkOnChannel(interaction.channel, "https://c.tenor.com/Xk5yKpCr96sAAAAd/christmas-tree-hit.gif", 10);
-
-    await interaction.reply("slt");
-    interaction.editReply("wesh");
 }
 
 const slashPUTAIN = new SlashCommandBuilder()

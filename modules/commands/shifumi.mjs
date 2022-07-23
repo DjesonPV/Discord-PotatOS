@@ -42,11 +42,11 @@ const slash = new SlashCommandBuilder()
         .setName('play')
         .setDescription('Pierre, Feuille, ou Ciseaux') //##LANG : Rock, Paper, or Scissors
         .setRequired(true)
-        .addChoices([
-            ['✊ Pierre',  0], //##LANG : Rock
-            ['✋ Feuille', 1], //##LANG : Paper
-            ['✌ Ciseaux', 2]  //##LANG : Scissors
-        ])
+        .addChoices(
+            { name: '✊ Pierre', value: 0 }, //##LANG : Rock
+            { name: '✋ Feuille', value: 1 }, //##LANG : Paper
+            { name: '✌ Ciseaux', value: 2}  //##LANG : Scissors
+        )
         .setMinValue(0)
         .setMaxValue(2)   
     )

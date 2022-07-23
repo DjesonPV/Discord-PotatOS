@@ -136,7 +136,7 @@ async function interactionHandler(itr){
             itr.deferUpdate();
         }    
     }
-    else if (itr.isCommand()){
+    else if (itr.type === DiscordJs.InteractionType.ApplicationCommand){
         await Commands[itr.commandName].command(itr);
     }
 
