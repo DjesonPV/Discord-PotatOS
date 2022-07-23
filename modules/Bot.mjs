@@ -25,10 +25,11 @@ const cmdSign = '§';
 
 const client = new DiscordJs.Client({
     intents:[
-        DiscordJs.Intents.FLAGS.GUILDS,
-        DiscordJs.Intents.FLAGS.GUILD_MESSAGES,
-        DiscordJs.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-        DiscordJs.Intents.FLAGS.GUILD_VOICE_STATES
+        DiscordJs.GatewayIntentBits.Guilds,
+        DiscordJs.GatewayIntentBits.GuildMessages,
+        DiscordJs.GatewayIntentBits.GuildMessageReactions,
+        DiscordJs.GatewayIntentBits.GuildVoiceStates,
+        DiscordJs.GatewayIntentBits.MessageContent
     ]
 });
 
@@ -60,9 +61,9 @@ export function start(){
 
         client.once('ready', async () => {
 
-            client.guilds.cache.forEach(guild => {
-              if (guild.me.voice) guild.me.voice.disconnect();
-
+            client.guilds.cache.forEach(async (guild) => {
+                const memberMe = await guild.members.fetchMe();
+                if (memberMe) memberMe.voice.disconnect();
             });
 
             await SlashCommandsUpdate.updateSlashCommands();
@@ -84,11 +85,13 @@ export function start(){
 /**
  * Handle a new `msg` starting with the character used as
  * command identifier, to call the wanted PotatOS command
- * @param msg Represents a message on Discord
+ * @param {DiscordJs.Message} msg Represents a message on Discord
  */
 /*
 function messageHandler(msg){
-    if (!msg.content.startsWith(cmdSign)) return;
+    if (!msg.content.startsWith(cmdSign)) {
+        return;
+    }
 
     MessageSafeDelete.deleteThisMessageEvenSoItSNotMine(msg).then(() => {    //##DEL
             let args = msg.content.substring(1).split(/\s+/g);
@@ -113,6 +116,7 @@ function messageHandler(msg){
 #  INTERACTION HANDLING FOR COMMANDS
 #
 */
+
 
 client.on('interactionCreate', interactionHandler);
 

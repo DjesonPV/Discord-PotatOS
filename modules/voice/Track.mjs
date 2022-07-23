@@ -1,16 +1,16 @@
-import * as DiscordJsVoice              from '@discordjs/voice';
-import * as fs                          from 'fs';
-import ytdl                             from 'youtube-dl-exec';
-import ytdlCore                         from 'ytdl-core';
+import * as DiscordJsVoice from '@discordjs/voice';
+import * as fs from 'fs';
+import ytdl from 'youtube-dl-exec';
+import ytdlCore from 'ytdl-core';
 
-import * as MP3Files                    from "./MP3Files.mjs";
+import * as MP3Files from "./MP3Files.mjs";
 
 
 // empty function
-const noop = () => {};
+const noop = () => { };
 
-export default class Track{
-    constructor({url, metadata = {isYoutube : false, isFile : false}, onStart, onFinish, onError}){
+export default class Track {
+    constructor({ url, metadata = { isYoutube: false, isFile: false }, onStart, onFinish, onError }) {
         this.url = url;
         this.metadata = metadata;
         this.volume = 1.0;
@@ -21,22 +21,23 @@ export default class Track{
     }
 
     // Don't ask me it's a copy of the example from discordjs/voice
-    createAudioResource(){
+    createAudioResource() {
         return new Promise((resolve, reject) => {
-            if(this.url.startsWith('http')) {
+            if (this.url.startsWith('http')) {
                 /**
                  * URL is a link
                  */
                 const process = ytdl.exec(
                     this.url,
                     {
-                        o: '-',
-                        q: '',
-                        f: 'bestaudio[ext=webm+acodec=opus+asr=48000]/bestaudio',
-                        r: '100K',
+                        output: '-',
+                        format: 'bestaudio/best',
+                        quiet: true,
                     },
-                    { stdio: ['ignore', 'pipe', 'ignore']},
+                    { stdio: ['ignore', 'pipe', 'ignore'] }
+
                 );
+
                 if (!process.stdout) {
                     reject(new Error('No stdout'));
                     return;
@@ -52,10 +53,10 @@ export default class Track{
                     .once('spawn', () => {
                         DiscordJsVoice.demuxProbe(stream)
                             .then((probe) => resolve(
-                                DiscordJsVoice.createAudioResource(probe.stream, { 
-                                    metadata: this, 
-                                    inputType: probe.type, 
-                                    inlineVolume: true 
+                                DiscordJsVoice.createAudioResource(probe.stream, {
+                                    metadata: this,
+                                    inputType: probe.type,
+                                    inlineVolume: true
                                 })
                             ))
                             .catch(onError);
@@ -72,31 +73,31 @@ export default class Track{
                             metadata: this,
                             inlineVolume: true
                         });
-    
+
                         resolve(resource);
                     }).catch(reject);
-                    
+
                 } catch (error) {
                     reject(error);
                 }
-                
+
             }
-		});
+        });
 
     }
 
-    setVolume(vol){
+    setVolume(vol) {
         this.volume = vol;
     }
-    
-    static fetchData(url, methods){
+
+    static fetchData(url, methods) {
 
         if (isItAYTLink(url))
-        return fromYoutube(url, methods);
-       
+            return fromYoutube(url, methods);
+
         if (url.startsWith(MP3Files.path))
-        return fromFile(url, methods);
-        
+            return fromFile(url, methods);
+
         return fromInternet(url, methods);
     }
 
@@ -109,59 +110,59 @@ export default class Track{
 
 
 /** Fetch data from YouTube */
-async function fromYoutube(url, methods){
+async function fromYoutube(url, methods) {
     const info = await ytdlCore.getInfo(url);
 
     const metadata = {
-        isYoutube       : true,     // Flags : important to set them
-        isFile          : false,    // for code stability
+        isYoutube: true,     // Flags : important to set them
+        isFile: false,    // for code stability
 
         // Data use in the MusicPlayer Embed
-        title           : info.videoDetails.title,
-        author          : info.videoDetails.ownerChannelName,
-        duration        : info.videoDetails.lengthSeconds,
-        videoThumbnail  : ((info.videoDetails.thumbnails[0].url).split('?'))[0],
-        videoURL        : info.videoDetails.video_url,
-        authorPicture   : ((info.videoDetails.author.thumbnails[0].url).split('='))[0],
-        authorURL       : info.videoDetails.author.channel_url,
-        uploadDate      : info.videoDetails.uploadDate,
-        viewCount       : info.videoDetails.viewCount,
+        title: info.videoDetails.title,
+        author: info.videoDetails.ownerChannelName,
+        duration: info.videoDetails.lengthSeconds,
+        videoThumbnail: ((info.videoDetails.thumbnails[0].url).split('?'))[0],
+        videoURL: info.videoDetails.video_url,
+        authorPicture: ((info.videoDetails.author.thumbnails[0].url).split('='))[0],
+        authorURL: info.videoDetails.author.channel_url,
+        uploadDate: info.videoDetails.uploadDate,
+        viewCount: info.videoDetails.viewCount,
     };
 
     return define(url, methods, metadata);
 }
 
 /** Fetch data from the MP3Files */
-function fromFile(url, methods){
+function fromFile(url, methods) {
 
     const mp3Key = getMP3KeyFromURL(url);
-    
+
     const metadata = {
-        isYoutube       : false,    // Flags : important to set them
-        isFile          : true,     // for code stability
+        isYoutube: false,    // Flags : important to set them
+        isFile: true,     // for code stability
 
         // Data use in the MusicPlayer Embed
-        title : MP3Files.files[mp3Key].title,
-        description : MP3Files.files[mp3Key].description,
-        key   : mp3Key,
+        title: MP3Files.files[mp3Key].title,
+        description: MP3Files.files[mp3Key].description,
+        key: mp3Key,
     };
 
     return define(url, methods, metadata);
 }
 
 /** Try do to something for Internet Files */
-function fromInternet(url, methods){
+function fromInternet(url, methods) {
 
     const uri = url.split('/').filter(Boolean); //Split an url and remove empty strings
-    
+
     const metadata = {
-        isYoutube       : false,    // Flags : important to set them
-        isFile          : false,    // for code stability
+        isYoutube: false,    // Flags : important to set them
+        isFile: false,    // for code stability
 
         // Data use in the MusicPlayer Embed
-        source : uri[1],
-        file   : uri[uri.length-1],
-        url : url,
+        source: uri[1],
+        file: uri[uri.length - 1],
+        url: url,
     };
 
     return define(url, methods, metadata);
@@ -171,18 +172,18 @@ function fromInternet(url, methods){
 // ===============================================================================
 // WRAPPED METHODS CONSTRUCTOR
 //
-function define(url, methods, metadata){
+function define(url, methods, metadata) {
 
     const wrappedMethods = {
         onStart() {
             wrappedMethods.onStart = noop;
             methods.onStart();
         },
-        onFinish(){
+        onFinish() {
             wrappedMethods.onFinish = noop;
             methods.onFinish();
         },
-        onError(error){
+        onError(error) {
             wrappedMethods.onError = noop;
             methods.onError(error);
         },
@@ -190,9 +191,9 @@ function define(url, methods, metadata){
 
     return new Track({
         url,
-        metadata : metadata,
+        metadata: metadata,
         ...wrappedMethods,
-        }
+    }
     )
 }
 
@@ -200,19 +201,19 @@ function define(url, methods, metadata){
 // =============================================================================
 // UTILITARY FUNCTIONS
 //
-function isItAYTLink(url){
-    if (typeof url == "string"){
-        if(url.match(/(youtube.com|youtu.be)\/(watch)?(\?v=)?(\S+)?/)){
+function isItAYTLink(url) {
+    if (typeof url == "string") {
+        if (url.match(/(youtube.com|youtu.be)\/(watch)?(\?v=)?(\S+)?/)) {
             return true;
         }
     }
     return false;
 }
 
-function getMP3KeyFromURL(url){
-    const key = Object.keys(MP3Files.files).filter(function(k) {
+function getMP3KeyFromURL(url) {
+    const key = Object.keys(MP3Files.files).filter(function (k) {
         return MP3Files.files[k].file === url.slice(MP3Files.path.length);
-      })[0];
+    })[0];
 
-      return key;
+    return key;
 }
