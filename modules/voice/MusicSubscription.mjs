@@ -31,7 +31,7 @@ export default class MusicSubscription{
                     try {
                         await DiscordJsVoice.entersState(this.voiceConnection, DiscordJsVoice.VoiceConnectionStatus.Connecting, 5000);
                         // Probably moved voice channel
-                    } catch {
+                    } catch (err){
                         this.voiceConnection.destroy();
                         // Probably removed from voice channel
 
@@ -59,7 +59,7 @@ export default class MusicSubscription{
                 this.readyLock = true;
                 try {
                     await DiscordJsVoice.entersState(this.voiceConnection, DiscordJsVoice.VoiceConnectionStatus.Ready, 30_000);
-                } catch{
+                } catch (err){
                     if (this.voiceConnection.state.status !== DiscordJsVoice.VoiceConnectionStatus.Destroyed){
                         this.voiceConnection.destroy();
                     }
@@ -73,13 +73,14 @@ export default class MusicSubscription{
 
     // Audio Player
         this.audioPlayer.on('stateChange', (oldState, newState) => {
-            if (newState.status === DiscordJsVoice.AudioPlayerStatus.Idle && oldState.status !== DiscordJsVoice.AudioPlayerStatus.Idle){
+            if (newState.status === DiscordJsVoice.AudioPlayerStatus.Idle /*&& oldState.status !== DiscordJsVoice.AudioPlayerStatus.Idle*/){
                 oldState.resource.metadata.onFinish();
                 this.processQueue();
             } else if (newState.status === DiscordJsVoice.AudioPlayerStatus.Playing){
                 // If a started playing, then start the new track
                 newState.resource.metadata.onStart();
             }
+
         });
 
 

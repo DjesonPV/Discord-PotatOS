@@ -11,10 +11,13 @@ export default class channels{
      */
     static explore(client){
         client.channels.cache.forEach( channel => {
-            if (channel.type == `GUILD_TEXT`){
+            if (
+                (channel.type === DiscordJs.ChannelType.GuildText)
+                // Can only writes in normal TextChannels
+            ){
                 this.text.set(channel.name, channel);
             } else
-            if (channel.type === `GUILD_VOICE`){
+            if (channel.isTextBased()){
                 this.voice.set(channel.name, channel);
             }
         });

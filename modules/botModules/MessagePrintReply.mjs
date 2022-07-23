@@ -37,12 +37,12 @@ const errorIcon = `https://cdn.discordapp.com/attachments/329613279204999170/970
         let timeRow;
 
         if (time >0) {//embeds.push(timeEmbed);
-            timeRow = new DiscordJs.MessageActionRow()
+            timeRow = new DiscordJs.ActionRowBuilder()
 			.addComponents(
-				new DiscordJs.MessageButton()
+				new DiscordJs.ButtonBuilder()
                     .setCustomId('deleteNotif')
 					.setLabel(`Ce message s'autodétruira dans ${time} secondes`)  //##LANG : This message will be deleted in x secondes
-					.setStyle('SECONDARY')
+					.setStyle(DiscordJs.ButtonStyle.Secondary)
                     .setEmoji('🚮')
 			);
         
@@ -89,7 +89,7 @@ export function printTextOnChannel(chnl, txt, time){
  * @param time Time the message will be displayed (in seconds)
  */
 export function printEmbedOnChannel(chnl, embed, time){
-    if(embed instanceof DiscordJs.MessageEmbed)
+    if(embed instanceof DiscordJs.EmbedBuilder)
     printOnChannel(chnl,[],[embed],[],[],time);
 }
 
@@ -121,7 +121,7 @@ export function isItAnHTTPURL(text){
  * @param time Time the alert will be displayed (in seconds)
  */
 export function printAlertOnChannel(chnl, txt, time){
-    let alertEmbed = new DiscordJs.MessageEmbed()
+    let alertEmbed = new DiscordJs.EmbedBuilder()
     .setColor('#FF006E')
     .setAuthor({
         name: `${txt}`,
@@ -140,7 +140,7 @@ export function printAlertOnChannel(chnl, txt, time){
 export function replyAlertOnInterarction(itr, txt){
     let reply = {};
     
-    let alertEmbed = new DiscordJs.MessageEmbed()
+    let alertEmbed = new DiscordJs.EmbedBuilder()
     .setColor('#FF006E')
     .setAuthor({
         name: `${txt}`,

@@ -3,24 +3,29 @@ import MessageSafeDelete                from "../botModules/MessageSafeDelete.mj
 import displayMusicDisplayer            from "../botModules/MusicDisplayer.mjs";
 import MusicSubscription                from "../voice/MusicSubscription.mjs";
 
+/**
+ * 
+ * @param {DiscordJs.MessageComponentInteraction} itr 
+ * @returns 
+ */
 export function PotatOSMusicPlayerStop(itr){
     if(!isConnectedToAMusicPlayer(itr)) {
         itr.deferUpdate();
         return;
     }
 
-    let stopRow = new DiscordJs.MessageActionRow()
+    let stopRow = new DiscordJs.ActionRowBuilder()
     .addComponents(
-        new DiscordJs.MessageButton()
+        new DiscordJs.ButtonBuilder()
         .setCustomId('PotatOSMusicPlayerStopYESSTOPIT')
         .setLabel(`Arrêter et supprimer la playlist en cours`)      //##LANG : Stop and deleted the current playlist
-        .setStyle('DANGER')
+        .setStyle(DiscordJs.ButtonStyle.Danger)
         .setEmoji('❕')
     ).addComponents(
-        new DiscordJs.MessageButton()
+        new DiscordJs.ButtonBuilder()
         .setCustomId('PotatOSMusicPlayerStopDONT')
         .setLabel(`Laisser la musique`)     //##LANG : Keep the music running
-        .setStyle('SECONDARY')
+        .setStyle(DiscordJs.ButtonStyle.Secondary)
         .setEmoji('🎧')
     );
 
@@ -42,6 +47,7 @@ export function PotatOSMusicPlayerStop(itr){
         });
 
 }
+
 
 function isConnectedToAMusicPlayer(itr){
     const subscription = MusicSubscription.getSubscription(itr.member.guild.id);
