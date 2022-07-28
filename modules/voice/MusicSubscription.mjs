@@ -8,20 +8,20 @@ export default class MusicSubscription{
 
     static subscriptions = new Map();
 
-    constructor(msg){
+    constructor(interaction){
        this.voiceConnection = DiscordJsVoice.joinVoiceChannel({
-            channelId: msg.member.voice.channel.id,
-            guildId: msg.guild.id,
-            adapterCreator: msg.guild.voiceAdapterCreator,
+            channelId: interaction.member.voice.channel.id,
+            guildId: interaction.guild.id,
+            adapterCreator: interaction.guild.voiceAdapterCreator,
         }),
        this.audioPlayer = DiscordJsVoice.createAudioPlayer();
        this.queue = [];
        this.queueLock = false;
        this.readyLock = false;
        this.currentTrack;
-       this.voiceChannel = msg.member.voice.channel;
-       this.guildId = msg.guild.id;
-       this.guildName = msg.guild.name;
+       this.voiceChannel = interaction.member.voice.channel;
+       this.guildId = interaction.guild.id;
+       this.guildName = interaction.guild.name;
        this.message = false;
 
     // Voice Connection
@@ -155,16 +155,12 @@ export default class MusicSubscription{
     }
 
 
-    static getNewSubscription(msg){
-        if (!msg.member.voice.channelId){
-            return false;
+    static getNewSubscription(interaction){
+        let subscription = this.getSubscription(interaction.guild.id);
+        if (subscription) {
+            return subscription;
         } else {
-            let subscription = this.getSubscription(msg.guild.id);
-            if (subscription) {
-                return subscription;
-            } else {
-                return this.createSubcription(msg);
-            }
+            return this.createSubcription(interaction);
         }
     
     }
@@ -179,11 +175,11 @@ export default class MusicSubscription{
         
     }
 
-    static createSubcription(msg){
-        let subscription = new MusicSubscription(msg);
+    static createSubcription(interaction){
+        let subscription = new MusicSubscription(interaction);
         subscription.voiceConnection.on('error', console.warn);
-        this.subscriptions.set(msg.guild.id, subscription);
-        return this.subscriptions.get(msg.guild.id);
+        this.subscriptions.set(interaction.guild.id, subscription);
+        return this.subscriptions.get(interaction.guild.id);
     }
 
     async destroy(){   

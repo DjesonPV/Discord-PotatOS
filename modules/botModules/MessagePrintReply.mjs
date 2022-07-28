@@ -152,3 +152,38 @@ export function replyAlertOnInterarction(itr, txt){
 
    itr.reply(reply);
 }
+
+export function replyToAnInteraction(interaction, message, time = 0){
+
+    function deleteResponse(msg){
+        if (time > 0){
+            setTimeout(
+                () => {
+                    MessageSafeDelete.deleteMessage(msg);
+                },
+                time * 1000);
+        }
+    };
+
+    let timeRow;
+
+    if (time >0) {
+        timeRow = new DiscordJs.ActionRowBuilder()
+        .addComponents(
+            new DiscordJs.ButtonBuilder()
+                .setCustomId('deleteNotif')
+                .setLabel(`Ce message s'autodétruira dans ${time} secondes`)  //##LANG : This message will be deleted in x secondes
+                .setStyle(DiscordJs.ButtonStyle.Secondary)
+                .setEmoji('🚮')
+        );
+    
+    }
+
+    let toSend = {};
+    if (message.length   != 0) toSend.content = message;
+    if (timeRow) toSend.components = [timeRow];
+    toSend.fetchReply = true;
+
+    interaction.reply(toSend).then(deleteResponse).catch(console.log);
+
+}

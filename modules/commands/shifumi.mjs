@@ -1,9 +1,8 @@
+//PotatOS - Commands
+// > ROCK PAPER SCISSORS / SHIFUMI / ROSHAMBO
+//  • • • • • • • • • • • • • • • • • • • • • • • •
+import { SlashCommandBuilder } from '@discordjs/builders';
 import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
-/*
- *  Commands for Rock Paper Scissors / Shifumi / Roshambo
- *
- */
-
 
 const emojisMove = [":fist:", ":raised_hand:", ":v:"];
 const emojisResult = [":arrow_right:",":regional_indicator_i:",":arrow_left:"];
@@ -24,41 +23,34 @@ const snReply = [sntDefeat, sntDraw, sntVictory];
  */
 const tableMath = [ 1, 2, 0, 0, 1, 2, 2, 0, 1];
 
-function game(playerMove, msg){
+function command(interaction){
+
+    const playerMove = interaction.options.getInteger('play');
     
     // 0, 1, 2
-    let botMove     = Math.floor(Math.random()*3);
+    let botMove     = Math.floor(Math.random()*3);  // Bot Move
+    let botResponse = Math.floor(Math.random()*3);  // Repartee
 
-    let result = tableMath[(3*playerMove+botMove)];
-    let botResponse = Math.floor(Math.random()*3);
+    let result = tableMath[(3*playerMove+botMove)]; // Evaluate win
 
-    MessagePrintReply.printTextOnChannel(msg.channel,`:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} :potato:  <@${msg.author.id}>  ${snReply[result][botResponse]}`);
+    MessagePrintReply.replyToAnInteraction(interaction, `:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} :potato:  ${snReply[result][botResponse]}`);
 }
 
-/**
- * Rock-Paper-Scissors game | Rock
- */
-export function pierre(args, msg){ //##LANG Function Name : rock
-    game(0,msg);
-}
+const slash = new SlashCommandBuilder()
+    .setName('shifumi')
+    .setDescription('Joue à Pierre-Feuille-Ciseaux contre PotatOS') //##LANG Command description : Play Rock-Paper-Scissors against PotatOS
+    .addIntegerOption(option => option
+        .setName('play')
+        .setDescription('Pierre, Feuille, ou Ciseaux') //##LANG : Rock, Paper, or Scissors
+        .setRequired(true)
+        .addChoices(
+            { name: '✊ Pierre', value: 0 }, //##LANG : Rock
+            { name: '✋ Feuille', value: 1 }, //##LANG : Paper
+            { name: '✌ Ciseaux', value: 2}  //##LANG : Scissors
+        )
+        .setMinValue(0)
+        .setMaxValue(2)   
+    )
+;
 
-/**
- * Rock-Paper-Scissors game | Paper
- */
-export function feuille(args, msg){ //##LANG Function Name : paper
-    game(1,msg);
-}
-
-/**
- * Rock-Paper-Scissors game | Paper
- */
-export function papier(args, msg){  //##LANG Function Name : paper DUPLICATE
-    feuille(args, msg);
-}
-
-/**
- * Rock-Paper-Scissors game | Scissors
- */
-export function ciseaux(args, msg){ //##LANG Fucntion Name : scissors
-    game(2,msg);
-}
+export const shifumi = {slash: slash, command: command};

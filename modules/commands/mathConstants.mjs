@@ -1,69 +1,109 @@
 import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
+import { SlashCommandBuilder } from '@discordjs/builders';
 
-/*
- * Commands that print math constants
- *
- */
+function phi(num) {
+    let n = num || 1;
 
+    let metallicMean = (n + Math.sqrt(Math.pow(n, 2) + 4)) / 2;
 
-/**
- * PI : THE FIRST FOUND TRANSENDANTAL CONSTANT
- */
-export function pi(args, msg){
-    MessagePrintReply.printTextOnChannel(msg.channel, `π = ${Math.PI}`);
+    return `φ(${n}) = ${metallicMean}`;
 }
 
-export function π(args, msg){
-    pi(args, msg);
+
+function exp(num) {
+    let n = num ?? 1;
+
+    return `e^(${n}) = ${Math.exp(n)}`;
 }
 
-/**
- * TAU : THE CIRCLE DIAMETER CONSTANT
- */
-export function tau(args,msg){
-    MessagePrintReply.printTextOnChannel(msg.channel, `τ = ${2*Math.PI}`);
+function ln(num) {
+    let n = num ?? 1;
+
+    return `log_e(${n}) = ${Math.log(n)}`;
 }
 
-export function τ(args,msg){
-    tau(args, msg);
-}
 
-/**
- * PHI : THE METTALIC RATIOS
- */
-export function phi(args, msg){
-    let n = 1;
-    let nbr;
-    if (args[0]) {
-        nbr = args[0].match(/^\d+|\d+\b|\d+(?=\w)/g) || [];
-        nbr = parseInt(nbr[0]);
-        if (nbr >= 0) n = nbr;
-    }
-    
-    let metallicMean = (n + Math.sqrt(Math.pow(n,2) + 4))/2;
+function cmdMaths(interaction) {
 
-    MessagePrintReply.printTextOnChannel(msg.channel, `φ(${n}) = ${metallicMean}`);
-}
+    let result;
 
-export function φ(args, msg){
-    phi(args, msg);
-}
+    switch (interaction.options.getSubcommand()) {
+        case 'pi':
+            result = `π = ${Math.PI}`;
+            break;
 
-export function exp(args, msg){
-    let n = 1;
-    let nbr;
+        case 'tau':
+            result = `τ = ${2 * Math.PI}`;
+            break;
 
-    if (args[0]) {
-        nbr = args[0].match(/\d+\.\d+|\d+\b|\d+(?=\w)/g) || [];
-        nbr = parseFloat(nbr[0]);
-        if (nbr >= 0) n = nbr;
-        if ((args[0]) && (args[0].charAt(0) == '-')) n = -n;
+        case 'un':
+            result = `un = 1`;
+
+        case 'exp':
+            result = exp(interaction.options.getNumber('number'));
+            break;
+
+        case 'ln':
+            result = ln(interaction.options.getNumber('number'));
+            break;
+
+        case 'phi':
+            result = phi(interaction.options.getInteger('integer'));
+            break;
+
+        default:
+            break;
     }
 
-    MessagePrintReply.printTextOnChannel(msg.channel, `e^(${n}) = ${Math.exp(n)}`);
+    if (result){
+        MessagePrintReply.replyToAnInteraction(interaction, result);
+    } else {
+        MessagePrintReply.replyAlertOnInterarction(interaction, `Bug avec la command \`maths\`, contact un admin !`);
+    }
+
+
 }
 
-export function e(args,msg){
-    exp(args,msg);
-}
+const slashMaths = new SlashCommandBuilder()
+    .setName('maths')
+    .setDescription(`Retourne des resultats mathématique`)
 
+    .addSubcommand(sub => sub
+        .setName('pi')
+        .setDescription(`π : première constante transcendantale`)
+    )
+    .addSubcommand(sub => sub
+        .setName('tau')
+        .setDescription(`τ : constante du périmètre d'un cercle`)
+    )
+    .addSubcommand(sub => sub
+        .setName('un')
+        .setDescription(`1 : constante mathématique innée de l'humanité`)
+    )
+    .addSubcommand(sub => sub
+        .setName('exp')
+        .setDescription(`e^x : seule fonction étant sa propre dérivée et sa propre primitive`)
+        .addNumberOption(option => option
+            .setName('number')
+            .setDescription('Nombre réel (écrit sous sa forme décimale avec un point)')
+        )
+    )
+    .addSubcommand(sub => sub
+        .setName('ln')
+        .setDescription(`log_e() : bijection réciproque de la fonction exponentielle`)
+        .addNumberOption(option => option
+            .setName('number')
+            .setDescription('Nombre réel (écrit sous sa forme décimale avec un point)')
+        )
+    )
+    .addSubcommand(sub => sub
+        .setName('phi')
+        .setDescription(`φ(n) : ratios métalliques`)
+        .addIntegerOption(option => option
+            .setName('integer')
+            .setDescription('Nombre entier naturel non nul')
+        )
+    )
+;
+
+export const maths = { slash: slashMaths, command: cmdMaths };
