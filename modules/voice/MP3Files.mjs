@@ -1,13 +1,6 @@
 export const path = "./assets/mp3voice/";
 export const files = {
 
-    kfc :{
-        file  : "11-tenders-kfc-pour-seulement-695eur-le-mardi.mp3",    //##LANG Transcript of a TV Ad :
-        title : "Le mardi dégustez onze délicieux tenders !",           // Eat eleven tasty teneder every Tuesdays
-        description : "Pour seulement 6€95 chez KFC",                   // For only €6.95, KFC
-        volume : 1.0,
-    },
-
     bang : {
         file  : "bang.mp3",
         title : "BANG !",
@@ -29,10 +22,17 @@ export const files = {
         volume : 0.3,
     },
 
-    bruh2 : {
+    bruh : {
         file  : "bruh-sound-effect-2.mp3",
         title : "🅱RUH",
         description : "Bruh Sound Effect #2",
+        volume : 1.0,
+    },
+
+    cum : {
+        file  : "keanu-reeves-says-why-do-you-cum.mp3",
+        title : "Wake up Samuraï",
+        description : "In 2077 what makes someone a criminal ?",
         volume : 1.0,
     },
 
@@ -50,10 +50,10 @@ export const files = {
         volume : 1.2,
     },
 
-    cum : {
-        file  : "keanu-reeves-says-why-do-you-cum.mp3",
-        title : "Wake up Samuraï",
-        description : "In 2077 what makes someone a criminal ?",
+    kfc :{
+        file  : "11-tenders-kfc-pour-seulement-695eur-le-mardi.mp3",    //##LANG Transcript of a TV Ad :
+        title : "Le mardi dégustez onze délicieux tenders !",           // Eat eleven tasty teneder every Tuesdays
+        description : "Pour seulement 6€95 chez KFC",                   // For only €6.95, KFC
         volume : 1.0,
     },
 
@@ -103,7 +103,7 @@ export const files = {
         file  : "yooooooooooo.mp3",
         title : "Kakegoe YO",
         description : "Cris et encouragements lancés lors des performances de théâtre kabuki", //##LANG : In the kabuki theatre, melodramatic calls from an audience
-        volume : 0.7,
+        volume : 0.6,
     },
 
 }
