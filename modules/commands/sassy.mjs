@@ -46,7 +46,7 @@ export const pk = {slash: slashPk, command: cmdPk};
  * Just print a gif of a guy rage throwing a cristmas tree
  * "PUTAIN" is refering the french interjection of rage
  */
-async function cmdPUTAIN(interaction){ 
+function cmdPUTAIN(interaction){ 
     MessagePrintReply.replyToAnInteraction(interaction, "https://c.tenor.com/Xk5yKpCr96sAAAAd/christmas-tree-hit.gif", 3);
 }
 
