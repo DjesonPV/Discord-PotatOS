@@ -48,7 +48,6 @@ export function PotatOSMusicPlayerStop(itr){
 
 }
 
-
 function isConnectedToAMusicPlayer(itr){
     const subscription = MusicSubscription.getSubscription(itr.member.guild.id);
     if (subscription) {

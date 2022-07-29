@@ -27,7 +27,7 @@ export async function streamVoice(interaction, url, volume){
             },
             onError(error){
                 console.warn(error);
-                MessagePrintReply.replyAlertOnInterarction(interaction, `Erreur : ${error}`); //##LANG : Error: $...
+                MessagePrintReply.printAlertOnChannel(interaction.channel, `Erreur : ${error}`, 10); //##LANG : Error: $...
             }
         });
 
@@ -40,7 +40,7 @@ export async function streamVoice(interaction, url, volume){
 
     } catch (error){
         console.warn(error);
-        MessagePrintReply.replyAlertOnInterarction(interaction, `J'ai pas reussi a jouer ton morceau`);  //##LANG : Couldn't play your song
+        MessagePrintReply.printAlertOnChannel(interaction.channel, `J'ai pas reussi a jouer ton morceau`, 10);  //##LANG : Couldn't play your song
     }
 
 }
@@ -59,7 +59,7 @@ async function connectVoice(interaction){
             await DiscordJsVoice.entersState(subscription.voiceConnection, DiscordJsVoice.VoiceConnectionStatus.Ready, 20e3);
         } catch (error) {
             console.warn(error);
-            MessagePrintReply.replyAlertOnInterarction(interaction, `Je n'ai pas réussi à me connecter, reessaie plus tard !`);    //##LANG : Can't connect now, retry later!
+            MessagePrintReply.printAlertOnChannel(interaction.channel, `Je n'ai pas réussi à me connecter, reessaie plus tard !`, 10);    //##LANG : Can't connect now, retry later!
             return;
         }
     }

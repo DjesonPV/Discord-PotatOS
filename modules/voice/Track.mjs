@@ -1,7 +1,6 @@
 import * as DiscordJsVoice from '@discordjs/voice';
 import * as fs from 'fs';
 import ytdl from 'youtube-dl-exec';
-import ytdlCore from 'ytdl-core';
 
 import * as MP3Files from "./MP3Files.mjs";
 
@@ -91,14 +90,10 @@ export default class Track {
     }
 
     static fetchData(url, methods) {
-
-        if (isItAYTLink(url))
-            return fromYoutube(url, methods);
-
         if (url.startsWith(MP3Files.path))
             return fromFile(url, methods);
 
-        return fromInternet(url, methods);
+        return fromYTDLP(url, methods);
     }
 
 }
@@ -107,29 +102,37 @@ export default class Track {
 //  TRACK FROM SOURCES
 //
 
+async function fromYTDLP(url, methods) {
+    const info  = await ytdl.exec(
+        url,
+        {
+            skipDownload: true,
+            addMetadata: true,
+            dumpSingleJson: true,
+        });
 
+    const parsedInfo = JSON.parse(info.stdout);
 
-/** Fetch data from YouTube */
-async function fromYoutube(url, methods) {
-    const info = await ytdlCore.getInfo(url);
+    if (parsedInfo.extractor !== 'generic'){
+        const metadata = {
+            isYoutube: true,     // Flags : important to set them
+            isFile: false,    // for code stability
 
-    const metadata = {
-        isYoutube: true,     // Flags : important to set them
-        isFile: false,    // for code stability
+            // Data use in the MusicPlayer Embed
+            title: parsedInfo.fulltitle || parsedInfo.title,
+            author: `${parsedInfo.extractor_key} • ${parsedInfo.channel ?? parsedInfo.artist ?? parsedInfo.uploader}`,
+            duration: parsedInfo.duration,
+            videoThumbnail: parsedInfo.thumbnail,
+            videoURL: parsedInfo.webpage_url,
+            authorPicture: `https://s2.googleusercontent.com/s2/favicons?domain_url=${parsedInfo.webpage_url_domain}&sz=48`,
+            authorURL: parsedInfo.uploader_url ?? parsedInfo.channel_url ?? parsedInfo.webpage_url,
+            uploadDate: parsedInfo.upload_date,
+            viewCount: parsedInfo.view_count,
+        };
 
-        // Data use in the MusicPlayer Embed
-        title: info.videoDetails.title,
-        author: info.videoDetails.ownerChannelName,
-        duration: info.videoDetails.lengthSeconds,
-        videoThumbnail: ((info.videoDetails.thumbnails[0].url).split('?'))[0],
-        videoURL: info.videoDetails.video_url,
-        authorPicture: ((info.videoDetails.author.thumbnails[0].url).split('='))[0],
-        authorURL: info.videoDetails.author.channel_url,
-        uploadDate: info.videoDetails.uploadDate,
-        viewCount: info.videoDetails.viewCount,
-    };
-
-    return define(url, methods, metadata);
+        return define(url, methods, metadata);
+    }
+    else return fromInternet(url, methods);
 }
 
 /** Fetch data from the MP3Files */
