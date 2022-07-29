@@ -70,9 +70,7 @@ export function start() {
             console.log(`Prêt !`);  //##LANG : Ready!
         })
     });
-
 }
-
 
 /* ______________________________ 
 #

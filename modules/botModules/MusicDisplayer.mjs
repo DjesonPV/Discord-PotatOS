@@ -4,7 +4,7 @@ import MusicSubscription                from "../voice/MusicSubscription.mjs";
 import MessageSafeDelete                from "./MessageSafeDelete.mjs";
 
 function durationToString(duration){
-    let seconds = duration%60;
+    let seconds = Math.floor(duration%60);
     let minutes = (Math.floor(duration/60))%60;
     let hours   = Math.floor(duration/3600);
 
@@ -16,73 +16,89 @@ function durationToString(duration){
 }
 
 function viewsToString(viewCount){
-    let views = [
-        viewCount % 1e3,
-        (Math.floor(viewCount/1e3))%1e3,
-        (Math.floor(viewCount/1e6))%1e3,
-        (Math.floor(viewCount/1e9)),
-    ];
+    let string;
+    if (viewCount){
+        let views = [
+            viewCount % 1e3,
+            (Math.floor(viewCount/1e3))%1e3,
+            (Math.floor(viewCount/1e6))%1e3,
+            (Math.floor(viewCount/1e9)),
+        ];
 
-    let num = 0;
-    let dec = 0;
-    let suf = "";
+        let num = 0;
+        let dec = 0;
+        let suf = "";
 
-    if(views[3] > 0) {
-        num = views[3];
-        dec = Math.floor(views[2]/1e2);
-        if (num > 10) dec = false;
+        if(views[3] > 0) {
+            num = views[3];
+            dec = Math.floor(views[2]/1e2);
+            if (num > 10) dec = false;
 
-        suf = " Md de";                 //##LANG :   x billion of (10^9)
-    } else if (views[2] > 0){
-        num = views[2];
-        dec = Math.floor(views[1]/1e2);
+            suf = " Md de";                 //##LANG :   x billion of (10^9)
+        } else if (views[2] > 0){
+            num = views[2];
+            dec = Math.floor(views[1]/1e2);
 
-        if (num > 10) dec = false;
-        suf = " M de";                  //##LANG :  x millions of (10^6)
-    } else if (views[1] > 0){
-        num = views[1];
-        dec = Math.floor(views[0]/1e2);
+            if (num > 10) dec = false;
+            suf = " M de";                  //##LANG :  x millions of (10^6)
+        } else if (views[1] > 0){
+            num = views[1];
+            dec = Math.floor(views[0]/1e2);
 
-        if (num > 10) dec = false;
-        suf = " k";                     //##LANG :  x thousands of (10^3)
-    } else {
-        num = views[0];
-        dec = false;
-        suf = "";
-    }
+            if (num > 10) dec = false;
+            suf = " k";                     //##LANG :  x thousands of (10^3)
+        } else {
+            num = views[0];
+            dec = false;
+            suf = "";
+        }
 
+        string = `${num}`;
+        if (dec !== false) string+=`,${dec}`;
+        string+=`${suf } vues`;           //##LANG :  views
+    } else string = "--- vues";
 
-
-    let string = `${num}`;
-    if (dec !== false) string+=`,${dec}`;
-    string+=`${suf} vues`;           //##LANG :  views
     return string;                  //##LANG string Format : x U of views // where U is a unit suffix
 }
 
 function dateToString(timestamp){
     let date = new Date(timestamp);
 
-    const months = [    //##LANG Month of a Gregorian calendar
-        "janv.",
-        "févr.",
-        "mars",
-        "avr.",
-        "mai",
-        "juin",
-        "juill.",
-        "août",
-        "sept.",
-        "oct.",
-        "nov.",
-        "déc."
-    ];
-    
     let day   = date.getUTCDate();
     let month = date.getUTCMonth();
     let year  = date.getUTCFullYear();
 
-    let string = `${day} ${months[month]} ${year}`; //##LANG : date format : DD month. YYYY
-    return string;
+   return dateToText(year, month, day);
+}
+
+function YYYYMMDDToString(yyyymmdd){
+
+    let [year, month, day] = yyyymmdd.match(/(\d{4})(\d{2})(\d{2})/).slice(1,4);
+
+    return dateToText(year.replace(/^0+/, ''), month.replace(/^0+/, ''), day.replace(/^0+/, ''));
+}
+
+function dateToText(year, month, day) {
+
+    const months = [    //##LANG Month of a Gregorian calendar
+    "zero.", // Array start at one
+    "janv.",
+    "févr.",
+    "mars",
+    "avr.",
+    "mai",
+    "juin",
+    "juill.",
+    "août",
+    "sept.",
+    "oct.",
+    "nov.",
+    "déc."
+];
+
+let string = `${day} ${months[month]} ${year}`; //##LANG : date format : DD month. YYYY
+return string;
+
 }
 
 
@@ -196,10 +212,10 @@ function constructDisplayerEmbed(sub){
         .setTitle(data.title)
         .setDescription(data.description)
         .setAuthor(data.author)
+        .setThumbnail(data.thumbnail ?? `https://cdn.discordapp.com/attachments/970417796729143316/1002583819683102770/PotatOS_black_and_white.png`)
         .setFooter({text : `__________________________________________\nPotatOS • ${sub.guildName} > ${sub.voiceChannel.name}`,});
     ;
 
-    if (data.thumbnail) displayerEmbed.setThumbnail(data.thumbnail);
     if (data.url)       displayerEmbed.setURL(data.url);
 
     return displayerEmbed;
@@ -238,10 +254,14 @@ function constructPlaylistRow(trackList){
 function dataToDisplay(metadata){
     let data = {};
 
+    
+
    if(metadata.isYoutube){
-        data.color = '#FF0000';
+        
+        //`#${color[0].toString(16).padStart(2,'0').toUpperCase()}${color[1].toString(16).padStart(2,'0').toUpperCase()}${color[2].toString(16).padStart(2,'0').toUpperCase()}`;
+        data.color = '#FFB46B';
         data.title = `${metadata.title}`;
-        data.description = `${durationToString(metadata.duration)} • ${viewsToString(metadata.viewCount)} • ${dateToString(metadata.uploadDate)}`;
+        data.description = `${durationToString(metadata.duration)} • ${viewsToString(metadata.viewCount)} • ${YYYYMMDDToString(metadata.uploadDate)}`;
         data.author = {
             name : `${metadata.author}`,
             iconURL : `${metadata.authorPicture}`,
