@@ -3,20 +3,16 @@
 //  • • • • • • • • • • • • • • • • • • • • • • • •
 import { SlashCommandBuilder } from '@discordjs/builders';
 import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
+import * as LANG from "../Language.mjs";
 
 const emojisMove = [":fist:", ":raised_hand:", ":v:"];
 const emojisResult = [":arrow_right:",":regional_indicator_i:",":arrow_left:"];
 
-const sntVictory  = ["Aucun aléatoire, que du talent.","Moins d'energie et poutant plus efficace.", "Humain == nul, Patate++"];
-// LANG Taunts victory : Nothing random, skils.  ;  Smart power and smarter logic.  ;  Human == trick, Potato++
-
-const sntDefeat   = ["Purée...", "Sûrement une erreur de calcul...", "Triche évidente !"];
-// LANG Taunts defeat : Mashed...  ;  Surely a math error...  ;  Obvious cheat!
-
-const sntDraw = ["Les grands esprits se recontrent.", "Même puissance de calcul, et je suis une patate !", "Je suis quatre univers parallèles devant toi !"];
-// LANG Taunts draw : Great minds think alike.  ;  Same brain power and I'm a potato !  ;  I'm four parallel universes ahead of you!
-
-const snReply = [sntDefeat, sntDraw, sntVictory];
+const snReply = [
+    LANG._SHIFUMI_DEFEAT_SENTENCES,
+    LANG._SHIFUMI_DRAW_SENTENCES,
+    LANG._SHIFUMI_VICTORY_SENTENCES
+];
 
 /**
  * Works with (2*Humain)+Bot : 0  = bot defeat, 1 = draw, 2 = bot victory
@@ -33,20 +29,20 @@ function command(interaction){
 
     let result = tableMath[(3*playerMove+botMove)]; // Evaluate win
 
-    MessagePrintReply.replyToAnInteraction(interaction, `:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} :potato:  ${snReply[result][botResponse]}`);
+    MessagePrintReply.replyToAnInteraction(interaction, `:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} ${LANG._SHIFUMI_BOT_EMOJI}  ${snReply[result][botResponse]}`);
 }
 
 const slash = new SlashCommandBuilder()
-    .setName('shifumi')
-    .setDescription('Joue à Pierre-Feuille-Ciseaux contre PotatOS') //##LANG Command description : Play Rock-Paper-Scissors against PotatOS
+    .setName(LANG._SHIFUMI_CMDNAME)
+    .setDescription(LANG._SHIFUMI_DESC)
     .addIntegerOption(option => option
         .setName('play')
-        .setDescription('Pierre, Feuille, ou Ciseaux') //##LANG : Rock, Paper, or Scissors
+        .setDescription(LANG._SHIFUMI_PLAY_DESC)
         .setRequired(true)
         .addChoices(
-            { name: '✊ Pierre', value: 0 }, //##LANG : Rock
-            { name: '✋ Feuille', value: 1 }, //##LANG : Paper
-            { name: '✌ Ciseaux', value: 2}  //##LANG : Scissors
+            { name: LANG._SHIFUMI_PLAY_ROCK, value: 0 },
+            { name: LANG._SHIFUMI_PLAY_PAPER, value: 1 },
+            { name: LANG._SHIFUMI_PLAY_SCISSORS, value: 2}
         )
         .setMinValue(0)
         .setMaxValue(2)   

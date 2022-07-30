@@ -4,9 +4,7 @@ import * as MessagePrintReply           from "../botModules/MessagePrintReply.mj
 import Track                            from "./Track.mjs";
 import MusicSubscription                from "./MusicSubscription.mjs";
 import displayMusicDisplayer            from '../botModules/MusicDisplayer.mjs';
-
-
-
+import * as LANG from "../Language.mjs";
 
 export async function streamVoice(interaction, url, volume){
 
@@ -27,7 +25,7 @@ export async function streamVoice(interaction, url, volume){
             },
             onError(error){
                 console.warn(error);
-                MessagePrintReply.printAlertOnChannel(interaction.channel, `Erreur : ${error}`, 10); //##LANG : Error: $...
+                MessagePrintReply.printAlertOnChannel(interaction.channel, LANG.ERROR_TRACK(error), 10);
             }
         });
 
@@ -40,7 +38,7 @@ export async function streamVoice(interaction, url, volume){
 
     } catch (error){
         console.warn(error);
-        MessagePrintReply.printAlertOnChannel(interaction.channel, `J'ai pas reussi a jouer ton morceau`, 10);  //##LANG : Couldn't play your song
+        MessagePrintReply.printAlertOnChannel(interaction.channel, LANG.ERROR_PLAY_TRACK, 10);
     }
 
 }
@@ -59,7 +57,7 @@ async function connectVoice(interaction){
             await DiscordJsVoice.entersState(subscription.voiceConnection, DiscordJsVoice.VoiceConnectionStatus.Ready, 20e3);
         } catch (error) {
             console.warn(error);
-            MessagePrintReply.printAlertOnChannel(interaction.channel, `Je n'ai pas réussi à me connecter, reessaie plus tard !`, 10);    //##LANG : Can't connect now, retry later!
+            MessagePrintReply.printAlertOnChannel(interaction.channel, LANG.ERROR_VOICECHANNEL_CONNECTION, 10);
             return;
         }
     }

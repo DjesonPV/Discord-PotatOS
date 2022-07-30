@@ -4,8 +4,7 @@ import {Routes} from 'discord-api-types/v10';
 import {createRequire} from 'module';
 
 import * as Commands from '../Commands.mjs';
-
-
+import * as LANG from "../Language.mjs";
 
 export async function updateSlashCommands() {
     const require = createRequire(import.meta.url);
@@ -21,7 +20,7 @@ export async function updateSlashCommands() {
     }
 
     try {
-        console.log('Started refreshing application (/) commands.');
+        console.log(LANG.SLASHCOMMANDS_REFRESH_START);
 
         for (let guildName in secret.guildsID){
 
@@ -31,7 +30,7 @@ export async function updateSlashCommands() {
             );                
         };
         
-        console.log('Successfully reloaded application (/) commands.');
+        console.log(LANG.SLASHCOMMANDS_REFRESH_SUCCESS);
     } catch (error) {
         console.error(error);
     }

@@ -2,6 +2,7 @@ import * as Voice from "../voice/Voice.mjs";
 import * as MP3Files from "../voice/MP3Files.mjs";
 import { SlashCommandBuilder } from '@discordjs/builders';
 import MessageSafeDelete from '../botModules/MessageSafeDelete.mjs';
+import * as LANG from "../Language.mjs";
 
 
 function cmdSoundSample(interaction){
@@ -12,11 +13,11 @@ function cmdSoundSample(interaction){
 }
 
 const slashSoundSample = new SlashCommandBuilder()
-    .setName('son')
-    .setDescription(`Joue un son dans le Salon Vocal auquel tu es connecté`) //##LANG Play a sound sample in the Vocal Channel you're connected to
+    .setName(LANG._PLAYSOUND_CMDNAME)
+    .setDescription(LANG._PLAYSOUND_DESC)
     .addStringOption(option => option
-        .setName('sample')
-        .setDescription(`Nom du son à jouer`) //##LANG
+        .setName(LANG._PLAYSOUND_OPTION_NAME)
+        .setDescription(LANG._PLAYSOUND_DESC)
         .addChoices(...getSampleChoices())
         .setRequired(true)
     )

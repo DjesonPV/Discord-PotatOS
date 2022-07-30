@@ -6,6 +6,7 @@ import * as DiscordJs               from 'discord.js';
 import * as Commands                from "./Commands.mjs";
 import * as ButtonInteractions      from "./ButtonInteractions.mjs";
 import * as SlashCommandsUpdate     from "./botModules/SlashCommands.mjs";
+import * as LANG                    from "./Language.mjs";
 
 import ExploreChannels      from "./botModules/ExploreChannels.mjs";
 import MessageSafeDelete    from './botModules/MessageSafeDelete.mjs';
@@ -44,10 +45,10 @@ export function start() {
                 return;
             }
 
-            console.log(`${client.user.username} est en ligne`);   //##LANG : PotatOS is online
+            console.log(LANG.BOT_IS_ONLINE(client.user.username));
 
             ExploreChannels.explore(client);
-            console.log(`${ExploreChannels.text.size} cannaux textuels et ${ExploreChannels.voice.size} cannaux vocaux trouvés`);  //##LANG : Found x textChannels and x voiceChannels
+            console.log(LANG.BOT_CHANNELS_FOUND(ExploreChannels.text.size, ExploreChannels.voice.size));
 
             MessageSafeDelete.botUserId = client.user.id;
 
@@ -67,7 +68,7 @@ export function start() {
 
             await SlashCommandsUpdate.updateSlashCommands();
 
-            console.log(`Prêt !`);  //##LANG : Ready!
+            console.log(LANG.BOT_READY);
         })
     });
 }
@@ -89,8 +90,6 @@ async function interactionHandler(itr) {
             let buttonInteraction = ButtonInteractions[itrName];
             if (buttonInteraction) buttonInteraction(itr);
             else itr.deferUpdate();
-            //MessagePrintReply.replyAlertOnInterarction(itr, `Ce bouton [ ${itrName} ] n'est pas géré`); //##LANG : Not handled Button [buttonID]
-
         }
         if (itr.isSelectMenu()) {
             itr.deferUpdate();

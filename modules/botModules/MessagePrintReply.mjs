@@ -1,6 +1,7 @@
 import * as DiscordJs                   from "discord.js";
 import ExploreChannels                  from "../botModules/ExploreChannels.mjs";
 import MessageSafeDelete                from "./MessageSafeDelete.mjs";
+import * as LANG from "../Language.mjs";
 
 const errorIcon = `https://cdn.discordapp.com/attachments/329613279204999170/970413892792623204/Error_icon.png`;
 
@@ -41,7 +42,7 @@ const errorIcon = `https://cdn.discordapp.com/attachments/329613279204999170/970
 			.addComponents(
 				new DiscordJs.ButtonBuilder()
                     .setCustomId('deleteNotif')
-					.setLabel(`Ce message s'autodétruira dans ${time} secondes`)  //##LANG : This message will be deleted in x secondes
+					.setLabel(LANG.MSG_AUTODESTRUCT(time))
 					.setStyle(DiscordJs.ButtonStyle.Secondary)
                     .setEmoji('🚮')
 			);
@@ -66,7 +67,7 @@ export function sendOnChannel(chnl, messageObject){
     return chnl.send(messageObject);
     }
     else {
-        console.log(`Ce TextChannel [${chnl.name}] de la Guild [${chnl.guild.name}] n'est pas géré !!`)  //##LANG : The [channelName] textChannel of [guildName] Guild is not supported !!
+        console.log(LANG.MSG_CHANNEL_NOT_SUPPORTED(chnl.name, chnl.guild.name));
         return;
     }
 }
@@ -172,7 +173,7 @@ export function replyToAnInteraction(interaction, message, time = 0){
         .addComponents(
             new DiscordJs.ButtonBuilder()
                 .setCustomId('deleteNotif')
-                .setLabel(`Ce message s'autodétruira dans ${time} secondes`)  //##LANG : This message will be deleted in x secondes
+                .setLabel(LANG.MSG_AUTODESTRUCT(time))
                 .setStyle(DiscordJs.ButtonStyle.Secondary)
                 .setEmoji('🚮')
         );

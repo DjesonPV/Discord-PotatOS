@@ -1,17 +1,13 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
 import MessageSafeDelete from '../botModules/MessageSafeDelete.mjs';
-
+import * as LANG from "../Language.mjs";
 
 /**
  * Private joke on Nathan's computer never delivered
  */
 function cmdPc(interaction){
-    const sntc = [
-        `Alors il est bien ton pc Nathan ?`, //##LANG Private Joke : Nathan, how well is your computer?
-        `Alors Nathan ce pc ?`,              //##LANG Private Joke : So, Nathan, what's up with the new computer?
-        `Il arrive quand ton pc ?`           //##LANG Private Joke : Again, when does your computer is delivered?
-    ];
+    const sntc = LANG._SASS_PC_SENTENCES;
 
     let rng = Math.floor(Math.random() * sntc.length);
 
@@ -20,8 +16,8 @@ function cmdPc(interaction){
 }
 
 const slashPc = new SlashCommandBuilder()
-    .setName('pc') //##LANG Function Name : pc short for Personal Computer
-    .setDescription(`Demande à Nathan quand est-ce qu'il reçoit son ordinateur.`) //##LANG Command description : Ask Nathan when will his computer will be delivered
+    .setName(LANG._SASS_PC_CMDNAME)
+    .setDescription(LANG._SASS_PC_DESC)
 ;
 
 export const pc = {slash: slashPc, command: cmdPc};
@@ -32,12 +28,12 @@ export const pc = {slash: slashPc, command: cmdPc};
  */
 function cmdPk(interaction){ 
     MessageSafeDelete.noReply(interaction); 
-    MessagePrintReply.printTextOnChannel(interaction.channel, `Quel est le chemin le plus court pour aller vers ton coeur ?`); //##LANG Private Joke : What's the shortest path to your heart?
+    MessagePrintReply.printTextOnChannel(interaction.channel, LANG._SASS_PK_SENTENCE);
 }
 
 const slashPk = new SlashCommandBuilder()
-    .setName('pk') //##LANG Function Name : pk short for WHY in French and a word play between previous function pc and nickname starting with K 
-    .setDescription(`Demande la direction pour trouver l'être cher`) //##LANG Command description : Ask for direction to your soulmate
+    .setName(LANG._SASS_PK_CMDNAME)
+    .setDescription(LANG._SASS_PK_DESC)
 ;
 
 export const pk = {slash: slashPk, command: cmdPk};
@@ -51,8 +47,8 @@ function cmdPUTAIN(interaction){
 }
 
 const slashPUTAIN = new SlashCommandBuilder()
-    .setName('putain') //##LANG Function Name : DAMNIT 
-    .setDescription(`PREND ÇA !`) //##LANG Command description : TAKE THIS
+    .setName(LANG._DAMMIT_CMDNAME)
+    .setDescription(LANG._DAMMIT_DESC)
 ;
 
 export const putain = {slash: slashPUTAIN, command: cmdPUTAIN};

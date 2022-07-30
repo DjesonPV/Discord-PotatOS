@@ -5,6 +5,7 @@ import MusicSubscription                from "../voice/MusicSubscription.mjs";
 import displayMusicDisplayer            from "../botModules/MusicDisplayer.mjs";
 import MessageSafeDelete                from '../botModules/MessageSafeDelete.mjs';
 import { SlashCommandBuilder }          from '@discordjs/builders';
+import * as LANG from "../Language.mjs";
 
 // Checks
 
@@ -13,18 +14,20 @@ function memberConnectedInAVoiceChannelInGuildInteraction(interaction){
         interaction.member 
      && interaction.member.voice
      && interaction.member.voice.channel
+     && interaction.member.voice.channel.id
      && interaction.member.voice.channel.guild
      && interaction.member.voice.channel.guild.id
      && interaction.guild
      && interaction.guild.id
      && (interaction.member.voice.channel.guild.id === interaction.guild.id)
+     && (!MusicSubscription.getSubscription(interaction.guild.id).voiceChannel || interaction.member.voice.channel.id === MusicSubscription.getSubscription(interaction.guild.id).voiceChannel.id)
     )
     return true;
     return false;
 }
 
 function replyYourNotConnected(interaction){
-    MessagePrintReply.replyAlertOnInterarction(interaction, `Tu dois rejoindre un Salon Vocal de ce Serveur pour utiliser cette commande`);
+    MessagePrintReply.replyAlertOnInterarction(interaction, LANG._MUSICPLAYER_NOT_CONNECTED);
 }
 
 // ________________________________________________________________
@@ -40,7 +43,7 @@ function cmdSkip(interaction){
 
 const slashSkip = new SlashCommandBuilder()
     .setName('skip')
-    .setDescription(`PotatOS Music Player : SKIP | Skip la musique actuelle et joue la suivante (le cas échéant)`) //##LANG : Skip the current music and play the next (if there is one)
+    .setDescription(LANG._SKIP_DESC)
 ;
 
 export const skip = {slash: slashSkip, command: cmdSkip};
@@ -58,7 +61,7 @@ function cmdStop(interaction){
 
 const slashStop = new SlashCommandBuilder()
     .setName('stop')
-    .setDescription(`PotatOS Music Player : STOP | Met fin au lecteur de musique`) //##LANG : Terminate the music player
+    .setDescription(LANG._STOP_DESC)
 ;
 
 export const stop = {slash: slashStop, command: cmdStop};
@@ -68,29 +71,37 @@ export const stop = {slash: slashStop, command: cmdStop};
 
 async function cmdPlay(interaction){
     if (!memberConnectedInAVoiceChannelInGuildInteraction(interaction)) return replyYourNotConnected(interaction);
-    MessageSafeDelete.noReply(interaction);
 
     const query = interaction.options.getString('query');
 
     if (MessagePrintReply.isItAnHTTPURL(query)){
         Voice.streamVoice(interaction, query, 0.2);
+        MessageSafeDelete.noReply(interaction);
     } else if (query === null){
         __playPause(interaction, false);
+        MessageSafeDelete.noReply(interaction);
     }
     else{ // YOUTUBE SEARCH
-        let searchResult = await SurfYT.searchYoutubeFor(`${query}`, {showVideos: true, location: 'FR', language: 'fr'}).catch((err)=>{MessagePrintReply.replyAlertOnInterarction(interaction, "Problème lors de la recherche")}); //##LANG : There was a problem while searching for a video;
+        let searchResult = await SurfYT.searchYoutubeFor(`${query}`, {showVideos: true, location: 'FR', language: 'fr'})
+            .catch((err)=>{
+                MessagePrintReply.replyAlertOnInterarction(interaction, LANG._PLAY_SEARCH_ERROR)
+            })
+        ;
 
-        if (searchResult[0] && searchResult[0].url) Voice.streamVoice(interaction, searchResult[0].url, 0.2);
-        else MessagePrintReply.replyAlertOnInterarction(interaction, `Aucune vidéo trouvée pour {${query}}`); //##LANG : No video found for {}
+        if (searchResult[0] && searchResult[0].url) {
+            Voice.streamVoice(interaction, searchResult[0].url, 0.2);
+            MessageSafeDelete.noReply(interaction);
+        }
+        else MessagePrintReply.replyAlertOnInterarction(interaction, LANG._PLAY_SEARCH_NO_RESULT(query));
     }
 }
 
 const slashPlay = new SlashCommandBuilder()
     .setName('play')
-    .setDescription(`PotatOS Music Player : PLAY | (Re)lance le lecteur de musique ou y ajoute une musique`) //##LANG : Resume the music, launch a music player or add a song to it
+    .setDescription(LANG._PLAY_DESC)
     .addStringOption(option => option
         .setName('query')
-        .setDescription(`URL du média à jouer ou texte à chercher sur YouTube`) //##LANG : URL of the media to play or text to search in YouTube
+        .setDescription(LANG._PLAY_QUERY_DESC)
     )
 
 
@@ -110,7 +121,7 @@ function cmdPause(interaction){
 
 const slashPause = new SlashCommandBuilder()
     .setName('pause')
-    .setDescription(`PotatOS Music Player : PAUSE | Met en pause le lecteur de musique`) //##LANG : Pause the music player
+    .setDescription(LANG._PAUSE_DESC)
 ;
 
 export const pause = {slash: slashPause, command: cmdPause};
@@ -126,6 +137,4 @@ function __playPause(interaction, wannaPause){
         else subscription.resume();
         displayMusicDisplayer(interaction.channel);
     }
-
 }
-

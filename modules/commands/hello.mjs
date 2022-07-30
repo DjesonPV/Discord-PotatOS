@@ -1,15 +1,16 @@
 import MessageSafeDelete from '../botModules/MessageSafeDelete.mjs';
 import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
 import { SlashCommandBuilder } from '@discordjs/builders';
+import * as LANG from "../Language.mjs";
 
 export function cmdHello(interaction){
-    MessagePrintReply.replyToAnInteraction(interaction, `Salut`, 5);
+    MessagePrintReply.replyToAnInteraction(interaction, LANG._HELLO_HI, 5);
 }
 
 const slashHello = new SlashCommandBuilder()
     .setName('hello')
     .setNameLocalization('fr','salut')
-    .setDescription(`Dire bonjour à PotatOS`) //##LANG Command description : Say hello to PotatOS
+    .setDescription(LANG._HELLO_DESC)
 ;
 
 export const hello = {slash: slashHello, command: cmdHello};
@@ -25,7 +26,7 @@ function cmdPing(interaction){
 
 const slashPing = new SlashCommandBuilder()
     .setName('ping')
-    .setDescription(`Pong (envoie un message en privé)`) //##LANG Command description : Pong (send a private message)
+    .setDescription(LANG._PING_DESC)
 ;
 
 export const ping = {slash: slashPing, command: cmdPing};
