@@ -70,6 +70,10 @@ export const MUSICDISPLAYER_LOADING_ASCII_ART =
 '----------------'
 \`\`\``
 ;
+export const MUSICDISPLAYER_FOOTER = (guildName, channelName) => `__________________________________________\n${BOT_NAME} • ${guildName} > ${channelName}`;
+export const MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_TITLE = `Morceau Inconnu`;
+export const MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_DESC = `Une erreur est survenue`;
+
 
 // Voice Errors
 
