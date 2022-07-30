@@ -2,6 +2,7 @@ import * as DiscordJs                   from "discord.js";
 import MessageSafeDelete                from "../botModules/MessageSafeDelete.mjs";
 import displayMusicDisplayer            from "../botModules/MusicDisplayer.mjs";
 import MusicSubscription                from "../voice/MusicSubscription.mjs";
+import * as LANG from "../Language.mjs";
 
 /**
  * 
@@ -18,19 +19,19 @@ export function PotatOSMusicPlayerStop(itr){
     .addComponents(
         new DiscordJs.ButtonBuilder()
         .setCustomId('PotatOSMusicPlayerStopYESSTOPIT')
-        .setLabel(`Arrêter et supprimer la playlist en cours`)      //##LANG : Stop and deleted the current playlist
+        .setLabel(LANG.MUSICDISPLAYER_STOP_VALIDATION)
         .setStyle(DiscordJs.ButtonStyle.Danger)
         .setEmoji('❕')
     ).addComponents(
         new DiscordJs.ButtonBuilder()
         .setCustomId('PotatOSMusicPlayerStopDONT')
-        .setLabel(`Laisser la musique`)     //##LANG : Keep the music running
+        .setLabel(LANG.MUSICDISPLAYER_STOP_KEEPPLAYING)
         .setStyle(DiscordJs.ButtonStyle.Secondary)
         .setEmoji('🎧')
     );
 
     let toSend = {};
-        toSend.content = `Es-tu sûr de vouloir arrêter le lecteur de musique ?`;    //##LANG : Are you sure you want to stop the Music Player?
+        toSend.content = LANG.MUSICDISPLAYER_STOP_QUESTION;
         toSend.components = [stopRow];
         toSend.ephemeral = true;
 
@@ -43,7 +44,7 @@ export function PotatOSMusicPlayerStop(itr){
         collector.on('collect', async i => {
             if (i.customId === 'PotatOSMusicPlayerStopYESSTOPIT') YesStopIt(i);
 
-            i.update({ content: 'Requête prise en compte !', components : []});      //##LANG : Reply received!
+            itr.editReply({ content: LANG.MUSICDISPLAYER_STOP_REQUEST_RECEIVED, components : []});
         });
 
 }
@@ -80,7 +81,6 @@ export function PotatOSMusicPlayerSkip(itr){
         subscription.skip();
         itr.deferUpdate();
     }
-
 }
 
 export function PotatOSMusicPlayer(itr){
@@ -91,7 +91,6 @@ export function PotatOSMusicPlayer(itr){
     }
         displayMusicDisplayer(itr.message.channel);
         itr.deferUpdate();
-
 }
 
 export function PotatOSMusicPlayerPlayPause(itr){
@@ -107,5 +106,4 @@ export function PotatOSMusicPlayerPlayPause(itr){
         displayMusicDisplayer(itr.message.channel);
         itr.deferUpdate();
     }
-
 }

@@ -18,7 +18,7 @@ export const files = {
     bang2 : {
         file  : "DearSister.wav",
         title : "Dear Sister",
-        description : "Extrait de Imogen Heap - Hide And Seek", //##LANG : Clip from Imogen Heap - Hide And Seek
+        description : "Extrait de Imogen Heap - Hide And Seek", // Clip from Imogen Heap - Hide And Seek
         volume : 0.3,
     },
 
@@ -44,21 +44,21 @@ export const files = {
     },
 
     ine : {
-        file  : "ine.mp3",                              //##LANG Bug in French MSCortana TextToSpeach (sadly patched, but here forever) :
+        file  : "ine.mp3",                              // Bug in French MSCortana TextToSpeach (sadly patched, but here forever) :
         title : "Insitut National d'Économie",          // National Economy Insitute
         description : "Université Nationale du Bénin",  // National University of Benin
         volume : 1.2,
     },
 
     kfc :{
-        file  : "11-tenders-kfc-pour-seulement-695eur-le-mardi.mp3",    //##LANG Transcript of a TV Ad :
+        file  : "11-tenders-kfc-pour-seulement-695eur-le-mardi.mp3",    // Transcript of a TV Ad :
         title : "Le mardi dégustez onze délicieux tenders !",           // Eat eleven tasty teneder every Tuesdays
         description : "Pour seulement 6€95 chez KFC",                   // For only €6.95, KFC
         volume : 1.0,
     },
 
     paris : {
-        file : "paris.mp3",                         //##LANG French politics meme about JL Melenchon hologram : 
+        file : "paris.mp3",                         // French politics meme about JL Melenchon hologram : 
         title : "Alors où suis-je ? À Lyon...",     // Well, where am I? In Lyon...
         description : "Et maintenant à Paris !",    // And now in Paris!
         volume : 1.0,
@@ -67,7 +67,7 @@ export const files = {
     pink : {
         file  : "pink.mp3",
         title : "⭘△▢",
-        description : "Littéralement Squid Game", //##LANG : Litteraly Squid Game
+        description : "Littéralement Squid Game", // Litteraly Squid Game
         volume : 1.0,
     },
 
@@ -79,7 +79,7 @@ export const files = {
     },
 
     somaj : {
-        file  : "somaj.mp3",    //##LANG Joke about Romanians asking for Unemployent money in France: 
+        file  : "somaj.mp3",    // Joke about Romanians asking for Unemployent money in France: 
         title : "somaj",        // money pls
         description : "🙏",
         volume : 2.0,
@@ -102,7 +102,7 @@ export const files = {
     yooooooooooo : {
         file  : "yooooooooooo.mp3",
         title : "Kakegoe YO",
-        description : "Cris et encouragements lancés lors des performances de théâtre kabuki", //##LANG : In the kabuki theatre, melodramatic calls from an audience
+        description : "Cris et encouragements lancés lors des performances de théâtre kabuki", // In the kabuki theatre, melodramatic calls from an audience
         volume : 0.6,
     },
 

@@ -2,6 +2,7 @@ import * as DiscordJs                   from "discord.js";
 import * as MessagePrintReply           from "../botModules/MessagePrintReply.mjs";
 import MusicSubscription                from "../voice/MusicSubscription.mjs";
 import MessageSafeDelete                from "./MessageSafeDelete.mjs";
+import * as LANG from "../Language.mjs";
 
 function durationToString(duration){
     let seconds = Math.floor(duration%60);
@@ -32,33 +33,33 @@ function viewsToString(viewCount){
         if(views[3] > 0) {
             num = views[3];
             dec = Math.floor(views[2]/1e2);
-            if (num > 10) dec = false;
 
-            suf = " Md de";                 //##LANG :   x billion of (10^9)
+            if (num > 10) dec = false;
+            suf = LANG.MUSICDISPLAYER_VIEWS_BILLION;
         } else if (views[2] > 0){
             num = views[2];
             dec = Math.floor(views[1]/1e2);
 
             if (num > 10) dec = false;
-            suf = " M de";                  //##LANG :  x millions of (10^6)
+            suf = LANG.MUSICDISPLAYER_VIEWS_MILLION;
         } else if (views[1] > 0){
             num = views[1];
             dec = Math.floor(views[0]/1e2);
 
             if (num > 10) dec = false;
-            suf = " k";                     //##LANG :  x thousands of (10^3)
+            suf = LANG.MUSICDISPLAYER_VIEWS_THOUSAND;
         } else {
             num = views[0];
             dec = false;
-            suf = "";
+            suf = LANG.MUSICDISPLAYER_VIEWS_UNIT;
         }
 
         string = `${num}`;
         if (dec !== false) string+=`,${dec}`;
-        string+=`${suf } vues`;           //##LANG :  views
-    } else string = "--- vues";
+        string+=`${suf}`;
+    } else string = LANG.MUSICDISPLAYER_VIEWS_UNKNOWN;
 
-    return string;                  //##LANG string Format : x U of views // where U is a unit suffix
+    return string;
 }
 
 function dateToString(timestamp){
@@ -68,37 +69,14 @@ function dateToString(timestamp){
     let month = date.getUTCMonth();
     let year  = date.getUTCFullYear();
 
-   return dateToText(year, month, day);
+   return LANG.DATE_TEXT_FORMAT(year, month, day);
 }
 
 function YYYYMMDDToString(yyyymmdd){
 
     let [year, month, day] = yyyymmdd.match(/(\d{4})(\d{2})(\d{2})/).slice(1,4);
 
-    return dateToText(year.replace(/^0+/, ''), month.replace(/^0+/, ''), day.replace(/^0+/, ''));
-}
-
-function dateToText(year, month, day) {
-
-    const months = [    //##LANG Month of a Gregorian calendar
-    "zero.", // Array start at one
-    "janv.",
-    "févr.",
-    "mars",
-    "avr.",
-    "mai",
-    "juin",
-    "juill.",
-    "août",
-    "sept.",
-    "oct.",
-    "nov.",
-    "déc."
-];
-
-let string = `${day} ${months[month]} ${year}`; //##LANG : date format : DD month. YYYY
-return string;
-
+    return LANG.DATE_TEXT_FORMAT(year.replace(/^0+/, ''), (month.replace(/^0+/, ''))-1, day.replace(/^0+/, ''));
 }
 
 
@@ -116,20 +94,14 @@ export default function displayMusicDisplayer(channel){
         return;
     }
 
-    /*let musicDisplayer = false;
-
-    if (!sub.message){
-
-        musicDisplayer = waitDisplayer(sub)
-    }
-    else {
-        musicDisplayer = updateMusicDisplayer(sub);
-    } */
-
     let musicDisplayer = (sub.message)?updateMusicDisplayer(sub):updateMusicDisplayer(sub,true);
 
-    if (musicDisplayer) MessagePrintReply.sendOnChannel(channel, musicDisplayer).then((msg) => {
-        sub.setMessage(msg)});
+    if (musicDisplayer)
+    MessagePrintReply.sendOnChannel(channel, musicDisplayer)
+        .then((msg) => {
+            sub.setMessage(msg)
+        })
+    ;
 
 }
 
@@ -161,27 +133,27 @@ function buildMusicDisplayer(sub, isLoading){
     .addComponents(
         new DiscordJs.ButtonBuilder()
         .setCustomId('PotatOSMusicPlayer')
-        .setLabel(`PotatOS Music Player`)
+        .setLabel(LANG.MUSICDISPLAYER_NAME)
         .setStyle(DiscordJs.ButtonStyle.Secondary)
         .setEmoji('🎧')
     ).addComponents(
         new DiscordJs.ButtonBuilder()
         .setCustomId('PotatOSMusicPlayerPlayPause')
-        .setLabel(`${sub.isPaused()?"Jouer":"Pause"}`)           //##LANG Music : "Play":"Pause"
+        .setLabel(`${sub.isPaused()?LANG.MUSICDISPLAYER_PLAY:LANG.MUSICDISPLAYER_PAUSE}`)
         .setStyle(`${sub.isPaused()?DiscordJs.ButtonStyle.Success:DiscordJs.ButtonStyle.Secondary}`)
         .setEmoji(`${sub.isPaused()?'▶':'⏸'}`)
         .setDisabled(isLoading)
     ).addComponents(
         new DiscordJs.ButtonBuilder()
         .setCustomId('PotatOSMusicPlayerSkip')
-        .setLabel(`Skip`)           //##LANG Music : Skip
+        .setLabel(LANG.MUSICDISPLAYER_SKIP)
         .setStyle(DiscordJs.ButtonStyle.Primary)
         //.setStyle(`${sub.queue.length>0?DiscordJs.ButtonStyle.Primary:DiscordJs.ButtonStyle.Danger}`)
         .setEmoji('⏭')
     ).addComponents(
         new DiscordJs.ButtonBuilder()
         .setCustomId('PotatOSMusicPlayerStop')
-        .setLabel(`Stop`)           //##LANG Music : Stop
+        .setLabel(LANG.MUSICDISPLAYER_STOP)
         .setStyle(DiscordJs.ButtonStyle.Danger)
         .setEmoji('◻')
         .setDisabled(sub.queue.length>0?false:true)
@@ -212,11 +184,11 @@ function constructDisplayerEmbed(sub){
         .setTitle(data.title)
         .setDescription(data.description)
         .setAuthor(data.author)
-        .setThumbnail(data.thumbnail ?? `https://cdn.discordapp.com/attachments/970417796729143316/1002583819683102770/PotatOS_black_and_white.png`)
+        .setThumbnail(data.thumbnail ?? LANG.MUSICDISPLAYER_DEFAULT_THUMBNAIL)
         .setFooter({text : `__________________________________________\nPotatOS • ${sub.guildName} > ${sub.voiceChannel.name}`,});
     ;
 
-    if (data.url)       displayerEmbed.setURL(data.url);
+    if (data.url) displayerEmbed.setURL(data.url);
 
     return displayerEmbed;
 }
@@ -241,7 +213,7 @@ function constructPlaylistRow(trackList){
     .addComponents(
         new DiscordJs.SelectMenuBuilder()
             .setCustomId('PotatOSMusicPlayerPlaylist')
-            .setPlaceholder(`Afficher la playlist [${trackList.length-1}]`)     //##LANG : Show playlist [2]
+            .setPlaceholder(LANG.MUSICDISPLAYER_SHOW_PLAYLIST(trackList.length-1))
             .setMaxValues(1)
             .setMinValues(1)
             .addOptions(options)
@@ -274,25 +246,25 @@ function dataToDisplay(metadata){
         data.playlistDesc = `${metadata.author} • ${data.description}`;
 
     }else if (metadata.isFile){
-        data.color = '#FFB46B';
+        data.color = LANG.MUSICDISPLAYER_BOT_COLOR;
         data.title = `${metadata.title}`;
         data.description = `${metadata.description}`;
         data.author = {
-            name : `Appelé avec la commande [${metadata.key}]`,         //##LANG : Called with [cmdName] command
-            iconURL : "https://media.discordapp.net/attachments/329613279204999170/970392014296338432/PotatOS_logo.png",
+            name : LANG.MUSICDISPLAYER_COMMAND_CALLED_SOUND(metadata.key),
+            iconURL : LANG.MUSICDISPLAYER_BOT_ICON,
         };
 
         data.playlistTitle = `${metadata.key}`;
-        data.playlistDesc = `Via la commande`;          //##LANG : Through the command
+        data.playlistDesc = LANG.MUSICDISPLAYER_THROUGH_COMMAND;
 
     }else {
-        data.color = '#20B6E7';
+        data.color = LANG.MUSICDISPLAYER_WEB_COLOR;
         data.title = `${metadata.file}`;
-        data.description = `Lien Internet`;         //##LANG : Internet link
+        data.description = LANG.MUSICDISPLAYER_WEB_LINK;
         data.author = {
             name : `${metadata.source}`,
             url : `https://${metadata.source}`,
-            iconURL : "https://media.discordapp.net/attachments/329613279204999170/975538715223003176/logoWWW.png", 
+            iconURL : LANG.MUSICDISPLAYER_WEB_ICON, 
         }
         data.url = `${metadata.url}`;
 
@@ -303,61 +275,23 @@ function dataToDisplay(metadata){
     return data;
 }
 
-function emojiForPlaylist(i){
-    switch (i) {
-        case 0:
-            return '🎶';
-        case 1:
-            return '⏭';
-        case 2:
-            return '2️⃣';
-        case 3:
-            return '3️⃣';
-        case 4:
-            return '4️⃣';
-        case 5:
-            return '5️⃣';
-        case 6:
-            return '6️⃣';
-        case 7:
-            return '7️⃣';
-        case 8:
-            return '8️⃣';
-        case 9:
-            return '9️⃣';
-        case 10:
-            return '🔟';
-        default:
-            return '#️⃣';
-    }
-
+function emojiForPlaylist(i){    
+    const emojis = ['🎶', '⏭', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
+    return emojis[i] ?? '#️⃣';
 }
 
 function constructLoadingEmbed(sub){
     const loadingEmbed = new DiscordJs.EmbedBuilder();
 
     loadingEmbed
-        .setColor("#ffb46b")
-        .setTitle(`C h a r g e m e n t . . .`)  //##LANG : L o a d i n g . . .
-        .setDescription(`\`\`\`
-                !
-                |
-                |    |~/
-                |   _|~
-  .============.|  (_|   |~/
-.-;____________;|.      _|~
-| [_________I__] |     (_|
-|  """"" (_) (_) |
-| .=====..=====. |
-| |:::::||:::::| |
-| '=====''=====' |
-'----------------'
-        \`\`\``)
+        .setColor(LANG.MUSICDISPLAYER_BOT_COLOR)
+        .setTitle(LANG.MUSICDISPLAYER_LOADING)
+        .setDescription(LANG.MUSICDISPLAYER_LOADING_ASCII_ART)
         .setAuthor({
-            name : `PotatOS`,
-            iconURL : "https://media.discordapp.net/attachments/329613279204999170/970392014296338432/PotatOS_logo.png",
+            name : LANG.BOT_NAME,
+            iconURL : LANG.BOT_ICON,
         })
-        .setFooter({text : `__________________________________________\nPotatOS • ${sub.guildName} > ${sub.voiceChannel.name}`,});
+        .setFooter({text : `__________________________________________\n${LANG.BOT_NAME} • ${sub.guildName} > ${sub.voiceChannel.name}`,});
     ;
 
     return loadingEmbed;
