@@ -3,6 +3,7 @@ import * as MessagePrintReply           from "../botModules/MessagePrintReply.mj
 import MusicSubscription                from "../voice/MusicSubscription.mjs";
 import MessageSafeDelete                from "./MessageSafeDelete.mjs";
 import * as LANG from "../Language.mjs";
+import favcolor from "favcolor";
 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
@@ -25,9 +26,10 @@ export default function displayMusicDisplayer(channel){
     }
     
     if (subscription.message && MessageSafeDelete.isMessageMine(subscription.message)) {
-        const toSend = MusicDiplayerMessagePayload(subscription);
-
-        subscription.message.edit(toSend)
+        MusicDiplayerMessagePayload(subscription)
+            .then((toSend) => {
+                return subscription.message.edit(toSend);
+            })
             .then((message) => {
                 subscription.setMessage(message);
             })
@@ -49,9 +51,9 @@ export default function displayMusicDisplayer(channel){
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // MUSIC DISPLAYER MESSAGE PAYLOAD
 
-function MusicDiplayerMessagePayload(subscription) {
+async function MusicDiplayerMessagePayload(subscription) {
 
-    const musicPlayerEmbed = displayerEmbed(subscription);
+    const musicPlayerEmbed = await displayerEmbed(subscription);
     const musicPlayerPlaylistRow = musicPlayerPlaylist([subscription.currentTrack,...subscription.queue]);
     const musicPlayerButtonsRow = musicPlayerButtons(subscription);
 
@@ -61,12 +63,11 @@ function MusicDiplayerMessagePayload(subscription) {
     return messagePayload;
 }
 
-function displayerEmbed(subscription){
-    
+async function displayerEmbed(subscription){
     
     let metadata = subscription.currentTrack.metadata;
 
-    let data = dataToDisplay(metadata);
+    let data = await dataToDisplay(metadata);
 
     const displayerEmbed = new DiscordJs.EmbedBuilder()
         .setColor(data.color)
@@ -90,31 +91,32 @@ function musicPlayerButtons(subscription, isLoading = false){
     const buttonActionRow = new DiscordJs.ActionRowBuilder()
     .addComponents(
         new DiscordJs.ButtonBuilder()
-        .setCustomId('PotatOSMusicPlayer')
-        .setLabel(LANG.MUSICDISPLAYER_NAME)
-        .setStyle(DiscordJs.ButtonStyle.Secondary)
-        .setEmoji('🎧')
-    ).addComponents(
+            .setCustomId('PotatOSMusicPlayer')
+            .setLabel(LANG.MUSICDISPLAYER_NAME)
+            .setStyle(DiscordJs.ButtonStyle.Secondary)
+            .setEmoji('🎧')
+        ,
         new DiscordJs.ButtonBuilder()
-        .setCustomId('PotatOSMusicPlayerPlayPause')
-        .setLabel(`${subscription.isPaused()?LANG.MUSICDISPLAYER_PLAY:LANG.MUSICDISPLAYER_PAUSE}`)
-        .setStyle(`${subscription.isPaused()?DiscordJs.ButtonStyle.Success:DiscordJs.ButtonStyle.Secondary}`)
-        .setEmoji(`${subscription.isPaused()?'▶':'⏸'}`)
-        .setDisabled(isLoading)
-    ).addComponents(
+            .setCustomId('PotatOSMusicPlayerPlayPause')
+            .setLabel(`${subscription.isPaused()?LANG.MUSICDISPLAYER_PLAY:LANG.MUSICDISPLAYER_PAUSE}`)
+            .setStyle(`${subscription.isPaused()?DiscordJs.ButtonStyle.Success:DiscordJs.ButtonStyle.Secondary}`)
+            .setEmoji(`${subscription.isPaused()?'▶':'⏸'}`)
+            .setDisabled(isLoading)
+        ,
         new DiscordJs.ButtonBuilder()
-        .setCustomId('PotatOSMusicPlayerSkip')
-        .setLabel(LANG.MUSICDISPLAYER_SKIP)
-        .setStyle(DiscordJs.ButtonStyle.Primary)
-        //.setStyle(`${subscription.queue.length>0?DiscordJs.ButtonStyle.Primary:DiscordJs.ButtonStyle.Danger}`)
-        .setEmoji('⏭')
-    ).addComponents(
+            .setCustomId('PotatOSMusicPlayerSkip')
+            .setLabel(LANG.MUSICDISPLAYER_SKIP)
+            .setStyle(DiscordJs.ButtonStyle.Primary)
+            //.setStyle(`${subscription.queue.length>0?DiscordJs.ButtonStyle.Primary:DiscordJs.ButtonStyle.Danger}`)
+            .setEmoji('⏭')
+        ,
         new DiscordJs.ButtonBuilder()
-        .setCustomId('PotatOSMusicPlayerStop')
-        .setLabel(LANG.MUSICDISPLAYER_STOP)
-        .setStyle(DiscordJs.ButtonStyle.Danger)
-        .setEmoji('◻')
-        .setDisabled(subscription.queue.length>0?false:true)
+            .setCustomId('PotatOSMusicPlayerStop')
+            .setLabel(LANG.MUSICDISPLAYER_STOP)
+            .setStyle(DiscordJs.ButtonStyle.Danger)
+            .setEmoji('◻')
+            .setDisabled(subscription.queue.length>0?false:true)
+        ,
     );
 
     return buttonActionRow;
@@ -172,11 +174,15 @@ function musicPlayerPlaylist(trackList){
 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
-function dataToDisplay(metadata){
+async function dataToDisplay(metadata){
     let data = {};
 
-   if(metadata.isYoutube) {
-        data.color          = '#FFB46B';
+    if(metadata.isYoutube) {
+        const color = (await favcolor.fromSiteFavicon(
+            metadata.videoURL.match(/(?:http|https):\/\/(?:[^\/])+\//)[0]
+        )).toHex();
+
+        data.color          = `${color}`;
         data.title          = `${metadata.title}`;
         data.description    = `${durationToString(metadata.duration)} • ${viewsToString(metadata.viewCount)} • ${YYYYMMDDToString(metadata.uploadDate)}`;
         data.author = {
