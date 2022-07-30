@@ -139,3 +139,17 @@ export const _SHIFUMI_PLAY_DESC = `Pierre, Feuille, ou Ciseaux`; // Rock, Paper,
 export const _SHIFUMI_PLAY_ROCK     = `✊ Pierre`;
 export const _SHIFUMI_PLAY_PAPER    = `✋ Feuille`;
 export const _SHIFUMI_PLAY_SCISSORS = `✌ Ciseaux`;
+
+export const _MATHS_CMDNAME         = `maths`;
+export const _MATHS_DESC            = `Calcul des constantes mathématiques`;
+export const _MATHS_CONSTANT_NAME   = `constant`;
+export const _MATHS_CONSTANT_DESC   = `Choix de la constante à calculer`;
+export const _MATHS_CONSTANT__PI    = `pi`;
+export const _MATHS_CONSTANT__TAU   = `tau`;
+export const _MATHS_CONSTANT__PHI   = `phi`;
+export const _MATHS_CONSTANT__ONE   = `un`;
+export const _MATHS_CONSTANT__EXP   = `exp`;
+export const _MATHS_CONSTANT__LOG_E = `ln`;
+export const _MATHS_NUMBER_NAME     = `number`;
+export const _MATHS_NUMBER_DESC     = `exp et ln : nombre réel, phi : nombre entier non nul`;
+export const _MATHS_ERROR           = `Bug avec la command \`${_MATHS_CMDNAME}\`, contact un admin !`; 
