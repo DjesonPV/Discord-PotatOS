@@ -3,7 +3,7 @@ import {Routes} from 'discord-api-types/v10';
 
 import {createRequire} from 'module';
 
-import * as Commands from '../Commands.mjs';
+import * as SlashCommands from '../SlashCommands.mjs';
 import * as LANG from "../Language.mjs";
 
 export async function updateSlashCommands() {
@@ -15,8 +15,8 @@ export async function updateSlashCommands() {
 
     const slashCommands = [];
 
-    for (let commandName in Commands){
-        slashCommands.push(Commands[commandName].slash.toJSON());
+    for (let commandName in SlashCommands){
+        slashCommands.push(SlashCommands[commandName].slash.toJSON());
     }
 
     try {

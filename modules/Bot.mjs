@@ -3,7 +3,7 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
 import * as DiscordJs               from 'discord.js';
-import * as Commands                from "./Commands.mjs";
+import * as SlashCommands           from "./SlashCommands.mjs";
 import * as ButtonInteractions      from "./ButtonInteractions.mjs";
 import * as SlashCommandsUpdate     from "./botModules/SlashCommands.mjs";
 import * as LANG                    from "./Language.mjs";
@@ -96,7 +96,7 @@ async function interactionHandler(itr) {
         }
     }
     else if (itr.type === DiscordJs.InteractionType.ApplicationCommand) {
-        const slashCommand = Object.values(Commands).find(command => command.slash.name === itr.commandName);
+        const slashCommand = Object.values(SlashCommands).find(command => command.slash.name === itr.commandName);
         if (slashCommand) await slashCommand.command(itr);
     }
 }
