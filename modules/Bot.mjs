@@ -3,9 +3,10 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
 import * as DiscordJs               from 'discord.js';
-import * as Commands                from "./Commands.mjs";
+import * as SlashCommands           from "./SlashCommands.mjs";
+import * as ContextMenuCommands     from "./ContextMenuCommands.mjs";
 import * as ButtonInteractions      from "./ButtonInteractions.mjs";
-import * as SlashCommandsUpdate     from "./botModules/SlashCommands.mjs";
+import * as SlashCommandsUpdate     from "./botModules/UpdateCommands.mjs";
 import * as LANG                    from "./Language.mjs";
 
 import ExploreChannels      from "./botModules/ExploreChannels.mjs";
@@ -82,7 +83,6 @@ export function start() {
 client.on('interactionCreate', interactionHandler);
 
 async function interactionHandler(itr) {
-
     if (itr.message && (itr.message.author.id === client.user.id)) {
         let itrName = itr.customId;
 
@@ -95,8 +95,12 @@ async function interactionHandler(itr) {
             itr.deferUpdate();
         }
     }
-    else if (itr.type === DiscordJs.InteractionType.ApplicationCommand) {
-        const slashCommand = Object.values(Commands).find(command => command.slash.name === itr.commandName);
+    else if (itr.isChatInputCommand()) {
+        const slashCommand = Object.values(SlashCommands).find(command => command.slash.name === itr.commandName);
         if (slashCommand) await slashCommand.command(itr);
+    }
+    else if (itr.isContextMenuCommand()){
+        const contextMenuCommand = Object.values(ContextMenuCommands).find(command => command.menu.name === itr.commandName);
+        if (contextMenuCommand) await contextMenuCommand.command(itr);
     }
 }

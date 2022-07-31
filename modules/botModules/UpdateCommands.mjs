@@ -3,7 +3,8 @@ import {Routes} from 'discord-api-types/v10';
 
 import {createRequire} from 'module';
 
-import * as Commands from '../Commands.mjs';
+import * as SlashCommands from '../SlashCommands.mjs';
+import * as ContextMenuCommands from '../ContextMenuCommands.mjs';
 import * as LANG from "../Language.mjs";
 
 export async function updateSlashCommands() {
@@ -13,10 +14,14 @@ export async function updateSlashCommands() {
 
     const rest = new REST({ version: '10' }).setToken(secret.botToken);
 
-    const slashCommands = [];
+    const commandList = [];
 
-    for (let commandName in Commands){
-        slashCommands.push(Commands[commandName].slash.toJSON());
+    for (let commandName in SlashCommands){
+        commandList.push(SlashCommands[commandName].slash.toJSON());
+    }
+
+    for (let commandName in ContextMenuCommands){
+        commandList.push(ContextMenuCommands[commandName].menu.toJSON());
     }
 
     try {
@@ -26,7 +31,7 @@ export async function updateSlashCommands() {
 
             await rest.put(
                 Routes.applicationGuildCommands(secret.botID, (secret.guildsID[guildName])),
-                { body: slashCommands },
+                { body: commandList },
             );                
         };
         
