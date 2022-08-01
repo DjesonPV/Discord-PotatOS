@@ -42,23 +42,20 @@ const client = new DiscordJs.Client({
 export function start() {
     return new Promise(async (resolve) => {
         client.on("ready", async () => {
-            if (!client.user || !client.application) {
-                return;
+            if (client?.user && client?.application) {
+                console.log(LANG.BOT_IS_ONLINE(client.user.username));
+
+                ExploreChannels.explore(client);
+                console.log(LANG.BOT_CHANNELS_FOUND(ExploreChannels.text.size, ExploreChannels.voice.size));
+
+                MessageSafeDelete.botUserId = client.user.id;
+
+                resolve();
             }
-
-            console.log(LANG.BOT_IS_ONLINE(client.user.username));
-
-            ExploreChannels.explore(client);
-            console.log(LANG.BOT_CHANNELS_FOUND(ExploreChannels.text.size, ExploreChannels.voice.size));
-
-            MessageSafeDelete.botUserId = client.user.id;
-
-            resolve();
         });
 
         const secret = require("../secret.json");
         client.login(secret.botToken);
-
 
         client.once('ready', async () => {
 
@@ -87,7 +84,7 @@ async function interactionHandler(interaction) {
 
     if (interaction.isButton() && interaction.message && (interaction.message.author.id === client.user.id)) {
         let buttonInteraction = ButtonInteractions[interaction.customId];
-        if (buttonInteraction) buttonInteraction(interaction);
+        if (buttonInteraction) await buttonInteraction(interaction);
         else interaction.deferUpdate();
     }
     else if (interaction.isSelectMenu()) {

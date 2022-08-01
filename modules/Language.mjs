@@ -81,6 +81,7 @@ export const ERROR_TRACK = (error) => `Erreur : ${error}`;
 export const ERROR_PLAY_TRACK = `Je n'ai pas reussi a jouer ton morceau`;
 export const ERROR_VOICECHANNEL_CONNECTION = `Je n'ai pas réussi à me connecter, reessaie plus tard !`;
 export const ERROR_ICON = `https://cdn.discordapp.com/attachments/329613279204999170/970413892792623204/Error_icon.png`;
+export const ERROR_VOICE_CONNECTION = `Impossible de se connecter à un Salon Vocal`;
 
 // = = = = = = = = = = =
 // COMMANDS / starts whith an underscore

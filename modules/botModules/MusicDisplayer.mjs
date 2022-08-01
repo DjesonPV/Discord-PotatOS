@@ -15,35 +15,36 @@ export default function displayMusicDisplayer(channel){
 
     const subscription = MusicSubscription.getSubscription(channel.guild.id);
 
-    if( 
-        !subscription ||
-        (
-            (subscription.currentTrack.metadata.isFile === true) && 
-            (!subscription.message) &&
-            (subscription.queue.length === 0)
-        ) 
-    ) {
-        return;
-    }
-    
-    if (subscription.message && MessageSafeDelete.isMessageMine(subscription.message)) {
-        MusicDiplayerMessageOptions(subscription)
-            .then((toSend) => {
-                return subscription.message.edit(toSend);
-            })
-            .then((message) => {
-                subscription.setMessage(message);
-            })
-        ;
-    }
-    else {
-        MessagePrintReply.printOnChannel(channel, WaitingMessageOptions(subscription))
-            .then((message) => {
-                subscription.setMessage(message);
-            })
-        ;
+    if(!isItALonelyPlaysound(subscription)) {
+                
+        if (MessageSafeDelete.isMessageMine(subscription.message)) {
+            MusicDiplayerMessageOptions(subscription)
+                .then((toSend) => {
+                    return subscription.message.edit(toSend);
+                })
+                .then((message) => {
+                    subscription.setMessage(message);
+                })
+            ;
+        }
+        else {
+            MessagePrintReply.printOnChannel(channel, WaitingMessageOptions(subscription))
+                .then((message) => {
+                    subscription.setMessage(message);
+                })
+            ;
+        }
     }
 
+}
+
+/** @param {MusicSubscription} subscription */
+function isItALonelyPlaysound(subscription) {
+    return ( // the ? provide false is there is no subscription
+        (subscription?.currentTrack.metadata.isFile === true) && 
+        (subscription.queue.length === 0) &&
+        (!subscription.message)
+    )
 }
 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 

@@ -6,26 +6,18 @@ export default class MessageSafeDelete{
     static botUserId;
 
     /** @param {DiscordJs.Message} message */
-    static deleteMessage(message) {
-        if (!message) return false;
-
+    static async deleteMessage(message) {
         if (this.isMessageMine(message) && message.deletable){
-            message.delete().catch(()=>{});
-            return true;
+            await message.delete().catch(console.log);
         }
-        
-        return false;
     }
     
     /** @param {DiscordJs.Message} message */
     static isMessageMine(message) {
-        if (
+        return (
             (message?.author?.id === this.botUserId) && 
             message?.author?.bot
-        ) 
-        return true;
-
-        return false;
+        )
     }
 
     /** Refuse a CommandInteraction reply  

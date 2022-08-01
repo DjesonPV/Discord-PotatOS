@@ -21,8 +21,7 @@ function replyYourNotConnected(interaction){
 async function cmdSkip(interaction){
     const subscription = MusicSubscription.getSubscription(interaction.guild.id);
     if (!subscription?.isMemberConnected(interaction.member)){
-        replyYourNotConnected(interaction);
-        return;
+        return replyYourNotConnected(interaction);
     }
     else {
         const thinkingMessage = await MessageSafeDelete.startThinking(interaction);
@@ -47,8 +46,7 @@ export const skip = {slash: slashSkip, command: cmdSkip};
 async function cmdStop(interaction){
     const subscription = MusicSubscription.getSubscription(interaction.guild.id);
     if (!subscription?.isMemberConnected(interaction.member)){
-        replyYourNotConnected(interaction);
-        return;
+        return replyYourNotConnected(interaction);
     }
     else {
         const thinkingMessage = await MessageSafeDelete.startThinking(interaction);
@@ -82,7 +80,7 @@ async function cmdPlay(interaction){
         // No query so it's a Resume action
         if (query === null)
         {
-            __playPause(interaction, false);
+            await __playPause(interaction, false);
         }
         // query is an URL 
         else if (isItAnURL(query))
@@ -109,8 +107,7 @@ async function cmdPlay(interaction){
 
         MessageSafeDelete.stopThinking(thinkingMessage);
     } else {
-        replyYourNotConnected(interaction);
-        return;
+        return replyYourNotConnected(interaction);
     }
 }
 
@@ -129,12 +126,9 @@ export const play = {slash: slashPlay, command: cmdPlay};
 // URL test
 
 function isItAnURL(text){
-    if(typeof text == "string"){
-        if (text.match(/^(https?|http):\/\/([a-zA-Z0-9\-]{1,64}\.){0,}([a-zA-Z0-9\-]{2,63})(\.(xn--)?[a-zA-Z0-9]{2,})(\:[0-9]{1,5})?\/([^\s]*)?$/)){
-        return true;    
-        }
-    }
-    return false;
+    return (typeof text == "string") &&
+    (text.match(/^(https?|http):\/\/([a-zA-Z0-9\-]{1,64}\.){0,}([a-zA-Z0-9\-]{2,63})(\.(xn--)?[a-zA-Z0-9]{2,})(\:[0-9]{1,5})?\/([^\s]*)?$/))
+    ;
 }
 
 
@@ -146,20 +140,16 @@ function isItAnURL(text){
  * @param {DiscordJs.GuildMember} member 
  */
 function goodMemberSubscriptionConnection(subscription, member){
-    // Member not in a VoiceChannel
-    if (!member.voice?.channel?.id) {
-        return false;
-    }
-
-    // There is no subscription and member is in a voiceChannel
-    if (!subscription) {
-        return true;
-    } // There is a subscription but member is not in the right voiceChannel
-    else if (!subscription.isMemberConnected(member)) {
-        return false;
-    }
-
-    return true;
+    // Member in a VoiceChannel
+    return (
+        (member.voice?.channel?.id) && // AND
+        (
+            // There is no subscription
+            (!subscription) ||
+            // Or member is in the right voiceChannel
+            (subscription.isMemberConnected(member))
+        )
+    );
 }
 
 
@@ -170,13 +160,12 @@ function goodMemberSubscriptionConnection(subscription, member){
 async function cmdPause(interaction){
         const subscription = MusicSubscription.getSubscription(interaction.guild.id);
     if (!subscription?.isMemberConnected(interaction.member)){
-        replyYourNotConnected(interaction);
-        return;
+        return replyYourNotConnected(interaction);
     }
     else {
         const thinkingMessage = await MessageSafeDelete.startThinking(interaction);
         
-        __playPause(interaction,true);
+        await __playPause(interaction,true);
 
         MessageSafeDelete.stopThinking(thinkingMessage); 
     }
@@ -196,7 +185,7 @@ export const pause = {slash: slashPause, command: cmdPause};
  * @param {DiscordJs.ChatInputCommandInteraction} interaction 
  * @param {boolean} wannaPause
 */
-function __playPause(interaction, wannaPause){
+async function __playPause(interaction, wannaPause){
 
     const subscription = MusicSubscription.getSubscription(interaction.guild.id);
     if (subscription) {

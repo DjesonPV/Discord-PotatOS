@@ -39,20 +39,13 @@ export function PotatOSMusicPlayerStop(interaction){
         interaction.reply(toSend);
 
         const filter = button => {
-            if (button.user.id === interaction.member.id){
-                if (button.customId === 'PotatOSMusicPlayerStopYESSTOPIT') {
-                    return true;
-                }
-                else if (button.customId === 'PotatOSMusicPlayerStopDONT'){
-                    return true;
-                }
-                else {
-                    return false;
-                }
-
-            } else {
-                return false;
-            }
+            return (
+                (button.user.id === interaction.member.id) &&
+                (
+                    (button.customId === 'PotatOSMusicPlayerStopYESSTOPIT') ||
+                    (button.customId === 'PotatOSMusicPlayerStopDONT')
+                )
+            );
         };
         
         const collector = interaction.channel.createMessageComponentCollector({ filter, max : 1});
@@ -101,7 +94,7 @@ function YesStopIt(member){
 // Skip
 
 /** @param {DiscordJs.ButtonInteraction} interaction */
-export function PotatOSMusicPlayerSkip(interaction){
+export async function PotatOSMusicPlayerSkip(interaction){
     interaction.deferUpdate();
     const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
 
@@ -132,7 +125,7 @@ export function PotatOSMusicPlayer(interaction){
 // Play Pause
 
 /** @param {DiscordJs.ButtonInteraction} interaction */
-export function PotatOSMusicPlayerPlayPause(interaction){
+export async function PotatOSMusicPlayerPlayPause(interaction){
     interaction.deferUpdate();
     const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
     

@@ -10,11 +10,15 @@ export default class MusicSubscription{
 
     static subscriptions = new Map();
 
+    /** @param {DiscordJs.CommandInteraction} interaction */
     constructor(interaction){
+        /** @type {DiscordJsVoice.VoiceConnection} */
        this.voiceConnection = DiscordJsVoice.joinVoiceChannel({
             channelId: interaction.member.voice.channel.id,
             guildId: interaction.guild.id,
             adapterCreator: interaction.guild.voiceAdapterCreator,
+            selfDeaf: false,
+            selfMute: true,
         }),
        this.audioPlayer = DiscordJsVoice.createAudioPlayer();
        /** @type {Track[]} */
@@ -22,6 +26,7 @@ export default class MusicSubscription{
        this.queueLock = false;
        this.readyLock = false;
        this.currentTrack;
+       /** @type {DiscordJs.VoiceChannel} */
        this.voiceChannel = interaction.member.voice.channel;
        this.guildId = interaction.guild.id;
        this.guildName = interaction.guild.name;
@@ -123,10 +128,19 @@ export default class MusicSubscription{
 
     pause(){
         this.audioPlayer.pause();
+        this.setSelfMute(true);
     }
 
     resume(){
+        this.setSelfMute(false);
         this.audioPlayer.unpause();
+    }
+
+    setSelfMute(selfMute){
+        return this.voiceConnection.rejoin({
+            ...this.voiceConnection.joinConfig,
+            selfMute: selfMute,
+        });
     }
 
     isPaused(){
@@ -135,46 +149,36 @@ export default class MusicSubscription{
 
     /** @param {DiscordJs.GuildMember} member */
     isMemberConnected(member){
-        // Member not connected in the right guild
-        // Impossible edge case ?
-        if (member?.guild?.id !== this.guildId){
-            return false;
-        }
-
-        // Member not in a VoiceChannel
-        if (!member.voice?.channel?.id){
-            return false;
-        }
-
-        // Member not in the right VoiceChannel
-        if (member.voice.channel.id !== this.voiceChannel?.id){
-            return false;
-        }
-
-        return true;
+        return (
+            // Member in the same Guild (edgecase)
+            (member?.guild?.id === this.guildId) &&
+            // And Member is connected to the right VoiceChannel
+            (member?.voice?.channel?.id === this.voiceChannel?.id)
+        );
     }
 
     async processQueue() {
-        if (this.queueLock || 
-            this.audioPlayer.state.status !== DiscordJsVoice.AudioPlayerStatus.Idle ||
-            this.queue.length === 0){
-                return;
-        }
+        if (
+            (!this.queueLock) && 
+            (this.audioPlayer.state.status === DiscordJsVoice.AudioPlayerStatus.Idle) &&
+            (this.queue.length !== 0)
+        ) {
+           
+            this.queueLock = true;
 
-        this.queueLock = true;
+            const nextTrack = this.queue.shift();
+            this.currentTrack = nextTrack;
 
-        const nextTrack = this.queue.shift();
-        this.currentTrack = nextTrack;
-
-        try {
-            const resource = await nextTrack.createAudioResource();
-            resource.volume.setVolume(nextTrack.volume);
-            this.audioPlayer.play(resource);
-            this.queueLock = false;
-        } catch (error) {
-            nextTrack.onError(error);
-            this.queueLock = false;
-            return this.processQueue();
+            try {
+                const resource = await nextTrack.createAudioResource();
+                resource.volume.setVolume(nextTrack.volume);
+                this.audioPlayer.play(resource);
+                this.queueLock = false;
+            } catch (error) {
+                nextTrack.onError(error);
+                this.queueLock = false;
+                return this.processQueue();
+            }
         }
     }
 
@@ -208,7 +212,9 @@ export default class MusicSubscription{
     }
 
     async destroy(){   
-        if (this.voiceConnection.state.status !== DiscordJsVoice.VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
+        if (this.voiceConnection.state.status !== DiscordJsVoice.VoiceConnectionStatus.Destroyed) {
+            this.voiceConnection.destroy();
+        }
         MessageSafeDelete.deleteMessage(this.message);
         this.stop();
         MusicSubscription.subscriptions.delete(this.guildId);
