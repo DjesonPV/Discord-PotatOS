@@ -85,8 +85,8 @@ export default class Track {
 
     }
 
-    setVolume(vol) {
-        this.volume = vol;
+    setVolume(volume) {
+        this.volume = volume;
     }
 
     static fetchData(url, methods) {

@@ -1,29 +1,41 @@
 import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
-import { SlashCommandBuilder } from '@discordjs/builders';
+import * as DiscordJs from 'discord.js';
 import * as LANG from "../Language.mjs";
 
-function phi(num) {
-    let n = Math.floor(Math.abs(num)) || 1;
+//
+// Maths Functions
 
-    let metallicMean = (n + Math.sqrt(Math.pow(n, 2) + 4)) / 2;
+/** @param {number} number */
+function phi(number) {
+    let integer = Math.floor(Math.abs(number)) || 1;
 
-    return `φ(${n}) = ${metallicMean}`;
+    let metallicMean = (integer + Math.sqrt(Math.pow(integer, 2) + 4)) / 2;
+
+    return `φ(${integer}) = ${metallicMean}`;
 }
 
-function exp(num) {
-    let n = num ?? 1;
+/** @param {number} number */
+function exp(number) {
+    let float = number ?? 1;
 
-    return `e^(${n}) = ${Math.exp(n)}`;
+    return `e^(${float}) = ${Math.exp(float)}`;
 }
 
-function ln(num) {
-    let n = num ?? 1;
+/** @param {number} number*/
+function ln(number) {
+    let float = number ?? 1;
 
-    return `log_e(${n}) = ${Math.log(n)}`;
+    return `log_e(${float}) = ${Math.log(float)}`;
 }
 
+// ___________________________________________________
+//
+// SlashCommand Maths
+
+/** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 function cmdMaths(interaction) {
 
+    /** @type {string} */
     let result;
 
     switch (interaction.options.getString(LANG._MATHS_CONSTANT_NAME)) {
@@ -54,14 +66,14 @@ function cmdMaths(interaction) {
             break;
     }
 
-    if (result){
+    if (result.length > 0){
         MessagePrintReply.replyToAnInteraction(interaction, result);
     } else {
         MessagePrintReply.replyAlertOnInterarction(interaction, LANG._MATHS_ERROR);
     }
 }
 
-const slashMaths = new SlashCommandBuilder()
+const slashMaths = new DiscordJs.SlashCommandBuilder()
     .setName(LANG._MATHS_CMDNAME)
     .setDescription(LANG._MATHS_DESC)
     .addStringOption(option => option

@@ -4,11 +4,15 @@ import * as Voice                       from "../voice/Voice.mjs";
 import MusicSubscription                from "../voice/MusicSubscription.mjs";
 import displayMusicDisplayer            from "../botModules/MusicDisplayer.mjs";
 import MessageSafeDelete                from '../botModules/MessageSafeDelete.mjs';
-import { SlashCommandBuilder }          from '@discordjs/builders';
+import * as DiscordJs                   from 'discord.js';
 import * as LANG from "../Language.mjs";
 
 // Checks
 
+/** 
+ * Must be replaced by subscription.isUserConnected(user)
+ * @param {DiscordJs.ChatInputCommandInteraction} interaction
+ *  */
 function memberConnectedInAVoiceChannelInGuildInteraction(interaction){
     if (
         interaction.member 
@@ -20,12 +24,19 @@ function memberConnectedInAVoiceChannelInGuildInteraction(interaction){
      && interaction.guild
      && interaction.guild.id
      && (interaction.member.voice.channel.guild.id === interaction.guild.id)
-     && (!MusicSubscription.getSubscription(interaction.guild.id).voiceChannel || interaction.member.voice.channel.id === MusicSubscription.getSubscription(interaction.guild.id).voiceChannel.id)
+     && (
+            MusicSubscription.getSubscription(interaction.guild.id) && 
+            (
+                !MusicSubscription.getSubscription(interaction.guild.id).voiceChannel || 
+                interaction.member.voice.channel.id === MusicSubscription.getSubscription(interaction.guild.id).voiceChannel.id
+            )
+        )
     )
     return true;
     return false;
 }
 
+/** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 function replyYourNotConnected(interaction){
     MessagePrintReply.replyAlertOnInterarction(interaction, LANG._MUSICPLAYER_NOT_CONNECTED);
 }
@@ -33,6 +44,7 @@ function replyYourNotConnected(interaction){
 // ________________________________________________________________
 // Skip
 
+/** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 function cmdSkip(interaction){
     if (!memberConnectedInAVoiceChannelInGuildInteraction(interaction)) return replyYourNotConnected(interaction);
     MessageSafeDelete.noReply(interaction);
@@ -41,7 +53,7 @@ function cmdSkip(interaction){
     if (subscription) subscription.skip();
 }
 
-const slashSkip = new SlashCommandBuilder()
+const slashSkip = new DiscordJs.SlashCommandBuilder()
     .setName('skip')
     .setDescription(LANG._SKIP_DESC)
 ;
@@ -51,6 +63,7 @@ export const skip = {slash: slashSkip, command: cmdSkip};
 // ________________________________________________________________
 // Stop
 
+/** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 function cmdStop(interaction){
     if (!memberConnectedInAVoiceChannelInGuildInteraction(interaction)) return replyYourNotConnected(interaction);
     MessageSafeDelete.noReply(interaction);
@@ -59,7 +72,7 @@ function cmdStop(interaction){
     if (subscription) subscription.destroy();
 }
 
-const slashStop = new SlashCommandBuilder()
+const slashStop = new DiscordJs.SlashCommandBuilder()
     .setName('stop')
     .setDescription(LANG._STOP_DESC)
 ;
@@ -69,7 +82,9 @@ export const stop = {slash: slashStop, command: cmdStop};
 // ________________________________________________________________
 // Play
 
+/** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 async function cmdPlay(interaction){
+    // MAJOR FLAW HERE !!!! MUST BE CORRECTED
     if (!memberConnectedInAVoiceChannelInGuildInteraction(interaction)) return replyYourNotConnected(interaction);
 
     const query = interaction.options.getString('query');
@@ -96,7 +111,7 @@ async function cmdPlay(interaction){
     }
 }
 
-const slashPlay = new SlashCommandBuilder()
+const slashPlay = new DiscordJs.SlashCommandBuilder()
     .setName('play')
     .setDescription(LANG._PLAY_DESC)
     .addStringOption(option => option
@@ -112,6 +127,7 @@ export const play = {slash: slashPlay, command: cmdPlay};
 // ________________________________________________________________
 // Pause
 
+/** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 function cmdPause(interaction){
     if (!memberConnectedInAVoiceChannelInGuildInteraction(interaction)) return replyYourNotConnected(interaction);
     MessageSafeDelete.noReply(interaction);
@@ -119,7 +135,7 @@ function cmdPause(interaction){
     __playPause(interaction,true);
 }
 
-const slashPause = new SlashCommandBuilder()
+const slashPause = new DiscordJs.SlashCommandBuilder()
     .setName('pause')
     .setDescription(LANG._PAUSE_DESC)
 ;
@@ -129,6 +145,10 @@ export const pause = {slash: slashPause, command: cmdPause};
 // ________________________________________________________________
 // UTILS
 
+/** 
+ * @param {DiscordJs.ChatInputCommandInteraction} interaction 
+ * @param {boolean} wannaPause
+*/
 function __playPause(interaction, wannaPause){
 
     const subscription = MusicSubscription.getSubscription(interaction.guild.id);

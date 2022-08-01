@@ -1,4 +1,5 @@
 import * as DiscordJsVoice              from '@discordjs/voice';
+import * as DiscordJs                   from 'discord.js';
 
 import * as MessagePrintReply           from "../botModules/MessagePrintReply.mjs";
 import Track                            from "./Track.mjs";
@@ -6,6 +7,7 @@ import MusicSubscription                from "./MusicSubscription.mjs";
 import displayMusicDisplayer            from '../botModules/MusicDisplayer.mjs';
 import * as LANG from "../Language.mjs";
 
+/** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 export async function streamVoice(interaction, url, volume){
 
     let subscription = MusicSubscription.getSubscription(interaction.guild.id);
@@ -43,6 +45,7 @@ export async function streamVoice(interaction, url, volume){
 
 }
 
+/** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 async function connectVoice(interaction){
 
     let subscription = MusicSubscription.getNewSubscription(interaction);

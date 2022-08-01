@@ -1,6 +1,7 @@
 import * as DiscordJsVoice              from '@discordjs/voice';
 import * as NodeUtil                    from 'node:util';
 import MessageSafeDelete                from '../botModules/MessageSafeDelete.mjs';
+import Track from './Track.mjs';
 
 const wait = NodeUtil.promisify(setTimeout);
 
@@ -15,6 +16,7 @@ export default class MusicSubscription{
             adapterCreator: interaction.guild.voiceAdapterCreator,
         }),
        this.audioPlayer = DiscordJsVoice.createAudioPlayer();
+       /** @type {Track[]} */
        this.queue = [];
        this.queueLock = false;
        this.readyLock = false;
@@ -154,7 +156,7 @@ export default class MusicSubscription{
         }
     }
 
-
+    /** @returns {MusicSubscription} */
     static getNewSubscription(interaction){
         let subscription = this.getSubscription(interaction.guild.id);
         if (subscription) {
@@ -165,12 +167,13 @@ export default class MusicSubscription{
     
     }
 
+    /** @returns {MusicSubscription} */
     static getSubscription(guildId){
         let subscription = this.subscriptions.get(guildId);
         if (subscription) {
             return subscription;
         } else {
-            return false;
+            return undefined;
         }   
         
     }

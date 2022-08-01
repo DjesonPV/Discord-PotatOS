@@ -10,6 +10,7 @@ import favcolor from "favcolor";
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // DISPLAY MUSIC DISPLAYER
 
+/** @param {DiscordJs.GuildTextBasedChannel} channel*/
 export default function displayMusicDisplayer(channel){
 
     let subscription = MusicSubscription.getSubscription(channel.guild.id);
@@ -51,6 +52,7 @@ export default function displayMusicDisplayer(channel){
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // MUSIC DISPLAYER MESSAGE PAYLOAD
 
+/** @param {MusicSubscription} subscription */
 async function MusicDiplayerMessagePayload(subscription) {
 
     const musicPlayerEmbed = await displayerEmbed(subscription);
@@ -63,6 +65,7 @@ async function MusicDiplayerMessagePayload(subscription) {
     return messagePayload;
 }
 
+/** @param {MusicSubscription} subscription */
 async function displayerEmbed(subscription){
     
     let metadata = subscription.currentTrack.metadata;
@@ -86,6 +89,7 @@ async function displayerEmbed(subscription){
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // BUTTON ROW
 
+/** @param {MusicSubscription} subscription */
 function musicPlayerButtons(subscription, isLoading = false){
 
     const buttonActionRow = new DiscordJs.ActionRowBuilder()
@@ -221,6 +225,7 @@ async function dataToDisplay(metadata){
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  
 // LOADING MESSAGE PAYLOAD
 
+/** @param {MusicSubscription} subscription */
 function WaitingMessagePayload(subscription){
 
     const loadingEmbed = new DiscordJs.EmbedBuilder()
@@ -244,6 +249,7 @@ function WaitingMessagePayload(subscription){
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // DATA JUGGLING
 
+/** @param {number} duration */
 function durationToString(duration){
     let seconds = Math.floor(duration%60);
     let minutes = (Math.floor(duration/60))%60;
@@ -256,6 +262,7 @@ function durationToString(duration){
     return string;
 }
 
+/** @param {number} viewCount */
 function viewsToString(viewCount){
     let string;
     if (viewCount){
@@ -302,6 +309,7 @@ function viewsToString(viewCount){
     return string;
 }
 
+/** @param {string} yyyymmdd */
 function YYYYMMDDToString(yyyymmdd){
 
     let [year, month, day] = yyyymmdd.match(/(\d{4})(\d{2})(\d{2})/).slice(1,4);

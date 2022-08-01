@@ -4,14 +4,14 @@ import displayMusicDisplayer            from "../botModules/MusicDisplayer.mjs";
 import MusicSubscription                from "../voice/MusicSubscription.mjs";
 import * as LANG from "../Language.mjs";
 
-/**
- * 
- * @param {DiscordJs.MessageComponentInteraction} itr 
- * @returns 
- */
-export function PotatOSMusicPlayerStop(itr){
-    if(!isConnectedToAMusicPlayer(itr)) {
-        itr.deferUpdate();
+// _______________________________
+//
+// Stop
+
+/** @param {DiscordJs.ButtonInteraction} interaction */
+export function PotatOSMusicPlayerStop(interaction){
+    if(!isConnectedToAMusicPlayer(interaction)) {
+        interaction.deferUpdate();
         return;
     }
 
@@ -37,7 +37,6 @@ export function PotatOSMusicPlayerStop(itr){
 
         itr.reply(toSend);
 
-
         const filter = button => (button.customId === 'PotatOSMusicPlayerStopYESSTOPIT' || button.customId === 'PotatOSMusicPlayerStopDONT') && button.user.id === itr.member.id;
         const collector = itr.channel.createMessageComponentCollector({ filter, max : 1});
 
@@ -49,61 +48,88 @@ export function PotatOSMusicPlayerStop(itr){
 
 }
 
-function isConnectedToAMusicPlayer(itr){
-    const subscription = MusicSubscription.getSubscription(itr.member.guild.id);
-    if (subscription) {
-    if ((itr.member.voice.channel.id === subscription.voiceChannel.id) && (itr.member.guild.id === itr.guild.id) )
-    // If GuildMember is in the same VoiceChannel as a MusicSubscription and the command comes from the right server
-    return true;
-    }
-    return false;
-}
+//
+// Stop confirmation
 
-function YesStopIt(itr){
-    if (!itr.member.voice.channel) {
+/** @param {DiscordJs.ButtonInteraction} interaction */
+function YesStopIt(interaction){
+    if (!interaction.member.voice.channel) {
         return;
     }
-    if(isConnectedToAMusicPlayer(itr)) {
-        const subscription = MusicSubscription.getSubscription(itr.member.guild.id);
+    if(isConnectedToAMusicPlayer(interaction)) {
+        const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
         if (subscription) subscription.destroy();
         return;
     }
 }
 
-export function PotatOSMusicPlayerSkip(itr){
-    if(!isConnectedToAMusicPlayer(itr)) {
-        itr.deferUpdate();
+// _______________________________
+//
+// test for MusicPlayerConnection
+// (should be absctracted into subscription.isUserConnected(user))
+
+/** @param {DiscordJs.ButtonInteraction} interaction */
+function isConnectedToAMusicPlayer(interaction){
+    const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
+    if (subscription) {
+    if ( // If GuildMember is in the same VoiceChannel as a MusicSubscription and the command comes from the right server
+        (interaction.member.voice.channel.id === subscription.voiceChannel.id) && 
+        (interaction.member.guild.id === interaction.guild.id)
+    )
+    return true;
+    }
+    return false;
+}
+
+// _______________________________
+//
+// Skip
+
+/** @param {DiscordJs.ButtonInteraction} interaction */
+export function PotatOSMusicPlayerSkip(interaction){
+    if(!isConnectedToAMusicPlayer(interaction)) {
+        interaction.deferUpdate();
         return;
     }
 
-    const subscription = MusicSubscription.getSubscription(itr.member.guild.id);
+    const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
     if (subscription) {
         subscription.skip();
-        itr.deferUpdate();
+        interaction.deferUpdate();
     }
 }
 
-export function PotatOSMusicPlayer(itr){
-    const subscription = MusicSubscription.getSubscription(itr.member.guild.id);
+// _______________________________
+//
+// Player Refresh or Delete
+
+/** @param {DiscordJs.ButtonInteraction} interaction */
+export function PotatOSMusicPlayer(interaction){
+    const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
     if (!subscription) {
-        MessageSafeDelete.deleteMessage(itr.message);
+        MessageSafeDelete.deleteMessage(interaction.message);
         return;
     }
-        displayMusicDisplayer(itr.message.channel);
-        itr.deferUpdate();
+        displayMusicDisplayer(interaction.message.channel);
+        interaction.deferUpdate();
 }
 
-export function PotatOSMusicPlayerPlayPause(itr){
-    if(!isConnectedToAMusicPlayer(itr)) {
-        itr.deferUpdate();
+// _______________________________
+//
+// Play Pause
+
+/** @param {DiscordJs.ButtonInteraction} interaction */
+export function PotatOSMusicPlayerPlayPause(interaction){
+    if(!isConnectedToAMusicPlayer(interaction)) {
+        interaction.deferUpdate();
         return;
     }
 
-    const subscription = MusicSubscription.getSubscription(itr.member.guild.id);
+    const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
     if (subscription) {
         if (subscription.isPaused()) subscription.resume(); 
         else subscription.pause();
-        displayMusicDisplayer(itr.message.channel);
-        itr.deferUpdate();
+        displayMusicDisplayer(interaction.message.channel);
+        interaction.deferUpdate();
     }
 }
