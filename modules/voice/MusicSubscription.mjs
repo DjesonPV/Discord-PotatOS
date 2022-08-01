@@ -1,6 +1,8 @@
 import * as DiscordJsVoice              from '@discordjs/voice';
+import * as DiscordJs                   from 'discord.js';
 import * as NodeUtil                    from 'node:util';
 import MessageSafeDelete                from '../botModules/MessageSafeDelete.mjs';
+import Track from './Track.mjs';
 
 const wait = NodeUtil.promisify(setTimeout);
 
@@ -8,23 +10,29 @@ export default class MusicSubscription{
 
     static subscriptions = new Map();
 
+    /** @param {DiscordJs.CommandInteraction} interaction */
     constructor(interaction){
+        /** @type {DiscordJsVoice.VoiceConnection} */
        this.voiceConnection = DiscordJsVoice.joinVoiceChannel({
             channelId: interaction.member.voice.channel.id,
             guildId: interaction.guild.id,
             adapterCreator: interaction.guild.voiceAdapterCreator,
+            selfDeaf: false,
+            selfMute: true,
         }),
        this.audioPlayer = DiscordJsVoice.createAudioPlayer();
+       /** @type {Track[]} */
        this.queue = [];
        this.queueLock = false;
        this.readyLock = false;
        this.currentTrack;
+       /** @type {DiscordJs.VoiceChannel} */
        this.voiceChannel = interaction.member.voice.channel;
        this.guildId = interaction.guild.id;
        this.guildName = interaction.guild.name;
        this.message = false;
 
-    // Voice Connection
+        // Voice Connection
         this.voiceConnection.on('stateChange', async (_, newState) => {
             if (newState.status === DiscordJsVoice.VoiceConnectionStatus.Disconnected){
                 if (newState.reason === DiscordJsVoice.VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014){
@@ -71,7 +79,7 @@ export default class MusicSubscription{
         });
 
 
-    // Audio Player
+        // Audio Player
         this.audioPlayer.on('stateChange', (oldState, newState) => {
             if (newState.status === DiscordJsVoice.AudioPlayerStatus.Idle /*&& oldState.status !== DiscordJsVoice.AudioPlayerStatus.Idle*/){
                 oldState.resource.metadata.onFinish();
@@ -120,41 +128,61 @@ export default class MusicSubscription{
 
     pause(){
         this.audioPlayer.pause();
+        this.setSelfMute(true);
     }
 
     resume(){
+        this.setSelfMute(false);
         this.audioPlayer.unpause();
+    }
+
+    setSelfMute(selfMute){
+        return this.voiceConnection.rejoin({
+            ...this.voiceConnection.joinConfig,
+            selfMute: selfMute,
+        });
     }
 
     isPaused(){
         return (this.audioPlayer.state.status === DiscordJsVoice.AudioPlayerStatus.Paused);
     }
 
+    /** @param {DiscordJs.GuildMember} member */
+    isMemberConnected(member){
+        return (
+            // Member in the same Guild (edgecase)
+            (member?.guild?.id === this.guildId) &&
+            // And Member is connected to the right VoiceChannel
+            (member?.voice?.channel?.id === this.voiceChannel?.id)
+        );
+    }
+
     async processQueue() {
-        if (this.queueLock || 
-            this.audioPlayer.state.status !== DiscordJsVoice.AudioPlayerStatus.Idle ||
-            this.queue.length === 0){
-                return;
-        }
+        if (
+            (!this.queueLock) && 
+            (this.audioPlayer.state.status === DiscordJsVoice.AudioPlayerStatus.Idle) &&
+            (this.queue.length !== 0)
+        ) {
+           
+            this.queueLock = true;
 
-        this.queueLock = true;
+            const nextTrack = this.queue.shift();
+            this.currentTrack = nextTrack;
 
-        const nextTrack = this.queue.shift();
-        this.currentTrack = nextTrack;
-
-        try {
-            const resource = await nextTrack.createAudioResource();
-            resource.volume.setVolume(nextTrack.volume);
-            this.audioPlayer.play(resource);
-            this.queueLock = false;
-        } catch (error) {
-            nextTrack.onError(error);
-            this.queueLock = false;
-            return this.processQueue();
+            try {
+                const resource = await nextTrack.createAudioResource();
+                resource.volume.setVolume(nextTrack.volume);
+                this.audioPlayer.play(resource);
+                this.queueLock = false;
+            } catch (error) {
+                nextTrack.onError(error);
+                this.queueLock = false;
+                return this.processQueue();
+            }
         }
     }
 
-
+    /** @returns {MusicSubscription} */
     static getNewSubscription(interaction){
         let subscription = this.getSubscription(interaction.guild.id);
         if (subscription) {
@@ -165,12 +193,13 @@ export default class MusicSubscription{
     
     }
 
+    /** @returns {MusicSubscription} */
     static getSubscription(guildId){
         let subscription = this.subscriptions.get(guildId);
         if (subscription) {
             return subscription;
         } else {
-            return false;
+            return undefined;
         }   
         
     }
@@ -183,7 +212,9 @@ export default class MusicSubscription{
     }
 
     async destroy(){   
-        if (this.voiceConnection.state.status !== DiscordJsVoice.VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
+        if (this.voiceConnection.state.status !== DiscordJsVoice.VoiceConnectionStatus.Destroyed) {
+            this.voiceConnection.destroy();
+        }
         MessageSafeDelete.deleteMessage(this.message);
         this.stop();
         MusicSubscription.subscriptions.delete(this.guildId);

@@ -1,7 +1,7 @@
 //PotatOS - Commands
 // > ROCK PAPER SCISSORS / SHIFUMI / ROSHAMBO
 //  • • • • • • • • • • • • • • • • • • • • • • • •
-import { SlashCommandBuilder } from '@discordjs/builders';
+import * as DiscordJs from 'discord.js';
 import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
 import * as LANG from "../Language.mjs";
 
@@ -19,6 +19,7 @@ const snReply = [
  */
 const tableMath = [ 1, 2, 0, 0, 1, 2, 2, 0, 1];
 
+/** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 function command(interaction){
 
     const playerMove = interaction.options.getInteger('play');
@@ -32,7 +33,7 @@ function command(interaction){
     MessagePrintReply.replyToAnInteraction(interaction, `:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} ${LANG._SHIFUMI_BOT_EMOJI}  ${snReply[result][botResponse]}`);
 }
 
-const slash = new SlashCommandBuilder()
+const slash = new DiscordJs.SlashCommandBuilder()
     .setName(LANG._SHIFUMI_CMDNAME)
     .setDescription(LANG._SHIFUMI_DESC)
     .addIntegerOption(option => option

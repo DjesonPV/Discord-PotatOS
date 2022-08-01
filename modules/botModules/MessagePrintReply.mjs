@@ -3,188 +3,119 @@ import ExploreChannels                  from "../botModules/ExploreChannels.mjs"
 import MessageSafeDelete                from "./MessageSafeDelete.mjs";
 import * as LANG from "../Language.mjs";
 
-const errorIcon = `https://cdn.discordapp.com/attachments/329613279204999170/970413892792623204/Error_icon.png`;
-
-/* 
-#
-#  MESSAGE REPLIES AND PRINT COMMANDS
-#
-*/
+// ____________________________________________________ 
+//
+//  MESSAGE REPLIES AND PRINT COMMANDS
 
 /**
- * 
- * @param chnl Represent a Discord TextChannel
- * @param text Content to send `String`
- * @param embeds Content to send `MessageEmbed`
- * @param attachments Content to send `MessageAttachement`
- * @param components Content to send `MessageActionRow`
- * @param time Time the message will be displayed (in seconds)
+ * @param {DiscordJs.BaseGuildTextChannel} channel
+ * @param {DiscordJs.MessageOptions | string} messageOptions
+ * @param {number} duration
  */
- function printOnChannel(chnl, text="", embeds=[], url = "", components=[], time = 0){
-    if (chnl == ExploreChannels.text.get(chnl.name)){
+export async function printOnChannel(channel, messageOptions, duration = 0){
+    if (channel == ExploreChannels.text.get(channel.name)){
 
-        time = Math.min(180, time);
+        duration = Math.min(180, duration);
 
-        function deleteResponse(msg){
-            if (time > 0){
-                setTimeout(
-                    () => {
-                        MessageSafeDelete.deleteMessage(msg);
-                    },
-                    time * 1000);
-            }
+        if (typeof(messageOptions) === 'string') {
+            messageOptions = {content: messageOptions}
         };
 
-        let timeRow;
+        const durationButtonRow = MessageSafeDelete.durationButtonActionRowBuilder(duration);
 
-        if (time >0) {//embeds.push(timeEmbed);
-            timeRow = new DiscordJs.ActionRowBuilder()
-			.addComponents(
-				new DiscordJs.ButtonBuilder()
-                    .setCustomId('deleteNotif')
-					.setLabel(LANG.MSG_AUTODESTRUCT(time))
-					.setStyle(DiscordJs.ButtonStyle.Secondary)
-                    .setEmoji('🚮')
-			);
+        if (duration > 0) messageOptions.components?.unshift(durationButtonRow) ?? [durationButtonRow];
         
-        }
-
-        let toSend = {};
-        if (text.length   != 0) toSend.content = text;
-        if (embeds.length != 0) toSend.embeds  = embeds;
-        if (url.length  != 0) toSend.files   = [{attachment : url}];
-        if ((components.length != 0) || timeRow) toSend.components = [...components, timeRow];
-
-        
-
-        sendOnChannel(chnl, toSend).then(deleteResponse).catch(console.log);
-
+        return await sendOnChannel(channel, messageOptions)
+            .then((message) => {
+                MessageSafeDelete.deleteMessageAfterDuration(message, duration);
+                return message;
+            })
+        ;
     }
 }
 
-export function sendOnChannel(chnl, messageObject){
-    if (chnl == ExploreChannels.text.get(chnl.name)){
-    return chnl.send(messageObject);
+/**
+ * @param {DiscordJs.BaseGuildTextChannel} channel 
+ * @param {DiscordJs.MessageOptions} messageOptions
+ */
+function sendOnChannel(channel, messageOptions){
+    if (channel == ExploreChannels.text.get(channel.name)){
+        return channel.send(messageOptions);
     }
     else {
-        console.log(LANG.MSG_CHANNEL_NOT_SUPPORTED(chnl.name, chnl.guild.name));
-        return;
+        return Promise.reject(LANG.MSG_CHANNEL_NOT_SUPPORTED(channel.name, channel.guild.name));
     }
 }
 
 /**
- * 
- * @param chnl Represent a Discord TextChannel
- * @param txt Text to send
- * @param time Time the message will be displayed (in seconds)
+ * @param {DiscordJs.BaseGuildTextChannel} channel
+ * @param {string} text
+ * @param {number} duration
  */
-export function printTextOnChannel(chnl, txt, time){
-    if(typeof txt == "string")
-    printOnChannel(chnl,txt,[],[],[],[],time);
+export function printAlertOnChannel(channel, text, duration){
+    printOnChannel(channel, getAlertMessageOptions(text), duration);
 }
+
+// ___________________________________________________ 
+//
+//  INTERACTION REPLY
 
 /**
- * 
- * @param chnl Represent a Discord TextChannel
- * @param embed MessageEmbed to send
- * @param time Time the message will be displayed (in seconds)
+ * @param {DiscordJs.CommandInteraction} interaction 
+ * @param {string} text 
  */
-export function printEmbedOnChannel(chnl, embed, time){
-    if(embed instanceof DiscordJs.EmbedBuilder)
-    printOnChannel(chnl,[],[embed],[],[],time);
-}
-
-/**
- * 
- * @param chnl Represent a Discord TextChannel
- * @param url URL link to the picture to display
- * @param time Time the message will be displayed (in seconds)
- */
-export function printLinkOnChannel(chnl, url, time){
-    if (isItAnHTTPURL(url)){
-        printOnChannel(chnl,[],[],url,[],time);
-    }    
-}
-
-export function isItAnHTTPURL(text){
-    if(typeof text == "string"){
-        if (text.match(/^(https?|http):\/\/([a-zA-Z0-9\-]{1,64}\.){0,}([a-zA-Z0-9\-]{2,63})(\.(xn--)?[a-zA-Z0-9]{2,})(\:[0-9]{1,5})?\/([^\s]*)?$/)){
-        return true;    
-        }
-    }
-    return false;
-}
-
-/**
- * 
- * @param chnl Represent a Discord TextChannel
- * @param txt Text to send in the alert
- * @param time Time the alert will be displayed (in seconds)
- */
-export function printAlertOnChannel(chnl, txt, time){
-    let alertEmbed = new DiscordJs.EmbedBuilder()
-    .setColor('#FF006E')
-    .setAuthor({
-        name: `${txt}`,
-        iconURL : errorIcon,
-    });
-
-    printEmbedOnChannel(chnl, alertEmbed, time);
-}
-
-/* 
-#
-#  INTERACTION REPLY
-#
-*/
-
-export function replyAlertOnInterarction(itr, txt){
-    let reply = {};
+export function replyAlertOnInterarction(interaction, text){
+    let messageOptions = getAlertMessageOptions(text);
+    messageOptions.ephemeral = true;
     
-    let alertEmbed = new DiscordJs.EmbedBuilder()
-    .setColor('#FF006E')
-    .setAuthor({
-        name: `${txt}`,
-        iconURL : errorIcon,
-    });
-
-    reply.embeds = [alertEmbed];
-    reply.ephemeral = true;
-
-   itr.reply(reply);
+    if (interaction.replied) {
+        interaction.followUp(messageOptions);
+    }
+    else {
+        interaction.reply(messageOptions);
+    }
 }
 
-export function replyToAnInteraction(interaction, message, time = 0){
-
-    function deleteResponse(msg){
-        if (time > 0){
-            setTimeout(
-                () => {
-                    MessageSafeDelete.deleteMessage(msg);
-                },
-                time * 1000);
-        }
+/**
+ * @param {string} text 
+ * @returns {DiscordJs.MessageOptions}
+ */
+export function getAlertMessageOptions(text){
+    return {
+        embeds: [
+        new DiscordJs.EmbedBuilder()
+            .setColor('#FF006E')
+            .setAuthor({
+                name: `${text}`,
+                iconURL : LANG.ERROR_ICON,
+            })
+        ,
+        ],
     };
-
-    let timeRow;
-
-    if (time >0) {
-        timeRow = new DiscordJs.ActionRowBuilder()
-        .addComponents(
-            new DiscordJs.ButtonBuilder()
-                .setCustomId('deleteNotif')
-                .setLabel(LANG.MSG_AUTODESTRUCT(time))
-                .setStyle(DiscordJs.ButtonStyle.Secondary)
-                .setEmoji('🚮')
-        );
-    
-    }
-
-    let toSend = {};
-    if (message.length   != 0) toSend.content = message;
-    if (timeRow) toSend.components = [timeRow];
-    toSend.fetchReply = true;
-
-    interaction.reply(toSend).then(deleteResponse).catch(console.log);
-
 }
+
+/**
+ * @param {DiscordJs.CommandInteraction} interaction 
+ * @param {string} text 
+ * @param {number} duration 
+ */
+export function replyToAnInteraction(interaction, text, duration = 0){
+
+    const durationButtonActionRow = MessageSafeDelete.durationButtonActionRowBuilder();
+
+    /** @type {DiscordJs.MessageOptions} */
+    let messageOptions = {
+        fetchReply: true,
+    };
+    if (text.length   != 0) messageOptions.content = text;
+    if (duration > 0 ) messageOptions.components = [durationButtonActionRow];
+
+    interaction.reply(messageOptions)
+        .then((message) => {
+            MessageSafeDelete.deleteMessageAfterDuration(message, duration);
+        })
+        .catch(console.log)
+    ;
+}
+
+

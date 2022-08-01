@@ -9,7 +9,7 @@ import * as MP3Files from "./MP3Files.mjs";
 const noop = () => { };
 
 export default class Track {
-    constructor({ url, metadata = { isYoutube: false, isFile: false }, onStart, onFinish, onError }) {
+    constructor({ url, metadata, onStart, onFinish, onError }) {
         this.url = url;
         this.metadata = metadata;
         this.volume = 1.0;
@@ -85,8 +85,8 @@ export default class Track {
 
     }
 
-    setVolume(vol) {
-        this.volume = vol;
+    setVolume(volume) {
+        this.volume = volume;
     }
 
     static fetchData(url, methods) {
@@ -115,8 +115,8 @@ async function fromYTDLP(url, methods) {
 
     if (parsedInfo.extractor !== 'generic'){
         const metadata = {
-            isYoutube: true,     // Flags : important to set them
-            isFile: false,    // for code stability
+            isYoutube: true,    // !
+            isFile: false,      // !
 
             // Data use in the MusicPlayer Embed
             title: parsedInfo.fulltitle || parsedInfo.title,
@@ -141,8 +141,8 @@ function fromFile(url, methods) {
     const mp3Key = getMP3KeyFromURL(url);
 
     const metadata = {
-        isYoutube: false,    // Flags : important to set them
-        isFile: true,     // for code stability
+        isYoutube: false, // !
+        isFile: true,     // !
 
         // Data use in the MusicPlayer Embed
         title: MP3Files.files[mp3Key].title,
@@ -159,8 +159,8 @@ function fromInternet(url, methods) {
     const uri = url.split('/').filter(Boolean); //Split an url and remove empty strings
 
     const metadata = {
-        isYoutube: false,    // Flags : important to set them
-        isFile: false,    // for code stability
+        isYoutube: false, // !
+        isFile: false,    // !
 
         // Data use in the MusicPlayer Embed
         source: uri[1],
@@ -204,14 +204,6 @@ function define(url, methods, metadata) {
 // =============================================================================
 // UTILITARY FUNCTIONS
 //
-function isItAYTLink(url) {
-    if (typeof url == "string") {
-        if (url.match(/(youtube.com|youtu.be)\/(watch)?(\?v=)?(\S+)?/)) {
-            return true;
-        }
-    }
-    return false;
-}
 
 function getMP3KeyFromURL(url) {
     const key = Object.keys(MP3Files.files).filter(function (k) {

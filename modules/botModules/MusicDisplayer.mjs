@@ -10,59 +10,62 @@ import favcolor from "favcolor";
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // DISPLAY MUSIC DISPLAYER
 
+/** @param {DiscordJs.GuildTextBasedChannel} channel*/
 export default function displayMusicDisplayer(channel){
 
-    let subscription = MusicSubscription.getSubscription(channel.guild.id);
+    const subscription = MusicSubscription.getSubscription(channel.guild.id);
 
-    if( 
-        !subscription ||
-        (
-            (subscription.currentTrack.metadata.isFile === true) && 
-            (!subscription.message) &&
-            (subscription.queue.length === 0)
-        ) 
-    ) {
-        return;
-    }
-    
-    if (subscription.message && MessageSafeDelete.isMessageMine(subscription.message)) {
-        MusicDiplayerMessagePayload(subscription)
-            .then((toSend) => {
-                return subscription.message.edit(toSend);
-            })
-            .then((message) => {
-                subscription.setMessage(message);
-            })
-        ;
-    }
-    else {
-        const toSend = WaitingMessagePayload(subscription);
-
-        MessagePrintReply.sendOnChannel(channel, toSend)
-            .then((message) => {
-                subscription.setMessage(message);
-            })
-        ;
+    if(!isItALonelyPlaysound(subscription)) {
+                
+        if (MessageSafeDelete.isMessageMine(subscription.message)) {
+            MusicDiplayerMessageOptions(subscription)
+                .then((toSend) => {
+                    return subscription.message.edit(toSend);
+                })
+                .then((message) => {
+                    subscription.setMessage(message);
+                })
+            ;
+        }
+        else {
+            MessagePrintReply.printOnChannel(channel, WaitingMessageOptions(subscription))
+                .then((message) => {
+                    subscription.setMessage(message);
+                })
+            ;
+        }
     }
 
 }
 
-// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
-// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
-// MUSIC DISPLAYER MESSAGE PAYLOAD
+/** @param {MusicSubscription} subscription */
+function isItALonelyPlaysound(subscription) {
+    return ( // the ? provide false is there is no subscription
+        (subscription?.currentTrack.metadata.isFile === true) && 
+        (subscription.queue.length === 0) &&
+        (!subscription.message)
+    )
+}
 
-async function MusicDiplayerMessagePayload(subscription) {
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+// MUSIC DISPLAYER MESSAGE OPTIONS
+
+/**  @param {MusicSubscription} subscription */
+async function MusicDiplayerMessageOptions(subscription) {
 
     const musicPlayerEmbed = await displayerEmbed(subscription);
     const musicPlayerPlaylistRow = musicPlayerPlaylist([subscription.currentTrack,...subscription.queue]);
     const musicPlayerButtonsRow = musicPlayerButtons(subscription);
 
-    const messagePayload = {embeds : [musicPlayerEmbed], components: [musicPlayerButtonsRow]};
-    if (subscription.queue.length > 0) messagePayload.components.unshift(musicPlayerPlaylistRow);
+    /** @type {DiscordJs.MessageOptions} */
+    const messageOptions = {embeds : [musicPlayerEmbed], components: [musicPlayerButtonsRow]};
+    if (subscription.queue.length > 0) messageOptions.components.unshift(musicPlayerPlaylistRow);
 
-    return messagePayload;
+    return messageOptions;
 }
 
+/** @param {MusicSubscription} subscription */
 async function displayerEmbed(subscription){
     
     let metadata = subscription.currentTrack.metadata;
@@ -86,6 +89,7 @@ async function displayerEmbed(subscription){
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // BUTTON ROW
 
+/** @param {MusicSubscription} subscription */
 function musicPlayerButtons(subscription, isLoading = false){
 
     const buttonActionRow = new DiscordJs.ActionRowBuilder()
@@ -178,11 +182,11 @@ async function dataToDisplay(metadata){
     let data = {};
 
     if(metadata.isYoutube) {
-        const color = (await favcolor.fromSiteFavicon(
+        const colour = (await favcolor.fromSiteFavicon(
             metadata.videoURL.match(/(?:http|https):\/\/(?:[^\/])+\//)[0]
         )).toHex();
 
-        data.color          = `${color}`;
+        data.color          = `${colour}`;
         data.title          = `${metadata.title}`;
         data.description    = `${durationToString(metadata.duration)} • ${viewsToString(metadata.viewCount)} • ${YYYYMMDDToString(metadata.uploadDate)}`;
         data.author = {
@@ -219,9 +223,13 @@ async function dataToDisplay(metadata){
 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  
-// LOADING MESSAGE PAYLOAD
+// LOADING MESSAGE OPTIONS
 
-function WaitingMessagePayload(subscription){
+/** 
+ * @param {MusicSubscription} subscription 
+ * @returns {DiscordJs.MessageOptions}
+ * */
+function WaitingMessageOptions(subscription){
 
     const loadingEmbed = new DiscordJs.EmbedBuilder()
         .setColor(LANG.MUSICDISPLAYER_BOT_COLOR)
@@ -244,6 +252,7 @@ function WaitingMessagePayload(subscription){
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // DATA JUGGLING
 
+/** @param {number} duration */
 function durationToString(duration){
     let seconds = Math.floor(duration%60);
     let minutes = (Math.floor(duration/60))%60;
@@ -256,6 +265,7 @@ function durationToString(duration){
     return string;
 }
 
+/** @param {number} viewCount */
 function viewsToString(viewCount){
     let string;
     if (viewCount){
@@ -302,6 +312,7 @@ function viewsToString(viewCount){
     return string;
 }
 
+/** @param {string} yyyymmdd */
 function YYYYMMDDToString(yyyymmdd){
 
     let [year, month, day] = yyyymmdd.match(/(\d{4})(\d{2})(\d{2})/).slice(1,4);

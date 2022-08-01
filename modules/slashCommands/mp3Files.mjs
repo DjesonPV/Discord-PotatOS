@@ -1,10 +1,10 @@
 import * as Voice from "../voice/Voice.mjs";
 import * as MP3Files from "../voice/MP3Files.mjs";
-import { SlashCommandBuilder } from '@discordjs/builders';
+import * as DiscordJs from 'discord.js';
 import MessageSafeDelete from '../botModules/MessageSafeDelete.mjs';
 import * as LANG from "../Language.mjs";
 
-
+/** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 function cmdSoundSample(interaction){
     const sampleKey = interaction.options.getString('sample');
 
@@ -12,7 +12,7 @@ function cmdSoundSample(interaction){
     Voice.streamVoice(interaction, `${MP3Files.path}${MP3Files.files[sampleKey].file}`, MP3Files.files[sampleKey].volume);
 }
 
-const slashSoundSample = new SlashCommandBuilder()
+const slashSoundSample = new DiscordJs.SlashCommandBuilder()
     .setName(LANG._PLAYSOUND_CMDNAME)
     .setDescription(LANG._PLAYSOUND_DESC)
     .addStringOption(option => option

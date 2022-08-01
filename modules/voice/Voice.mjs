@@ -1,4 +1,5 @@
 import * as DiscordJsVoice              from '@discordjs/voice';
+import * as DiscordJs                   from 'discord.js';
 
 import * as MessagePrintReply           from "../botModules/MessagePrintReply.mjs";
 import Track                            from "./Track.mjs";
@@ -6,22 +7,25 @@ import MusicSubscription                from "./MusicSubscription.mjs";
 import displayMusicDisplayer            from '../botModules/MusicDisplayer.mjs';
 import * as LANG from "../Language.mjs";
 
+/** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 export async function streamVoice(interaction, url, volume){
 
     let subscription = MusicSubscription.getSubscription(interaction.guild.id);
     if (!subscription) subscription = await connectVoice(interaction);
 
-    if (!subscription) {
-        return;
+    if (!subscription) { // If there is no subscription
+        return console.log(LANG.ERROR_VOICE_CONNECTION);
     }
 
     try{
         const track = await Track.fetchData(url, {
             onStart(){
-                displayMusicDisplayer(subscription.message.channel || interaction.channel);
+                displayMusicDisplayer(subscription.message.channel ?? interaction.channel);
+                subscription.setSelfMute(false);
             },
             onFinish(){
                if(subscription.queue.length === 0) subscription.destroy();
+               subscription.setSelfMute(true);
             },
             onError(error){
                 console.warn(error);
@@ -37,33 +41,31 @@ export async function streamVoice(interaction, url, volume){
         displayMusicDisplayer(interaction.channel);
 
     } catch (error){
-        console.warn(error);
         MessagePrintReply.printAlertOnChannel(interaction.channel, LANG.ERROR_PLAY_TRACK, 10);
+        console.error(error);
     }
 
 }
 
+/** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 async function connectVoice(interaction){
 
     let subscription = MusicSubscription.getNewSubscription(interaction);
 
     if (!subscription) {
-        console.error(`Bug in /voice/Voice.mjs/connectVoice()`);
-        return;
+        return Promise.reject(`Bug in /voice/Voice.mjs/connectVoice()`);
     }
 
     if (subscription.voiceConnection.state.status !== DiscordJsVoice.VoiceConnectionStatus.Ready){
         try{
             await DiscordJsVoice.entersState(subscription.voiceConnection, DiscordJsVoice.VoiceConnectionStatus.Ready, 20e3);
         } catch (error) {
-            console.warn(error);
             MessagePrintReply.printAlertOnChannel(interaction.channel, LANG.ERROR_VOICECHANNEL_CONNECTION, 10);
-            return;
+            return Promise.reject(error);
         }
     }
 
     return subscription;
-
 }
 
 

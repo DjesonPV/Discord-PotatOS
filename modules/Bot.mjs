@@ -42,23 +42,20 @@ const client = new DiscordJs.Client({
 export function start() {
     return new Promise(async (resolve) => {
         client.on("ready", async () => {
-            if (!client.user || !client.application) {
-                return;
+            if (client?.user && client?.application) {
+                console.log(LANG.BOT_IS_ONLINE(client.user.username));
+
+                ExploreChannels.explore(client);
+                console.log(LANG.BOT_CHANNELS_FOUND(ExploreChannels.text.size, ExploreChannels.voice.size));
+
+                MessageSafeDelete.botUserId = client.user.id;
+
+                resolve();
             }
-
-            console.log(LANG.BOT_IS_ONLINE(client.user.username));
-
-            ExploreChannels.explore(client);
-            console.log(LANG.BOT_CHANNELS_FOUND(ExploreChannels.text.size, ExploreChannels.voice.size));
-
-            MessageSafeDelete.botUserId = client.user.id;
-
-            resolve();
         });
 
         const secret = require("../secret.json");
         client.login(secret.botToken);
-
 
         client.once('ready', async () => {
 
@@ -82,25 +79,23 @@ export function start() {
 
 client.on('interactionCreate', interactionHandler);
 
-async function interactionHandler(itr) {
-    if (itr.message && (itr.message.author.id === client.user.id)) {
-        let itrName = itr.customId;
+/** @param {DiscordJs.BaseInteraction} interaction*/
+async function interactionHandler(interaction) {
 
-        if (itr.isButton()) {
-            let buttonInteraction = ButtonInteractions[itrName];
-            if (buttonInteraction) buttonInteraction(itr);
-            else itr.deferUpdate();
-        }
-        if (itr.isSelectMenu()) {
-            itr.deferUpdate();
-        }
+    if (interaction.isButton() && interaction.message && (interaction.message.author.id === client.user.id)) {
+        let buttonInteraction = ButtonInteractions[interaction.customId];
+        if (buttonInteraction) await buttonInteraction(interaction);
+        else interaction.deferUpdate();
     }
-    else if (itr.isChatInputCommand()) {
-        const slashCommand = Object.values(SlashCommands).find(command => command.slash.name === itr.commandName);
-        if (slashCommand) await slashCommand.command(itr);
+    else if (interaction.isSelectMenu()) {
+        interaction.deferUpdate();
     }
-    else if (itr.isContextMenuCommand()){
-        const contextMenuCommand = Object.values(ContextMenuCommands).find(command => command.menu.name === itr.commandName);
-        if (contextMenuCommand) await contextMenuCommand.command(itr);
+    else if (interaction.isChatInputCommand()) {
+        const slashCommand = Object.values(SlashCommands).find(command => command.slash.name === interaction.commandName);
+        if (slashCommand) await slashCommand.command(interaction);
+    }
+    else if (interaction.isContextMenuCommand()){
+        const contextMenuCommand = Object.values(ContextMenuCommands).find(command => command.menu.name === interaction.commandName);
+        if (contextMenuCommand) await contextMenuCommand.command(interaction);
     }
 }
