@@ -1,4 +1,5 @@
 import * as DiscordJsVoice              from '@discordjs/voice';
+import * as DiscordJs                   from 'discord.js';
 import * as NodeUtil                    from 'node:util';
 import MessageSafeDelete                from '../botModules/MessageSafeDelete.mjs';
 import Track from './Track.mjs';
@@ -26,7 +27,7 @@ export default class MusicSubscription{
        this.guildName = interaction.guild.name;
        this.message = false;
 
-    // Voice Connection
+        // Voice Connection
         this.voiceConnection.on('stateChange', async (_, newState) => {
             if (newState.status === DiscordJsVoice.VoiceConnectionStatus.Disconnected){
                 if (newState.reason === DiscordJsVoice.VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014){
@@ -73,7 +74,7 @@ export default class MusicSubscription{
         });
 
 
-    // Audio Player
+        // Audio Player
         this.audioPlayer.on('stateChange', (oldState, newState) => {
             if (newState.status === DiscordJsVoice.AudioPlayerStatus.Idle /*&& oldState.status !== DiscordJsVoice.AudioPlayerStatus.Idle*/){
                 oldState.resource.metadata.onFinish();
@@ -130,6 +131,27 @@ export default class MusicSubscription{
 
     isPaused(){
         return (this.audioPlayer.state.status === DiscordJsVoice.AudioPlayerStatus.Paused);
+    }
+
+    /** @param {DiscordJs.GuildMember} member */
+    isMemberConnected(member){
+        // Member not connected in the right guild
+        // Impossible edge case ?
+        if (member?.guild?.id !== this.guildId){
+            return false;
+        }
+
+        // Member not in a VoiceChannel
+        if (!member.voice?.channel?.id){
+            return false;
+        }
+
+        // Member not in the right VoiceChannel
+        if (member.voice.channel.id !== this.voiceChannel?.id){
+            return false;
+        }
+
+        return true;
     }
 
     async processQueue() {

@@ -9,33 +9,6 @@ import * as LANG from "../Language.mjs";
 
 // Checks
 
-/** 
- * Must be replaced by subscription.isUserConnected(user)
- * @param {DiscordJs.ChatInputCommandInteraction} interaction
- *  */
-function memberConnectedInAVoiceChannelInGuildInteraction(interaction){
-    if (
-        interaction.member 
-     && interaction.member.voice
-     && interaction.member.voice.channel
-     && interaction.member.voice.channel.id
-     && interaction.member.voice.channel.guild
-     && interaction.member.voice.channel.guild.id
-     && interaction.guild
-     && interaction.guild.id
-     && (interaction.member.voice.channel.guild.id === interaction.guild.id)
-     && (
-            MusicSubscription.getSubscription(interaction.guild.id) && 
-            (
-                !MusicSubscription.getSubscription(interaction.guild.id).voiceChannel || 
-                interaction.member.voice.channel.id === MusicSubscription.getSubscription(interaction.guild.id).voiceChannel.id
-            )
-        )
-    )
-    return true;
-    return false;
-}
-
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 function replyYourNotConnected(interaction){
     MessagePrintReply.replyAlertOnInterarction(interaction, LANG._MUSICPLAYER_NOT_CONNECTED);
@@ -45,12 +18,19 @@ function replyYourNotConnected(interaction){
 // Skip
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
-function cmdSkip(interaction){
-    if (!memberConnectedInAVoiceChannelInGuildInteraction(interaction)) return replyYourNotConnected(interaction);
-    MessageSafeDelete.noReply(interaction);
-
+async function cmdSkip(interaction){
     const subscription = MusicSubscription.getSubscription(interaction.guild.id);
-    if (subscription) subscription.skip();
+    if (!subscription?.isMemberConnected(interaction.member)){
+        replyYourNotConnected(interaction);
+        return;
+    }
+    else {
+        const thinkingMessage = await MessageSafeDelete.startThinking(interaction);
+
+        subscription.skip();
+
+        MessageSafeDelete.stopThinking(thinkingMessage); 
+    }
 }
 
 const slashSkip = new DiscordJs.SlashCommandBuilder()
@@ -64,12 +44,19 @@ export const skip = {slash: slashSkip, command: cmdSkip};
 // Stop
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
-function cmdStop(interaction){
-    if (!memberConnectedInAVoiceChannelInGuildInteraction(interaction)) return replyYourNotConnected(interaction);
-    MessageSafeDelete.noReply(interaction);
-
+async function cmdStop(interaction){
     const subscription = MusicSubscription.getSubscription(interaction.guild.id);
-    if (subscription) subscription.destroy();
+    if (!subscription?.isMemberConnected(interaction.member)){
+        replyYourNotConnected(interaction);
+        return;
+    }
+    else {
+        const thinkingMessage = await MessageSafeDelete.startThinking(interaction);
+
+        subscription.destroy();
+
+        MessageSafeDelete.stopThinking(thinkingMessage); 
+    }
 }
 
 const slashStop = new DiscordJs.SlashCommandBuilder()
@@ -84,30 +71,46 @@ export const stop = {slash: slashStop, command: cmdStop};
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 async function cmdPlay(interaction){
-    // MAJOR FLAW HERE !!!! MUST BE CORRECTED
-    if (!memberConnectedInAVoiceChannelInGuildInteraction(interaction)) return replyYourNotConnected(interaction);
+    const subscription = MusicSubscription.getSubscription(interaction.guild.id);
+    
+    if (goodMemberSubscriptionConnection(subscription, interaction.member))
+    {
+        const thinkingMessage = await MessageSafeDelete.startThinking(interaction);
 
-    const query = interaction.options.getString('query');
+        const query = interaction.options.getString('query');
 
-    if (MessagePrintReply.isItAnHTTPURL(query)){
-        Voice.streamVoice(interaction, query, 0.2);
-        MessageSafeDelete.noReply(interaction);
-    } else if (query === null){
-        __playPause(interaction, false);
-        MessageSafeDelete.noReply(interaction);
-    }
-    else{ // YOUTUBE SEARCH
-        let searchResult = await SurfYT.searchYoutubeFor(`${query}`, {showVideos: true, location: 'FR', language: 'fr'})
-            .catch((err)=>{
-                MessagePrintReply.replyAlertOnInterarction(interaction, LANG._PLAY_SEARCH_ERROR)
-            })
-        ;
-
-        if (searchResult[0] && searchResult[0].url) {
-            Voice.streamVoice(interaction, searchResult[0].url, 0.2);
-            MessageSafeDelete.noReply(interaction);
+        // No query so it's a Resume action
+        if (query === null)
+        {
+            __playPause(interaction, false);
         }
-        else MessagePrintReply.replyAlertOnInterarction(interaction, LANG._PLAY_SEARCH_NO_RESULT(query));
+        // query is an URL 
+        else if (isItAnURL(query))
+        {
+            await Voice.streamVoice(interaction, query, 0.2);
+        }
+        // query is not an URL, so we search on YouTube
+        else 
+        {
+            let searchResult = await SurfYT.searchYoutubeFor(
+                `${query}`,
+                {showVideos: true, location: 'FR', language: 'fr'}
+            )
+                .catch((error)=>{
+                    MessagePrintReply.replyAlertOnInterarction(interaction, LANG._PLAY_SEARCH_ERROR)
+                })
+            ;
+
+            if (searchResult[0] && searchResult[0].url) {
+                await Voice.streamVoice(interaction, searchResult[0].url, 0.2);
+            }
+            else MessagePrintReply.replyAlertOnInterarction(interaction, LANG._PLAY_SEARCH_NO_RESULT(query));
+        }
+
+        MessageSafeDelete.stopThinking(thinkingMessage);
+    } else {
+        replyYourNotConnected(interaction);
+        return;
     }
 }
 
@@ -118,21 +121,65 @@ const slashPlay = new DiscordJs.SlashCommandBuilder()
         .setName('query')
         .setDescription(LANG._PLAY_QUERY_DESC)
     )
-
-
 ;
 
 export const play = {slash: slashPlay, command: cmdPlay};
+
+//
+// URL test
+
+function isItAnURL(text){
+    if(typeof text == "string"){
+        if (text.match(/^(https?|http):\/\/([a-zA-Z0-9\-]{1,64}\.){0,}([a-zA-Z0-9\-]{2,63})(\.(xn--)?[a-zA-Z0-9]{2,})(\:[0-9]{1,5})?\/([^\s]*)?$/)){
+        return true;    
+        }
+    }
+    return false;
+}
+
+
+//
+// Connection
+
+/**
+ * @param {MusicSubscription} subscription 
+ * @param {DiscordJs.GuildMember} member 
+ */
+function goodMemberSubscriptionConnection(subscription, member){
+    // Member not in a VoiceChannel
+    if (!member.voice?.channel?.id) {
+        return false;
+    }
+
+    // There is no subscription and member is in a voiceChannel
+    if (!subscription) {
+        return true;
+    } // There is a subscription but member is not in the right voiceChannel
+    else if (!subscription.isMemberConnected(member)) {
+        return false;
+    }
+
+    return true;
+}
+
 
 // ________________________________________________________________
 // Pause
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
-function cmdPause(interaction){
-    if (!memberConnectedInAVoiceChannelInGuildInteraction(interaction)) return replyYourNotConnected(interaction);
-    MessageSafeDelete.noReply(interaction);
+async function cmdPause(interaction){
+        const subscription = MusicSubscription.getSubscription(interaction.guild.id);
+    if (!subscription?.isMemberConnected(interaction.member)){
+        replyYourNotConnected(interaction);
+        return;
+    }
+    else {
+        const thinkingMessage = await MessageSafeDelete.startThinking(interaction);
+        
+        __playPause(interaction,true);
 
-    __playPause(interaction,true);
+        MessageSafeDelete.stopThinking(thinkingMessage); 
+    }
 }
 
 const slashPause = new DiscordJs.SlashCommandBuilder()

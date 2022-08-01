@@ -20,7 +20,7 @@ export async function streamVoice(interaction, url, volume){
     try{
         const track = await Track.fetchData(url, {
             onStart(){
-                displayMusicDisplayer(subscription.message.channel || interaction.channel);
+                displayMusicDisplayer(subscription.message.channel ?? interaction.channel);
             },
             onFinish(){
                if(subscription.queue.length === 0) subscription.destroy();

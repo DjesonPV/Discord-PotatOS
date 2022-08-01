@@ -75,11 +75,12 @@ export const MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_TITLE = `Morceau Inconnu`;
 export const MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_DESC = `Une erreur est survenue`;
 
 
-// Voice Errors
+// ERRORS
 
 export const ERROR_TRACK = (error) => `Erreur : ${error}`;
 export const ERROR_PLAY_TRACK = `Je n'ai pas reussi a jouer ton morceau`;
 export const ERROR_VOICECHANNEL_CONNECTION = `Je n'ai pas réussi à me connecter, reessaie plus tard !`;
+export const ERROR_ICON = `https://cdn.discordapp.com/attachments/329613279204999170/970413892792623204/Error_icon.png`;
 
 // = = = = = = = = = = =
 // COMMANDS / starts whith an underscore
@@ -95,7 +96,7 @@ export const _PLAYSOUND_DESC = `Joue un son dans le Salon Vocal auquel tu es con
 export const _PLAYSOUND_OPTION_NAME = `sample`;
 export const _PLAYSOUND_OPTION_DESC = `Nom du son à jouer`;
 
-export const _MUSICPLAYER_NOT_CONNECTED = `Tu dois rejoindre un Salon Vocal de ce Serveur pour utiliser cette commande`;
+export const _MUSICPLAYER_NOT_CONNECTED = `Tu dois rejoindre un Salon Vocal (ou le même que ${BOT_NAME}) sur ce Serveur pour utiliser cette commande`;
 
 export const _SKIP_DESC = `${BOT_NAME} Music Player : SKIP | Skip la musique actuelle et joue la suivante (le cas échéant)`;
 export const _STOP_DESC = `${BOT_NAME} Music Player : STOP | Met fin au lecteur de musique`;

@@ -13,7 +13,7 @@ function cmdPc(interaction){
     let sentenceKey = Math.floor(Math.random() * sentences.length);
 
     MessageSafeDelete.noReply(interaction); 
-    MessagePrintReply.printTextOnChannel(interaction.channel, sentences[sentenceKey]);
+    MessagePrintReply.printOnChannel(interaction.channel, sentences[sentenceKey]);
 }
 
 const slashPc = new DiscordJs.SlashCommandBuilder()
@@ -30,7 +30,7 @@ export const pc = {slash: slashPc, command: cmdPc};
  */
 function cmdPk(interaction){ 
     MessageSafeDelete.noReply(interaction); 
-    MessagePrintReply.printTextOnChannel(interaction.channel, LANG._SASS_PK_SENTENCE);
+    MessagePrintReply.printOnChannel(interaction.channel, LANG._SASS_PK_SENTENCE);
 }
 
 const slashPk = new DiscordJs.SlashCommandBuilder()

@@ -1,4 +1,5 @@
 import * as DiscordJs from 'discord.js';
+import * as LANG from "../Language.mjs";
 
 export default class MessageSafeDelete{
 
@@ -19,10 +20,8 @@ export default class MessageSafeDelete{
     /** @param {DiscordJs.Message} message */
     static isMessageMine(message) {
         if (
-            message && 
-            message.author &&
-            ((message.author.id === this.botUserId) && 
-            message.author.bot)
+            (message?.author?.id === this.botUserId) && 
+            message?.author?.bot
         ) 
         return true;
 
@@ -34,7 +33,7 @@ export default class MessageSafeDelete{
      * @param {DiscordJs.ChatInputCommandInteraction} interaction
     */
     static noReply(interaction) {
-        interaction.deferReply({fetchReply :true})
+        interaction.deferReply({fetchReply: true})
             .then((message) =>
                 MessageSafeDelete.deleteMessage(message)
             )
@@ -66,8 +65,19 @@ export default class MessageSafeDelete{
                 () => {
                     MessageSafeDelete.deleteMessage(message);
                 },
-                duration * 1000);
+                duration * 1000
+            );
         }
+    }
+
+    /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
+    static async startThinking(interaction) {
+        return await interaction.deferReply({fetchReply: true});
+    }
+
+    /** @param {DiscordJs.Message} message */
+    static stopThinking(message) {
+        MessageSafeDelete.deleteMessage(message);
     }
 
 }
