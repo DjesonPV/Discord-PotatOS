@@ -105,7 +105,7 @@ function YesStopIt(member){
     const subscription = MusicSubscription.getSubscription(member.guild.id);
 
     if (subscription?.isMemberConnected(member)) {
-        subscription.destroy();
+        subscription.stop();
     }
 }
 

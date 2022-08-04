@@ -216,7 +216,6 @@ export default class MusicSubscription{
             this.voiceConnection.destroy();
         }
         MessageSafeDelete.deleteMessage(this.message);
-        this.stop();
         MusicSubscription.subscriptions.delete(this.guildId);
     }
 }

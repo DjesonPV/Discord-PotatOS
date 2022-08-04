@@ -51,7 +51,7 @@ async function cmdStop(interaction){
     else {
         const thinkingMessage = await MessageSafeDelete.startThinking(interaction);
 
-        subscription.destroy();
+        subscription.stop();
 
         MessageSafeDelete.stopThinking(thinkingMessage); 
     }
