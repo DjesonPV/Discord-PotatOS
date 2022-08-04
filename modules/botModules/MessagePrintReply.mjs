@@ -1,5 +1,5 @@
 import * as DiscordJs                   from "discord.js";
-import ExploreChannels                  from "../botModules/ExploreChannels.mjs";
+import ExploreChannels                  from "./ExploreChannels.mjs";
 import MessageSafeDelete                from "./MessageSafeDelete.mjs";
 import * as LANG from "../Language.mjs";
 
@@ -23,7 +23,7 @@ export async function printOnChannel(channel, messageOptions, duration = 0){
 
         const durationButtonRow = MessageSafeDelete.durationButtonActionRowBuilder(duration);
 
-        if (duration > 0) messageOptions.components?.unshift(durationButtonRow) ?? [durationButtonRow];
+        if (duration > 0) messageOptions.components = messageOptions.components?.unshift(durationButtonRow) ?? [durationButtonRow];
         
         return await sendOnChannel(channel, messageOptions)
             .then((message) => {
@@ -101,7 +101,7 @@ export function getAlertMessageOptions(text){
  */
 export function replyToAnInteraction(interaction, text, duration = 0){
 
-    const durationButtonActionRow = MessageSafeDelete.durationButtonActionRowBuilder();
+    const durationButtonActionRow = MessageSafeDelete.durationButtonActionRowBuilder(duration);
 
     /** @type {DiscordJs.MessageOptions} */
     let messageOptions = {

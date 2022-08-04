@@ -1,5 +1,5 @@
 import * as DiscordJs from 'discord.js';
-import * as LANG from "../Language.mjs";
+import * as ButtonInteractions from "../botCommands/ButtonInteractions.mjs";
 
 export default class MessageSafeDelete{
 
@@ -38,12 +38,7 @@ export default class MessageSafeDelete{
     /** @param {number} duration */
     static durationButtonActionRowBuilder(duration) {
         return new DiscordJs.ActionRowBuilder().addComponents(
-            new DiscordJs.ButtonBuilder()
-                .setCustomId('deleteNotif')
-                .setLabel(LANG.MSG_AUTODESTRUCT(duration))
-                .setStyle(DiscordJs.ButtonStyle.Secondary)
-                .setEmoji('🚮')
-            ,
+            ButtonInteractions.deleteMessage.button(duration),
         );
     }
 

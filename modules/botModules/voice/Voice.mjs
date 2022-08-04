@@ -1,11 +1,11 @@
 import * as DiscordJsVoice              from '@discordjs/voice';
 import * as DiscordJs                   from 'discord.js';
 
-import * as MessagePrintReply           from "../botModules/MessagePrintReply.mjs";
+import * as MessagePrintReply           from "../MessagePrintReply.mjs";
 import Track                            from "./Track.mjs";
 import MusicSubscription                from "./MusicSubscription.mjs";
-import displayMusicDisplayer            from '../botModules/MusicDisplayer.mjs';
-import * as LANG from "../Language.mjs";
+import displayMusicDisplayer            from '../MusicDisplayer.mjs';
+import * as LANG from "../../Language.mjs";
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 export async function streamVoice(interaction, url, volume){

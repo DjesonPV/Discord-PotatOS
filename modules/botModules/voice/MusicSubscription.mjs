@@ -1,7 +1,7 @@
 import * as DiscordJsVoice              from '@discordjs/voice';
 import * as DiscordJs                   from 'discord.js';
 import * as NodeUtil                    from 'node:util';
-import MessageSafeDelete                from '../botModules/MessageSafeDelete.mjs';
+import MessageSafeDelete                from '../MessageSafeDelete.mjs';
 import Track from './Track.mjs';
 
 const wait = NodeUtil.promisify(setTimeout);
@@ -216,7 +216,6 @@ export default class MusicSubscription{
             this.voiceConnection.destroy();
         }
         MessageSafeDelete.deleteMessage(this.message);
-        this.stop();
         MusicSubscription.subscriptions.delete(this.guildId);
     }
 }

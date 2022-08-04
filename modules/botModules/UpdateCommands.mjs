@@ -3,8 +3,8 @@ import {Routes} from 'discord-api-types/v10';
 
 import {createRequire} from 'module';
 
-import * as SlashCommands from '../SlashCommands.mjs';
-import * as ContextMenuCommands from '../ContextMenuCommands.mjs';
+import * as SlashCommands from '../botCommands/SlashCommands.mjs';
+import * as ContextMenuCommands from '../botCommands/ContextMenuCommands.mjs';
 import * as LANG from "../Language.mjs";
 
 export async function updateSlashCommands() {

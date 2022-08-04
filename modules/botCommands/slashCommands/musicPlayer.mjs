@@ -1,11 +1,11 @@
 import * as SurfYT                      from "surfyt-api";
-import * as MessagePrintReply           from "../botModules/MessagePrintReply.mjs";
-import * as Voice                       from "../voice/Voice.mjs";
-import MusicSubscription                from "../voice/MusicSubscription.mjs";
-import displayMusicDisplayer            from "../botModules/MusicDisplayer.mjs";
-import MessageSafeDelete                from '../botModules/MessageSafeDelete.mjs';
+import * as MessagePrintReply           from "../../botModules/MessagePrintReply.mjs";
+import * as Voice                       from "../../botModules/voice/Voice.mjs"
+import MusicSubscription                from "../../botModules/voice/MusicSubscription.mjs";
+import displayMusicDisplayer            from "../../botModules/MusicDisplayer.mjs";
+import MessageSafeDelete                from '../../botModules/MessageSafeDelete.mjs';
 import * as DiscordJs                   from 'discord.js';
-import * as LANG from "../Language.mjs";
+import * as LANG from "../../Language.mjs";
 
 // Checks
 
@@ -51,7 +51,7 @@ async function cmdStop(interaction){
     else {
         const thinkingMessage = await MessageSafeDelete.startThinking(interaction);
 
-        subscription.destroy();
+        subscription.stop();
 
         MessageSafeDelete.stopThinking(thinkingMessage); 
     }

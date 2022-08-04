@@ -1,5 +1,5 @@
 import * as DiscordJs from 'discord.js';
-import MessageSafeDelete from '../botModules/MessageSafeDelete.mjs';
+import MessageSafeDelete from '../../botModules/MessageSafeDelete.mjs';
 
 const menuBruh = new DiscordJs.ContextMenuCommandBuilder()
     .setName(`BRUH`)
