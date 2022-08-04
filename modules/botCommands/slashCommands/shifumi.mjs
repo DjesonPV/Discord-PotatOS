@@ -2,8 +2,8 @@
 // > ROCK PAPER SCISSORS / SHIFUMI / ROSHAMBO
 //  • • • • • • • • • • • • • • • • • • • • • • • •
 import * as DiscordJs from 'discord.js';
-import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
-import * as LANG from "../Language.mjs";
+import * as MessagePrintReply from "../../botModules/MessagePrintReply.mjs";
+import * as LANG from "../../Language.mjs";
 
 const emojisMove = [":fist:", ":raised_hand:", ":v:"];
 const emojisResult = [":arrow_right:",":regional_indicator_i:",":arrow_left:"];

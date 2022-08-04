@@ -1,16 +1,16 @@
 import * as DiscordJs                   from "discord.js";
-import MessageSafeDelete                from "../botModules/MessageSafeDelete.mjs";
-import * as MessagePrintReply                from "../botModules/MessagePrintReply.mjs"
-import displayMusicDisplayer            from "../botModules/MusicDisplayer.mjs";
-import MusicSubscription                from "../voice/MusicSubscription.mjs";
-import * as LANG from "../Language.mjs";
+import MessageSafeDelete                from "../../botModules/MessageSafeDelete.mjs";
+import * as MessagePrintReply           from "../../botModules/MessagePrintReply.mjs"
+import displayMusicDisplayer            from "../../botModules/MusicDisplayer.mjs";
+import MusicSubscription                from "../../botModules/voice/MusicSubscription.mjs";
+import * as LANG from "../../Language.mjs";
 
 // _______________________________
 //
 // Stop
 
 /** @param {DiscordJs.ButtonInteraction} interaction */
-export function PotatOSMusicPlayerStop(interaction){
+function commandMusicPlayerStop(interaction){
     const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
     if (subscription?.isMemberConnected(interaction.member)) {
 
@@ -61,6 +61,7 @@ export function PotatOSMusicPlayerStop(interaction){
                     content: LANG.MUSICDISPLAYER_STOP_REQUEST_RECEIVED, 
                     components : []
                 });
+                collectedInteraction.deferUpdate();
             }
             else {
                 const messageOptions = MessagePrintReply.getAlertMessageOptions(LANG._MUSICPLAYER_NOT_CONNECTED);
@@ -68,6 +69,7 @@ export function PotatOSMusicPlayerStop(interaction){
                 messageOptions.components = [];
 
                 interaction.editReply(messageOptions);
+                collectedInteraction.deferUpdate();
             }
            
         });
@@ -76,6 +78,24 @@ export function PotatOSMusicPlayerStop(interaction){
         interaction.deferUpdate();
     }
 }
+
+const buttonMusicPlayerStop = (disable) => {
+    return new DiscordJs.ButtonBuilder()
+        .setCustomId(customIdStop)
+        .setLabel(LANG.MUSICDISPLAYER_STOP)
+        .setStyle(DiscordJs.ButtonStyle.Danger)
+        .setEmoji('◻')
+        .setDisabled(disable)
+    ;
+};
+
+const customIdStop = 'PotatOSMusicPlayerStop';
+
+export const musicPlayerStop = {
+    button: buttonMusicPlayerStop,
+    command: commandMusicPlayerStop,
+    customId: customIdStop
+};
 
 //
 // Stop execution
@@ -94,21 +114,37 @@ function YesStopIt(member){
 // Skip
 
 /** @param {DiscordJs.ButtonInteraction} interaction */
-export async function PotatOSMusicPlayerSkip(interaction){
-    interaction.deferUpdate();
+async function commandMusicPlayerSkip(interaction) {
     const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
 
     if (subscription?.isMemberConnected(interaction.member)) {
         subscription.skip();
     }
+    interaction.deferUpdate();
 }
+
+const customIdSkip = 'PotatOSMusicPlayerSkip';
+
+const buttonMusicPlayerSkip = new DiscordJs.ButtonBuilder()
+    .setCustomId(customIdSkip)
+    .setLabel(LANG.MUSICDISPLAYER_SKIP)
+    .setStyle(DiscordJs.ButtonStyle.Primary)
+    //.setStyle(`${subscription.queue.length>0?DiscordJs.ButtonStyle.Primary:DiscordJs.ButtonStyle.Danger}`)
+    .setEmoji('⏭')
+;
+
+export const musicPlayerSkip = { 
+    button : buttonMusicPlayerSkip,
+    command: commandMusicPlayerSkip,
+    customId: customIdSkip
+};
 
 // _______________________________
 //
 // Player Refresh or Delete
 
 /** @param {DiscordJs.ButtonInteraction} interaction */
-export function PotatOSMusicPlayer(interaction){
+function commandMusicPlayer(interaction) {
     const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
     
     if (!subscription) {
@@ -117,16 +153,29 @@ export function PotatOSMusicPlayer(interaction){
         displayMusicDisplayer(interaction.message.channel);
         interaction.deferUpdate(); 
     }
-    
 }
+
+const customIdMusicPlayer = 'PotatOSMusicPlayer';
+
+const buttonMusicPlayer =  new DiscordJs.ButtonBuilder()
+    .setCustomId(customIdMusicPlayer)
+    .setLabel(LANG.MUSICDISPLAYER_NAME)
+    .setStyle(DiscordJs.ButtonStyle.Secondary)
+    .setEmoji('🎧')
+;
+
+export const musicPlayer = { 
+    button: buttonMusicPlayer,
+    command: commandMusicPlayer,
+    customId: customIdMusicPlayer
+};
 
 // _______________________________
 //
 // Play Pause
 
 /** @param {DiscordJs.ButtonInteraction} interaction */
-export async function PotatOSMusicPlayerPlayPause(interaction){
-    interaction.deferUpdate();
+async function commandMusicPlayerPlayPause(interaction) {
     const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
     
     if (subscription?.isMemberConnected(interaction.member)) {
@@ -139,4 +188,23 @@ export async function PotatOSMusicPlayerPlayPause(interaction){
         }
         displayMusicDisplayer(interaction.message.channel);
     }
+    interaction.deferUpdate();
 }
+
+const customIdPlayPause = 'PotatOSMusicPlayerPlayPause';
+
+const buttonMusicPlayerPlayPause = (isPaused, isLoading) => {
+    return new DiscordJs.ButtonBuilder()
+        .setCustomId(customIdPlayPause)
+        .setLabel(`${isPaused?LANG.MUSICDISPLAYER_PLAY:LANG.MUSICDISPLAYER_PAUSE}`)
+        .setStyle(`${isPaused?DiscordJs.ButtonStyle.Success:DiscordJs.ButtonStyle.Secondary}`)
+        .setEmoji(`${isPaused?'▶':'⏸'}`)
+        .setDisabled(isLoading)
+    ;
+}
+
+export const musicPlayerPlayPause = { 
+    button: buttonMusicPlayerPlayPause,
+    command: commandMusicPlayerPlayPause,
+    customId: customIdPlayPause
+};

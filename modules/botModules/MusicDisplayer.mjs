@@ -1,7 +1,9 @@
 import * as DiscordJs                   from "discord.js";
-import * as MessagePrintReply           from "../botModules/MessagePrintReply.mjs";
-import MusicSubscription                from "../voice/MusicSubscription.mjs";
+import * as MessagePrintReply           from "./MessagePrintReply.mjs";
+import MusicSubscription                from "./voice/MusicSubscription.mjs";
 import MessageSafeDelete                from "./MessageSafeDelete.mjs";
+import * as ButtonInteractions          from "../botCommands/ButtonInteractions.mjs";
+import * as SelectMenuInteractions      from "../botCommands/SelectMenuInteractions.mjs";
 import * as LANG from "../Language.mjs";
 import favcolor from "favcolor";
 
@@ -91,39 +93,14 @@ async function displayerEmbed(subscription){
 
 /** @param {MusicSubscription} subscription */
 function musicPlayerButtons(subscription, isLoading = false){
-
-    const buttonActionRow = new DiscordJs.ActionRowBuilder()
-    .addComponents(
-        new DiscordJs.ButtonBuilder()
-            .setCustomId('PotatOSMusicPlayer')
-            .setLabel(LANG.MUSICDISPLAYER_NAME)
-            .setStyle(DiscordJs.ButtonStyle.Secondary)
-            .setEmoji('🎧')
-        ,
-        new DiscordJs.ButtonBuilder()
-            .setCustomId('PotatOSMusicPlayerPlayPause')
-            .setLabel(`${subscription.isPaused()?LANG.MUSICDISPLAYER_PLAY:LANG.MUSICDISPLAYER_PAUSE}`)
-            .setStyle(`${subscription.isPaused()?DiscordJs.ButtonStyle.Success:DiscordJs.ButtonStyle.Secondary}`)
-            .setEmoji(`${subscription.isPaused()?'▶':'⏸'}`)
-            .setDisabled(isLoading)
-        ,
-        new DiscordJs.ButtonBuilder()
-            .setCustomId('PotatOSMusicPlayerSkip')
-            .setLabel(LANG.MUSICDISPLAYER_SKIP)
-            .setStyle(DiscordJs.ButtonStyle.Primary)
-            //.setStyle(`${subscription.queue.length>0?DiscordJs.ButtonStyle.Primary:DiscordJs.ButtonStyle.Danger}`)
-            .setEmoji('⏭')
-        ,
-        new DiscordJs.ButtonBuilder()
-            .setCustomId('PotatOSMusicPlayerStop')
-            .setLabel(LANG.MUSICDISPLAYER_STOP)
-            .setStyle(DiscordJs.ButtonStyle.Danger)
-            .setEmoji('◻')
-            .setDisabled(subscription.queue.length>0?false:true)
-        ,
-    );
-
-    return buttonActionRow;
+    return new DiscordJs.ActionRowBuilder()
+        .addComponents(
+            ButtonInteractions.musicPlayer.button,
+            ButtonInteractions.musicPlayerPlayPause.button(subscription.isPaused(), isLoading),
+            ButtonInteractions.musicPlayerSkip.button,
+            ButtonInteractions.musicPlayerStop.button(subscription.queue.length<=0),
+        )
+    ;
 }
 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
@@ -164,13 +141,7 @@ function musicPlayerPlaylist(trackList){
 
     const playlistRow = new DiscordJs.ActionRowBuilder()
     .addComponents(
-        new DiscordJs.SelectMenuBuilder()
-            .setCustomId('PotatOSMusicPlayerPlaylist')
-            .setPlaceholder(LANG.MUSICDISPLAYER_SHOW_PLAYLIST(trackList.length-1))
-            .setMaxValues(1)
-            .setMinValues(1)
-            .addOptions(options)
-        ,
+        SelectMenuInteractions.musicPlayerPlaylist.selectMenu(options, trackList.length-1),
     );
 
     return playlistRow;

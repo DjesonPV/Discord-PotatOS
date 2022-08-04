@@ -1,7 +1,7 @@
-import MessageSafeDelete from '../botModules/MessageSafeDelete.mjs';
-import * as MessagePrintReply from "../botModules/MessagePrintReply.mjs";
+import MessageSafeDelete from '../../botModules/MessageSafeDelete.mjs';
+import * as MessagePrintReply from "../../botModules/MessagePrintReply.mjs";
 import * as DiscordJs from 'discord.js';
-import * as LANG from "../Language.mjs";
+import * as LANG from "../../Language.mjs";
 
 //
 // Reply hello

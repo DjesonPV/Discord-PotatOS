@@ -1,7 +1,7 @@
 import * as DiscordJsVoice              from '@discordjs/voice';
 import * as DiscordJs                   from 'discord.js';
 import * as NodeUtil                    from 'node:util';
-import MessageSafeDelete                from '../botModules/MessageSafeDelete.mjs';
+import MessageSafeDelete                from '../MessageSafeDelete.mjs';
 import Track from './Track.mjs';
 
 const wait = NodeUtil.promisify(setTimeout);

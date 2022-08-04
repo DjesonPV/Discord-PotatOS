@@ -1,8 +1,8 @@
-import * as Voice from "../voice/Voice.mjs";
-import * as MP3Files from "../voice/MP3Files.mjs";
+import * as Voice from "../../botModules/voice/Voice.mjs";
+import * as MP3Files from "../../botModules/voice/MP3Files.mjs";
 import * as DiscordJs from 'discord.js';
-import MessageSafeDelete from '../botModules/MessageSafeDelete.mjs';
-import * as LANG from "../Language.mjs";
+import MessageSafeDelete from '../../botModules/MessageSafeDelete.mjs';
+import * as LANG from "../../Language.mjs";
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 function cmdSoundSample(interaction){

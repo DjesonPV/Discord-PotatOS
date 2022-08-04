@@ -3,9 +3,12 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
 import * as DiscordJs               from 'discord.js';
-import * as SlashCommands           from "./SlashCommands.mjs";
-import * as ContextMenuCommands     from "./ContextMenuCommands.mjs";
-import * as ButtonInteractions      from "./ButtonInteractions.mjs";
+
+import * as SlashCommands           from "./botCommands/SlashCommands.mjs";
+import * as ContextMenuCommands     from "./botCommands/ContextMenuCommands.mjs";
+import * as ButtonInteractions      from "./botCommands/ButtonInteractions.mjs";
+import * as SelectMenuInteractions  from "./botCommands/SelectMenuInteractions.mjs";
+
 import * as SlashCommandsUpdate     from "./botModules/UpdateCommands.mjs";
 import * as LANG                    from "./Language.mjs";
 
@@ -82,20 +85,36 @@ client.on('interactionCreate', interactionHandler);
 /** @param {DiscordJs.BaseInteraction} interaction*/
 async function interactionHandler(interaction) {
 
-    if (interaction.isButton() && interaction.message && (interaction.message.author.id === client.user.id)) {
-        let buttonInteraction = ButtonInteractions[interaction.customId];
-        if (buttonInteraction) await buttonInteraction(interaction);
-        else interaction.deferUpdate();
+    // DiscordJs.ButtonInteraction
+    if ( interaction.isButton() && 
+        interaction.message && (interaction.message.author.id === client.user.id)
+    ) {
+        const buttonInteraction = Object.values(ButtonInteractions)
+            .find(command => command.customId === interaction.customId)
+        ;
+        if (buttonInteraction) await buttonInteraction.command(interaction);
     }
-    else if (interaction.isSelectMenu()) {
-        interaction.deferUpdate();
+    // DiscordJs.SelectMenuInteraction
+    else if (interaction.isSelectMenu() && 
+        interaction.message && (interaction.message.author.id === client.user.id)
+    ) {
+        const selectMenuInteraction = Object.values(SelectMenuInteractions)
+            .find(command => command.customId === interaction.customId)
+        ;
+        if (selectMenuInteraction) await selectMenuInteraction.command(interaction);
     }
+    // DiscordJs.ChatInputCommandInteraction a.k.a SlashCommand
     else if (interaction.isChatInputCommand()) {
-        const slashCommand = Object.values(SlashCommands).find(command => command.slash.name === interaction.commandName);
+        const slashCommand = Object.values(SlashCommands)
+            .find(command => command.slash.name === interaction.commandName)
+        ;
         if (slashCommand) await slashCommand.command(interaction);
     }
+    // DiscordJs.ContextMenuCommandInteraction a.k.a RightClicCommand
     else if (interaction.isContextMenuCommand()){
-        const contextMenuCommand = Object.values(ContextMenuCommands).find(command => command.menu.name === interaction.commandName);
+        const contextMenuCommand = Object.values(ContextMenuCommands)
+            .find(command => command.menu.name === interaction.commandName)
+        ;
         if (contextMenuCommand) await contextMenuCommand.command(interaction);
     }
 }

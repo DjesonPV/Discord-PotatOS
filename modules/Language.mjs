@@ -17,7 +17,7 @@ export const SLASHCOMMANDS_REFRESH_SUCCESS = `Commandes (/) mises à jour avec s
 
 // MessagePrintReply ___________________
 
-export const MSG_AUTODESTRUCT = (time) => `Ce message s'autodétruira dans ${time} secondes`; //This message will be deleted in {} secondes
+export const MSG_AUTODESTRUCT = (duration) => `Ce message s'autodétruira dans ${duration} secondes`; //This message will be deleted in {} secondes
 export const MSG_CHANNEL_NOT_SUPPORTED = (channelName, guildName) => `Le TextChannel [${channelName}] de la Guild [${guildName}] n'est pas géré !!`; // The [{}] TextChannel of [{}] Guild is not supported!!
 
 // MusicDisplayer ____________________
