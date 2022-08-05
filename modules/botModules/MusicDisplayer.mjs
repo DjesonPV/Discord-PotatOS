@@ -118,7 +118,7 @@ function musicPlayerPlaylist(trackList){
 
         if (track.metadata.isYoutube){
             playlistTitle = `${track.metadata.title}`;
-            playlistDescription = `${track.metadata.author} • ${durationToString(track.metadata.duration)} • ${viewsToString(track.metadata.viewCount)} • ${YYYYMMDDToString(track.metadata.uploadDate)}`;
+            playlistDescription = `${track.metadata.author} • ${track.metadata.isLive?`⬤ LIVE`:durationToString(track.metadata.duration)} • ${viewsToString(track.metadata.viewCount)} • ${YYYYMMDDToString(track.metadata.uploadDate)}`;
         }
         else if (track.metadata.isFile){
             playlistTitle = `${track.metadata.key}`;
@@ -159,7 +159,7 @@ async function dataToDisplay(metadata){
 
         data.color          = `${colour}`;
         data.title          = `${metadata.title}`;
-        data.description    = `${durationToString(metadata.duration)} • ${viewsToString(metadata.viewCount)} • ${YYYYMMDDToString(metadata.uploadDate)}`;
+        data.description    = `${metadata.isLive?`🔴 LIVE`:durationToString(metadata.duration)} • ${viewsToString(metadata.viewCount)} • ${YYYYMMDDToString(metadata.uploadDate)}`;
         data.author = {
             name    : `${metadata.author}`,
             iconURL : `${metadata.authorPicture}`,
