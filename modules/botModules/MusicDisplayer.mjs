@@ -97,8 +97,8 @@ function musicPlayerButtons(subscription, isLoading = false){
         .addComponents(
             ButtonInteractions.musicPlayer.button,
             ButtonInteractions.musicPlayerPlayPause.button(subscription.isPaused(), isLoading),
-            ButtonInteractions.musicPlayerSkip.button,
-            ButtonInteractions.musicPlayerStop.button(subscription.queue.length<=0),
+            ButtonInteractions.musicPlayerSkip.button(isLoading),
+            ButtonInteractions.musicPlayerStop.button(isLoading || subscription.queue.length<=0),
         )
     ;
 }

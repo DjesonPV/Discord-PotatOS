@@ -125,13 +125,16 @@ async function commandMusicPlayerSkip(interaction) {
 
 const customIdSkip = 'PotatOSMusicPlayerSkip';
 
-const buttonMusicPlayerSkip = new DiscordJs.ButtonBuilder()
-    .setCustomId(customIdSkip)
-    .setLabel(LANG.MUSICDISPLAYER_SKIP)
-    .setStyle(DiscordJs.ButtonStyle.Primary)
-    //.setStyle(`${subscription.queue.length>0?DiscordJs.ButtonStyle.Primary:DiscordJs.ButtonStyle.Danger}`)
-    .setEmoji('⏭')
-;
+const buttonMusicPlayerSkip = (disable) => {
+    return new DiscordJs.ButtonBuilder()
+        .setCustomId(customIdSkip)
+        .setLabel(LANG.MUSICDISPLAYER_SKIP)
+        .setStyle(DiscordJs.ButtonStyle.Primary)
+        //.setStyle(`${subscription.queue.length>0?DiscordJs.ButtonStyle.Primary:DiscordJs.ButtonStyle.Danger}`)
+        .setEmoji('⏭')
+        .setDisabled(disable)
+    ;
+}
 
 export const musicPlayerSkip = { 
     button : buttonMusicPlayerSkip,
