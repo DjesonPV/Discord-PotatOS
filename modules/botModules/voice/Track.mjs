@@ -109,9 +109,9 @@ async function fromYTDLP(url, methods) {
             skipDownload: true,
             addMetadata: true,
             dumpSingleJson: true,
-        });
+        }).catch(error => {;});
 
-    const parsedInfo = JSON.parse(info.stdout);
+    const parsedInfo = JSON.parse(info?.stdout ?? `{"extractor":"generic"}`);
 
     if (parsedInfo.extractor !== 'generic'){
         const metadata = {
