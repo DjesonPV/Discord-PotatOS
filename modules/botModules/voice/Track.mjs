@@ -1,12 +1,9 @@
 import * as DiscordJsVoice from '@discordjs/voice';
 import * as fs from 'fs';
 import ytdl from 'youtube-dl-exec';
+import { YouTubeLiveStream } from 'ytls';
 
 import * as MP3Files from "./MP3Files.mjs";
-
-
-// empty function
-const noop = () => { };
 
 export default class Track {
     constructor({ url, metadata, onStart, onFinish, onError }) {
@@ -19,37 +16,75 @@ export default class Track {
         this.onError = onError;
     }
 
-    // Don't ask me it's a copy of the example from discordjs/voice
+    // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+    //
     createAudioResource() {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
+            // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+            // URL is a LINK to a remote file
             if (this.url.startsWith('http')) {
-                /**
-                 * URL is a link
-                 */
-                const process = ytdl.exec(
+                
+                // Fetch Media file URL
+                const fileURL = (await ytdl.exec(
                     this.url,
                     {
-                        output: '-',
-                        format: 'bestaudio/best',
-                        quiet: true,
-                    },
-                    { stdio: ['ignore', 'pipe', 'ignore'] }
+                        format: 'bestaudio/bestaudio*',
+                        getUrl : true,
+                    }
+                )).stdout;
 
-                );
+                // _____________________________________________________________
+                // File is a YouTube Livestream
+                if(fileURL.startsWith('https://manifest.googlevideo.com/api/manifest/hls_playlist/')){
 
-                if (!process.stdout) {
-                    reject(new Error('No stdout'));
-                    return;
+                    const stream = new YouTubeLiveStream(async () => {
+                        return fileURL;
+                    });
+
+                    try {
+                        DiscordJsVoice.demuxProbe(stream).then(({ stream, type }) => {
+                            const resource = DiscordJsVoice.createAudioResource(stream, {
+                                inputType: type,
+                                metadata: this,
+                                inlineVolume: true
+                            });
+    
+                            resolve(resource);
+                        }).catch(reject);
+    
+                    } catch (error) {
+                        reject(error);
+                    }
+
                 }
-                const stream = process.stdout;
+                // _____________________________________________________________
+                // File is not a YouTube Livestream
+                else { 
+                    const process = ytdl.exec(
+                        this.url,
+                        {
+                            output: '-',
+                            format: 'bestaudio/best',
+                            quiet: true,
+                        },
+                        { stdio: ['ignore', 'pipe', 'ignore'] }
 
-                const onError = (error) => {
-                    if (!process.killed) process.kill();
-                    stream.resume();
-                    reject(error);
-                };
-                process
-                    .once('spawn', () => {
+                    );
+    
+                    if (!process.stdout) {
+                        reject(new Error('No stdout'));
+                        return;
+                    }
+
+                    const stream = process.stdout;
+
+                    const onError = (error) => {
+                        if (!process.killed) process.kill();
+                        stream.resume();
+                        reject(error);
+                    };
+
+                    process.once('spawn', () => {
                         DiscordJsVoice.demuxProbe(stream)
                             .then((probe) => resolve(
                                 DiscordJsVoice.createAudioResource(probe.stream, {
@@ -58,13 +93,14 @@ export default class Track {
                                     inlineVolume: true
                                 })
                             ))
-                            .catch(onError);
-                    })
-                    .catch(onError);
-            } else {
-                /**
-                 * URL is a file
-                 */
+                            .catch(onError)
+                        ;
+                    }).catch(onError);
+                }
+            } 
+            // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+            // URL is a local file
+            else { 
                 try {
                     DiscordJsVoice.demuxProbe(fs.createReadStream(this.url)).then(({ stream, type }) => {
                         const resource = DiscordJsVoice.createAudioResource(stream, {
@@ -84,6 +120,7 @@ export default class Track {
         });
 
     }
+    // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
     setVolume(volume) {
         this.volume = volume;
@@ -98,7 +135,7 @@ export default class Track {
 
 }
 
-// ==================================================================================
+// =====================================================================================================================
 //  TRACK FROM SOURCES
 //
 
@@ -128,6 +165,7 @@ async function fromYTDLP(url, methods) {
             authorURL: parsedInfo.uploader_url ?? parsedInfo.channel_url ?? parsedInfo.webpage_url,
             uploadDate: parsedInfo.upload_date,
             viewCount: parsedInfo.view_count,
+            isLive: parsedInfo.is_live,
         };
 
         return define(url, methods, metadata);
@@ -172,22 +210,22 @@ function fromInternet(url, methods) {
 }
 
 
-// ===============================================================================
+// =====================================================================================================================
 // WRAPPED METHODS CONSTRUCTOR
 //
 function define(url, methods, metadata) {
 
     const wrappedMethods = {
         onStart() {
-            wrappedMethods.onStart = noop;
+            wrappedMethods.onStart = () => {;};
             methods.onStart();
         },
         onFinish() {
-            wrappedMethods.onFinish = noop;
+            wrappedMethods.onFinish = () => {;};
             methods.onFinish();
         },
         onError(error) {
-            wrappedMethods.onError = noop;
+            wrappedMethods.onError = () => {;};
             methods.onError(error);
         },
     };
@@ -201,7 +239,7 @@ function define(url, methods, metadata) {
 }
 
 
-// =============================================================================
+// =====================================================================================================================
 // UTILITARY FUNCTIONS
 //
 

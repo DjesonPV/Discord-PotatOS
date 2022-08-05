@@ -92,7 +92,7 @@ async function cmdPlay(interaction){
         {
             let searchResult = await SurfYT.searchYoutubeFor(
                 `${query}`,
-                {showVideos: true, location: 'FR', language: 'fr'}
+                {showVideos: true, showLives: true, location: 'FR', language: 'fr'}
             )
                 .catch((error)=>{
                     MessagePrintReply.replyAlertOnInterarction(interaction, LANG._PLAY_SEARCH_ERROR)
