@@ -30,7 +30,8 @@ export default class MusicSubscription{
        this.voiceChannel = interaction.member.voice.channel;
        this.guildId = interaction.guild.id;
        this.guildName = interaction.guild.name;
-       this.message = false;
+       /** @type {DiscordJs.Message} */
+       this.message = undefined;
 
         // Voice Connection
         this.voiceConnection.on('stateChange', async (_, newState) => {
@@ -78,22 +79,21 @@ export default class MusicSubscription{
 
         });
 
-
         // Audio Player
-        this.audioPlayer.on('stateChange', (oldState, newState) => {
+        this.audioPlayer.on('stateChange', async (oldState, newState) => {
             if (newState.status === DiscordJsVoice.AudioPlayerStatus.Idle /*&& oldState.status !== DiscordJsVoice.AudioPlayerStatus.Idle*/){
-                oldState.resource.metadata.onFinish();
+                await oldState.resource.metadata.onFinish();
                 this.processQueue();
             } else if (newState.status === DiscordJsVoice.AudioPlayerStatus.Playing){
                 // If a started playing, then start the new track
-                newState.resource.metadata.onStart();
+                await newState.resource.metadata.onStart();
             }
 
         });
 
 
-        this.audioPlayer.on('error', (error)=> {
-            error.resource.metadata.onError(error);
+        this.audioPlayer.on('error', async (error)=> {
+            await error.resource.metadata.onError(error);
         });
 
         this.voiceConnection.subscribe(this.audioPlayer);

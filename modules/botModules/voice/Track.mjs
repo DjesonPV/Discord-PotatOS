@@ -7,6 +7,7 @@ import * as MP3Files from "./MP3Files.mjs";
 
 export default class Track {
     constructor({ url, metadata, onStart, onFinish, onError }) {
+        /**@type {string} */
         this.url = url;
         this.metadata = metadata;
         this.volume = 1.0;
@@ -23,7 +24,6 @@ export default class Track {
             // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
             // URL is a LINK to a remote file
             if (this.url.startsWith('http')) {
-                
                 // Fetch Media file URL
                 const fileURL = (await ytdl.exec(
                     this.url,
@@ -31,8 +31,13 @@ export default class Track {
                         format: 'bestaudio/bestaudio*',
                         getUrl : true,
                     }
-                )).stdout;
+                ).catch((reason)=>{reject(LANG.ERROR_NO_AUDIO_MEDIA)}))?.stdout;
 
+                if(!fileURL) {
+                    this.onFinish();
+                    return;
+                }
+                
                 // _____________________________________________________________
                 // File is a YouTube Livestream
                 if(fileURL.startsWith('https://manifest.googlevideo.com/api/manifest/hls_playlist/')){
@@ -41,84 +46,46 @@ export default class Track {
                         return fileURL;
                     });
 
-                    try {
-                        DiscordJsVoice.demuxProbe(stream).then(({ stream, type }) => {
-                            const resource = DiscordJsVoice.createAudioResource(stream, {
-                                inputType: type,
-                                metadata: this,
-                                inlineVolume: true
-                            });
-    
-                            resolve(resource);
-                        }).catch(reject);
-    
-                    } catch (error) {
-                        reject(error);
-                    }
-
+                    resolve(probeAndCreateAudioResource(stream, this));
                 }
                 // _____________________________________________________________
                 // File is not a YouTube Livestream
                 else { 
                     const process = ytdl.exec(
-                        this.url,
+                        fileURL,
                         {
                             output: '-',
-                            format: 'bestaudio/best',
-                            quiet: true,
+                            format : 'bestaudio/bestaudio*',
                         },
                         { stdio: ['ignore', 'pipe', 'ignore'] }
-
                     );
     
-                    if (!process.stdout) {
-                        reject(new Error('No stdout'));
+                    const stream = process.stdout;
+
+                    if (!stream) {
+                        reject(LANG.ERROR_NO_STREAM);
+                        this.onFinish();
                         return;
                     }
 
-                    const stream = process.stdout;
-
-                    const onError = (error) => {
-                        if (!process.killed) process.kill();
-                        stream.resume();
-                        reject(error);
-                    };
-
-                    process.once('spawn', () => {
-                        DiscordJsVoice.demuxProbe(stream)
-                            .then((probe) => resolve(
-                                DiscordJsVoice.createAudioResource(probe.stream, {
-                                    metadata: this,
-                                    inputType: probe.type,
-                                    inlineVolume: true
-                                })
-                            ))
-                            .catch(onError)
-                        ;
-                    }).catch(onError);
+                    process
+                        .once('spawn', () => {
+                            resolve(probeAndCreateAudioResource(stream, this));
+                        })
+                        .catch((error) => {
+                            if (!process.killed) process.kill();
+                            stream.resume();
+                            reject(error);
+                        })
+                    ;
                 }
             } 
             // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
             // URL is a local file
             else { 
-                try {
-                    DiscordJsVoice.demuxProbe(fs.createReadStream(this.url)).then(({ stream, type }) => {
-                        const resource = DiscordJsVoice.createAudioResource(stream, {
-                            inputType: type,
-                            metadata: this,
-                            inlineVolume: true
-                        });
-
-                        resolve(resource);
-                    }).catch(reject);
-
-                } catch (error) {
-                    reject(error);
-                }
-
+                resolve(probeAndCreateAudioResource(fs.createReadStream(this.url), this));
             }
         });
-
     }
     // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -133,6 +100,16 @@ export default class Track {
         return fromYTDLP(url, methods);
     }
 
+}
+
+async function probeAndCreateAudioResource(readableStream, thisTrack) {
+    const probe = await DiscordJsVoice.demuxProbe(readableStream);
+
+    return DiscordJsVoice.createAudioResource(probe.stream, {
+        metadata: thisTrack,
+        inputType: probe.type,
+        inlineVolume: true,
+    });    
 }
 
 // =====================================================================================================================

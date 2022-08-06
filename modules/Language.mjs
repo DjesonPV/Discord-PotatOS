@@ -78,8 +78,10 @@ export const MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_DESC = `Une erreur est surven
 // ERRORS
 
 export const ERROR_TRACK = (error) => `Erreur : ${error}`;
-export const ERROR_PLAY_TRACK = `Je n'ai pas reussi a jouer ton morceau`;
-export const ERROR_VOICECHANNEL_CONNECTION = `Je n'ai pas réussi à me connecter, reessaie plus tard !`;
+export const ERROR_PLAY_TRACK = `Je n'ai pas réussi à jouer ton morceau`;
+export const ERROR_NO_AUDIO_MEDIA = `Aucune vidéo trouvée à cette adresse`;
+export const ERROR_NO_STREAM = `Échec lors de la création du flux`;
+export const ERROR_VOICECHANNEL_CONNECTION = `Je n'ai pas réussi à me connecter, réessaie plus tard !`;
 export const ERROR_ICON = `https://cdn.discordapp.com/attachments/329613279204999170/970413892792623204/Error_icon.png`;
 export const ERROR_VOICE_CONNECTION = `Impossible de se connecter à un Salon Vocal`;
 

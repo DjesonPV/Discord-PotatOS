@@ -196,13 +196,13 @@ async function commandMusicPlayerPlayPause(interaction) {
 
 const customIdPlayPause = 'PotatOSMusicPlayerPlayPause';
 
-const buttonMusicPlayerPlayPause = (isPaused, isLoading) => {
+const buttonMusicPlayerPlayPause = (isPaused, disable) => {
     return new DiscordJs.ButtonBuilder()
         .setCustomId(customIdPlayPause)
         .setLabel(`${isPaused?LANG.MUSICDISPLAYER_PLAY:LANG.MUSICDISPLAYER_PAUSE}`)
         .setStyle(`${isPaused?DiscordJs.ButtonStyle.Success:DiscordJs.ButtonStyle.Secondary}`)
         .setEmoji(`${isPaused?'▶':'⏸'}`)
-        .setDisabled(isLoading)
+        .setDisabled(disable)
     ;
 }
 

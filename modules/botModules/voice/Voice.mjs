@@ -19,15 +19,15 @@ export async function streamVoice(interaction, url, volume){
 
     try{
         const track = await Track.fetchData(url, {
-            onStart(){
+            async onStart(){
                 displayMusicDisplayer(subscription.message.channel ?? interaction.channel);
                 subscription.setSelfMute(false);
             },
-            onFinish(){
-               if(subscription.queue.length === 0) subscription.destroy();
+            async onFinish(){
+               if(subscription.queue.length === 0) await subscription.destroy();
                subscription.setSelfMute(true);
             },
-            onError(error){
+            async onError(error){
                 console.warn(error);
                 MessagePrintReply.printAlertOnChannel(interaction.channel, LANG.ERROR_TRACK(error), 10);
             }
