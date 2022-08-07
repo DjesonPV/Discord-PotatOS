@@ -2,6 +2,7 @@ import * as DiscordJsVoice from '@discordjs/voice';
 import * as fs from 'fs';
 import ytdl from 'youtube-dl-exec';
 import { YouTubeLiveStream } from 'ytls';
+import * as LANG from '../../Language.mjs';
 
 import * as MP3Files from "./MP3Files.mjs";
 
