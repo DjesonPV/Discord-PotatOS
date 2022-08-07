@@ -188,7 +188,7 @@ export const pause = {slash: slashPause, command: cmdPause};
 async function __playPause(interaction, wannaPause){
 
     const subscription = MusicSubscription.getSubscription(interaction.guild.id);
-    if (subscription) {
+    if (subscription?.currentTrack?.metadata && !subscription.currentTrack.metadata.isLive) {
         if(wannaPause) subscription.pause();
         else subscription.resume();
         displayMusicDisplayer(interaction.channel);

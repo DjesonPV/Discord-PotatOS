@@ -22,11 +22,12 @@ export default function displayMusicDisplayer(channel){
         if (MessageSafeDelete.isMessageMine(subscription.message)) {
             MusicDiplayerMessageOptions(subscription)
                 .then((toSend) => {
-                    return subscription.message.edit(toSend);
+                    return subscription.message.editable?subscription.message.edit(toSend):undefined;
                 })
                 .then((message) => {
                     subscription.setMessage(message);
                 })
+                .catch((error) => {;})
             ;
         }
         else {
@@ -96,11 +97,19 @@ function musicPlayerButtons(subscription, isLoading = false){
     return new DiscordJs.ActionRowBuilder()
         .addComponents(
             ButtonInteractions.musicPlayer.button,
-            ButtonInteractions.musicPlayerPlayPause.button(subscription.isPaused(), isLoading),
+            ButtonInteractions.musicPlayerPlayPause.button(subscription.isPaused(), disablePlayPauseButton(subscription, isLoading)),
             ButtonInteractions.musicPlayerSkip.button(isLoading),
             ButtonInteractions.musicPlayerStop.button(isLoading || subscription.queue.length<=0),
         )
     ;
+}
+
+function disablePlayPauseButton(subscription, isLoading) {
+    return (
+        isLoading ||
+        !subscription?.currentTrack?.metadata ||
+        subscription.currentTrack.metadata.isLive
+    );
 }
 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
