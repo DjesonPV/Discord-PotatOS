@@ -120,11 +120,14 @@ export default class Track {
         this.volume = volume;
     }
 
-    static fetchData(url, methods) {
-        if (url.startsWith(MP3Files.path))
+    static async fetchData(url, methods) {
+        if (url.startsWith(MP3Files.path)) {
             return fromFile(url, methods);
-
-        return fromYTDLP(url, methods);
+        } else if (RadioGarden.matchRadioChannelforId(url) != null) {
+            return await fromRadioGarden(url, methods);
+        } else {
+            return await fromYTDLP(url, methods);
+        }
     }
 
 }
@@ -177,8 +180,9 @@ async function fromYTDLP(url, methods) {
         const metadata = {
             isYoutube: true,    // !
             isFile: false,      // !
+            isRadio: false,   // !
 
-            // Data use in the MusicPlayer Embed
+            // Data use in the MusicDsiplayer Embed
             title: parsedInfo.fulltitle || parsedInfo.title,
             author: `${parsedInfo.webpage_url_domain} • ${parsedInfo.channel ?? parsedInfo.artist ?? parsedInfo.uploader ?? parsedInfo.creator}`,
             duration: parsedInfo.duration,
@@ -204,8 +208,9 @@ function fromFile(url, methods) {
     const metadata = {
         isYoutube: false, // !
         isFile: true,     // !
+        isRadio: false,   // !
 
-        // Data use in the MusicPlayer Embed
+        // Data use in the MusicDisplayer Embed
         title: MP3Files.files[mp3Key].title,
         description: MP3Files.files[mp3Key].description,
         key: mp3Key,
@@ -222,8 +227,9 @@ function fromInternet(url, methods) {
     const metadata = {
         isYoutube: false, // !
         isFile: false,    // !
+        isRadio: false,   // !
 
-        // Data use in the MusicPlayer Embed
+        // Data use in the MusicDisplayer Embed
         source: uri[1],
         file: uri[uri.length - 1],
         url: url,
@@ -231,6 +237,31 @@ function fromInternet(url, methods) {
     };
 
     return define(url, methods, metadata);
+}
+
+/** Fetch Data from Radio Garden */
+async function fromRadioGarden(url, methods) {
+
+    const info = await RadioGarden.getRadioData(url).catch((error) => {return null;})
+
+    if (info) {
+
+        const metadata = {
+            isYoutube: false, // !
+            isFile: false,    // !
+            isRadio: true,    // !
+
+            // Data use in the MusicDisplayer Embed
+            name: info.title,
+            url: `https://radio.garden${info.website}`,
+            website: info.website,
+            place: info.place.title,
+            country: info.country.title,
+        };
+
+        return define(url, methods, metadata);
+    }
+    else return fromInternet(url, methods);
 }
 
 

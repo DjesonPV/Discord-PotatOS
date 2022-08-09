@@ -201,6 +201,18 @@ async function dataToDisplay(metadata){
             iconURL : LANG.MUSICDISPLAYER_BOT_ICON,
         };
 
+    } else if (metadata.isRadio) {
+        data.color          = LANG.MUSICDISPLAYER_RADIO_COLOR;
+        data.title          = `${metadata.name}`;
+        data.description    = `${metadata.place}, ${metadata.country}`;
+        data.author = {
+            name    : `Radio Garden`,
+            url     : `${metadata.url}`,
+            iconURL : LANG.MUSICDISPLAYER_RADIO_ICON,
+        };
+        data.url            = `${metadata.website}`;
+        data.thumbnail      = LANG.MUSICDISPLAYER_RADIO_THUMBNAIL;
+
     // if it's file is from Internet and not parsed by yt-dlp
     } else {
         data.color          = `${colour}`;
