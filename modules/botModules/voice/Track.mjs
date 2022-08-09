@@ -149,30 +149,27 @@ async function probeAndCreateAudioResource(readableStream, thisTrack) {
 async function fromYTDLP(url, methods) {
 
     // Fetch data from yt-dlp in less than 5 seconds or nothing
-    const info  = await Promise.race([
-        new Promise (async (resolve) => { // Will resolve only if no error
-            let data;
-            try {
-                data = await ytdl.exec(
-                    url, {
-                        embedMetadata: true,
-                        noEmbedChapters: true,
-                        noEmbedInfoJson: true,
-                        simulate: true,
-                        dumpSingleJson: true,
-                    }
-                );
-            } catch (error) {
-                return;
-            }
-            resolve(data); 
-        })
-        ,
-        new Promise (async (resolve) => { // Will resolve after timeout
-            await new Promise((resolve) => setTimeout(resolve, 5000));
+    const info  = await new Promise ((resolve) => {
+        setTimeout(() => {
             resolve(undefined);
-        })
-    ]);
+            return;
+        }, 5000);
+
+        try {
+            ytdl.exec(
+                url, {
+                    embedMetadata: true,
+                    noEmbedChapters: true,
+                    noEmbedInfoJson: true,
+                    simulate: true,
+                    dumpSingleJson: true,
+                }
+            ).then(data => resolve(data));
+        } catch (error) {
+            resolve(undefined);
+            return;
+        }
+    });
 
     const parsedInfo = JSON.parse(info?.stdout ?? `{"extractor":"generic"}`);
 
