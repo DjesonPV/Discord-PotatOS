@@ -132,15 +132,32 @@ async function probeAndCreateAudioResource(readableStream, thisTrack) {
 //
 
 async function fromYTDLP(url, methods) {
-    const info  = await ytdl.exec(
-        url,
-        {
-            embedMetadata: true,
-            noEmbedChapters: true,
-            noEmbedInfoJson: true,
-            simulate: true,
-            dumpSingleJson: true,
-        }).catch(error => {;});
+
+    // Fetch data from yt-dlp in less than 5 seconds or nothing
+    const info  = await Promise.race([
+        new Promise (async (resolve) => { // Will resolve only if no error
+            let data;
+            try {
+                data = await ytdl.exec(
+                    url, {
+                        embedMetadata: true,
+                        noEmbedChapters: true,
+                        noEmbedInfoJson: true,
+                        simulate: true,
+                        dumpSingleJson: true,
+                    }
+                );
+            } catch (error) {
+                return;
+            }
+            resolve(data); 
+        })
+        ,
+        new Promise (async (resolve) => { // Will resolve after timeout
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+            resolve(undefined);
+        })
+    ]);
 
     const parsedInfo = JSON.parse(info?.stdout ?? `{"extractor":"generic"}`);
 
@@ -153,9 +170,9 @@ async function fromYTDLP(url, methods) {
             title: parsedInfo.fulltitle || parsedInfo.title,
             author: `${parsedInfo.webpage_url_domain} • ${parsedInfo.channel ?? parsedInfo.artist ?? parsedInfo.uploader ?? parsedInfo.creator}`,
             duration: parsedInfo.duration,
-            videoThumbnail: parsedInfo.thumbnail,
-            videoURL: parsedInfo.webpage_url,
-            authorPicture: `https://s2.googleusercontent.com/s2/favicons?domain_url=${parsedInfo.webpage_url_domain}&sz=48`,
+            thumbnail: parsedInfo.thumbnail,
+            url: parsedInfo.webpage_url,
+            favicon: `https://s2.googleusercontent.com/s2/favicons?domain_url=${parsedInfo.webpage_url_domain}&sz=48`,
             authorURL: parsedInfo.uploader_url ?? parsedInfo.channel_url ?? parsedInfo.webpage_url,
             uploadDate: parsedInfo.upload_date,
             viewCount: parsedInfo.view_count,
@@ -198,6 +215,7 @@ function fromInternet(url, methods) {
         source: uri[1],
         file: uri[uri.length - 1],
         url: url,
+        favicon: `https://s2.googleusercontent.com/s2/favicons?domain_url=${url}&sz=48`
     };
 
     return define(url, methods, metadata);

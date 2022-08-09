@@ -107,8 +107,7 @@ function musicPlayerButtons(subscription, isLoading = false){
 function disablePlayPauseButton(subscription, isLoading) {
     return (
         isLoading ||
-        !subscription?.currentTrack?.metadata ||
-        subscription.currentTrack.metadata.isLive
+        subscription?.currentTrack?.metadata?.isLive === true
     );
 }
 
@@ -161,22 +160,38 @@ function musicPlayerPlaylist(trackList){
 async function dataToDisplay(metadata){
     let data = {};
 
-    if(metadata.isYoutube) {
-        const colour = (await favcolor.fromSiteFavicon(
-            metadata.videoURL.match(/(?:http|https):\/\/(?:[^\/])+\//)[0]
-        )).toHex();
+    // Fetch coulour in less than half a second of use default
+    const colour = await Promise.race([
+        new Promise(async (resolve) => { // Will resolve only if no error
+            let color = undefined;
+            try {
+                color = (await favcolor.fromSiteFavicon( metadata.url.match(/(?:http|https):\/\/(?:[^\/])+\//)[0] )).toHex();
+            } catch (error) {
+                return;
+            }
+            resolve(color); 
+        })
+        ,
+        new Promise (async (resolve) => { // Will resolve after timeout
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            resolve(LANG.MUSICDISPLAYER_WEB_COLOR);
+        })
+    ]);
 
+    // If metadata were fetch by yt-dlp
+    if (metadata.isYoutube) {
         data.color          = `${colour}`;
         data.title          = `${metadata.title}`;
         data.description    = `${metadata.isLive?`🔴 LIVE`:durationToString(metadata.duration)} • ${viewsToString(metadata.viewCount)} • ${YYYYMMDDToString(metadata.uploadDate)}`;
         data.author = {
             name    : `${metadata.author}`,
-            iconURL : `${metadata.authorPicture}`,
+            iconURL : `${metadata.favicon}`,
             url     : `${metadata.authorURL}`,
         };
-        data.url            = `${metadata.videoURL}`;
-        data.thumbnail      = `${metadata.videoThumbnail}`;
+        data.url            = `${metadata.url}`;
+        data.thumbnail      = `${metadata.thumbnail}`;
 
+    // If metadata if from PotatOS files
     } else if (metadata.isFile) {
         data.color          = LANG.MUSICDISPLAYER_BOT_COLOR;
         data.title          = `${metadata.title}`;
@@ -186,14 +201,15 @@ async function dataToDisplay(metadata){
             iconURL : LANG.MUSICDISPLAYER_BOT_ICON,
         };
 
+    // if it's file is from Internet and not parsed by yt-dlp
     } else {
-        data.color          = LANG.MUSICDISPLAYER_WEB_COLOR;
+        data.color          = `${colour}`;
         data.title          = `${metadata.file}`;
         data.description    = LANG.MUSICDISPLAYER_WEB_LINK;
         data.author = {
             name    : `${metadata.source}`,
             url     : `https://${metadata.source}`,
-            iconURL : LANG.MUSICDISPLAYER_WEB_ICON, 
+            iconURL : `${metadata.favicon}`, 
         };
         data.url        = `${metadata.url}`;
     }
