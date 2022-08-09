@@ -20,7 +20,7 @@ const snReply = [
 const tableMath = [ 1, 2, 0, 0, 1, 2, 2, 0, 1];
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
-function command(interaction){
+async function command(interaction){
 
     const playerMove = interaction.options.getInteger('play');
     
@@ -30,7 +30,7 @@ function command(interaction){
 
     let result = tableMath[(3*playerMove+botMove)]; // Evaluate win
 
-    MessagePrintReply.replyToAnInteraction(interaction, `:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} ${LANG._SHIFUMI_BOT_EMOJI}  ${snReply[result][botResponse]}`);
+    await MessagePrintReply.replyToAnInteraction(interaction, `:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} ${LANG._SHIFUMI_BOT_EMOJI}  ${snReply[result][botResponse]}`);
 }
 
 const slash = new DiscordJs.SlashCommandBuilder()

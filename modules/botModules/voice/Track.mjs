@@ -4,6 +4,7 @@ import * as ChildProcess from 'child_process';
 
 import ytdl from 'youtube-dl-exec';
 import { YouTubeLiveStream } from 'ytls';
+import * as RadioGarden from '../RadioGarden.mjs';
 
 import * as LANG from '../../Language.mjs';
 import * as MP3Files from "./MP3Files.mjs";
@@ -27,17 +28,28 @@ export default class Track {
             // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
             // URL is a LINK to a remote file
             if (this.url.startsWith('http')) {
-                // Fetch Media file URL
-                const fileURL = (await ytdl.exec(
-                    this.url,
-                    {
-                        format: 'bestaudio.1/bestaudio*.2/best.2',
-                        print: 'urls',
-                        simulate: true,
-                    }
-                ).catch((reason)=>{reject(LANG.ERROR_NO_AUDIO_MEDIA)}))?.stdout;
 
-                if(!fileURL) {
+                let fileURL = undefined;
+                const radioGardenId = RadioGarden.matchRadioChannelforId(this.url)?.[1];
+
+                // URL is a Radio Garden link
+                if (radioGardenId != undefined) {
+
+                    fileURL = RadioGarden.getRadioFlux(radioGardenId);
+
+                // Fetch Media file URL with yt-dlp
+                } else {
+                    fileURL = (await ytdl.exec(
+                        this.url,
+                        {
+                            format: 'bestaudio.1/bestaudio*.2/best.2',
+                            print: 'urls',
+                            simulate: true,
+                        }
+                    ).catch((reason)=>{reject(LANG.ERROR_NO_AUDIO_MEDIA)}))?.stdout;
+                }
+
+                if(fileURL === undefined) {
                     this.onFinish();
                     return;
                 }

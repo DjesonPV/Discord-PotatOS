@@ -33,7 +33,7 @@ function ln(number) {
 // SlashCommand Maths
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
-function cmdMaths(interaction) {
+async function cmdMaths(interaction) {
 
     /** @type {string} */
     let result;
@@ -67,9 +67,9 @@ function cmdMaths(interaction) {
     }
 
     if (result.length > 0){
-        MessagePrintReply.replyToAnInteraction(interaction, result);
+       await MessagePrintReply.replyToAnInteraction(interaction, result);
     } else {
-        MessagePrintReply.replyAlertOnInterarction(interaction, LANG._MATHS_ERROR);
+        await MessagePrintReply.replyAlertOnInterarction(interaction, LANG._MATHS_ERROR);
     }
 }
 
