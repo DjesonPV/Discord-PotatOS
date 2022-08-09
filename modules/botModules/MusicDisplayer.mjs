@@ -161,22 +161,21 @@ async function dataToDisplay(metadata){
     let data = {};
 
     // Fetch coulour in less than half a second of use default
-    const colour = await Promise.race([
-        new Promise(async (resolve) => { // Will resolve only if no error
-            let color = undefined;
-            try {
-                color = (await favcolor.fromSiteFavicon( metadata.url.match(/(?:http|https):\/\/(?:[^\/])+\//)[0] )).toHex();
-            } catch (error) {
-                return;
-            }
-            resolve(color); 
-        })
-        ,
-        new Promise (async (resolve) => { // Will resolve after timeout
-            await new Promise((resolve) => setTimeout(resolve, 500));
+    const colour = await new Promise((resolve) => {
+        setTimeout(() => {
             resolve(LANG.MUSICDISPLAYER_WEB_COLOR);
-        })
-    ]);
+            return;
+        }, 500);
+
+        try {
+            favcolor.fromSiteFavicon(metadata.url.match(/(?:http|https):\/\/(?:[^\/])+\//)[0]).then(color => {
+                resolve(color.toHex());
+            });
+        } catch (error) {
+            resolve(LANG.MUSICDISPLAYER_WEB_COLOR);
+            return;
+        } 
+    });
 
     // If metadata were fetch by yt-dlp
     if (metadata.isYoutube) {
