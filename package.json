@@ -31,7 +31,7 @@
     "ffmpeg-static": "^5.0.2",
     "libsodium-wrappers": "^0.7.10",
     "surfyt-api": "^0.1.2",
-    "youtube-dl-exec": "^2.1.4",
+    "youtube-dl-exec": "^2.1.5",
     "ytls": "^1.0.6"
   }
 }
