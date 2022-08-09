@@ -9,3 +9,5 @@ export { maths } from "./slashCommands/mathConstants.mjs";
 export { soundSample } from "./slashCommands/mp3Files.mjs";
 
 export { play, stop, skip, pause } from "./slashCommands/musicPlayer.mjs";
+
+export { radio } from "./slashCommands/radioGarden.mjs";
