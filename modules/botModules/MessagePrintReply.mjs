@@ -13,7 +13,7 @@ import * as LANG from "../Language.mjs";
  * @param {number} duration
  */
 export async function printOnChannel(channel, messageOptions, duration = 0){
-    if (channel == ExploreChannels.text.get(channel.name)){
+    if (channel == ExploreChannels.text.get(channel.id)){
 
         duration = Math.min(180, duration);
 
@@ -39,7 +39,7 @@ export async function printOnChannel(channel, messageOptions, duration = 0){
  * @param {DiscordJs.MessageOptions} messageOptions
  */
 function sendOnChannel(channel, messageOptions){
-    if (channel == ExploreChannels.text.get(channel.name)){
+    if (channel == ExploreChannels.text.get(channel.id)){
         return channel.send(messageOptions);
     }
     else {

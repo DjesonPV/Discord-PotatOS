@@ -1,6 +1,7 @@
 import * as DiscordJsVoice              from '@discordjs/voice';
 import * as DiscordJs                   from 'discord.js';
 import * as NodeUtil                    from 'node:util';
+import ExploreChannels                  from "../ExploreChannels.mjs";
 import MessageSafeDelete                from '../MessageSafeDelete.mjs';
 import Track from './Track.mjs';
 
@@ -75,6 +76,8 @@ export default class MusicSubscription{
                 } finally {
                     this.readyLock = false;
                 }
+            } else if ( newState.subscription.connection.joinConfig.channelId !== this.voiceChannel.id){
+                this.updateVoiceChannel(newState.subscription.connection.joinConfig.channelId);
             }
 
         });
@@ -147,6 +150,10 @@ export default class MusicSubscription{
         return (this.audioPlayer.state.status === DiscordJsVoice.AudioPlayerStatus.Paused);
     }
 
+    updateVoiceChannel(voiceChannelId){
+        this.voiceChannel = ExploreChannels.voice.get(voiceChannelId);
+    }
+
     /** @param {DiscordJs.GuildMember} member */
     isMemberConnected(member){
         return (
@@ -155,6 +162,17 @@ export default class MusicSubscription{
             // And Member is connected to the right VoiceChannel
             (member?.voice?.channel?.id === this.voiceChannel?.id)
         );
+    }
+
+    /** @param {DiscordJs.GuildMember} member */
+    static goodMemberConnection(member){
+        const subscription = MusicSubscription.getSubscription(member?.guild?.id);
+
+        return ( (member.voice?.channel?.id !== undefined) && 
+        (
+            (subscription === undefined) ||
+            (subscription?.isMemberConnected(member)) 
+        ));
     }
 
     async processQueue() {

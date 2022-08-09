@@ -71,7 +71,7 @@ export const stop = {slash: slashStop, command: cmdStop};
 async function cmdPlay(interaction){
     const subscription = MusicSubscription.getSubscription(interaction.guild.id);
     
-    if (goodMemberSubscriptionConnection(subscription, interaction.member))
+    if (MusicSubscription.goodMemberConnection(interaction.member))
     {
         const thinkingMessage = await MessageSafeDelete.startThinking(interaction);
 
@@ -130,28 +130,6 @@ function isItAnURL(text){
     (text.match(/^(https?|http):\/\/([a-zA-Z0-9\-]{1,64}\.){0,}([a-zA-Z0-9\-]{2,63})(\.(xn--)?[a-zA-Z0-9]{2,})(\:[0-9]{1,5})?\/([^\s]*)?$/))
     ;
 }
-
-
-//
-// Connection
-
-/**
- * @param {MusicSubscription} subscription 
- * @param {DiscordJs.GuildMember} member 
- */
-function goodMemberSubscriptionConnection(subscription, member){
-    // Member in a VoiceChannel
-    return (
-        (member.voice?.channel?.id) && // AND
-        (
-            // There is no subscription
-            (!subscription) ||
-            // Or member is in the right voiceChannel
-            (subscription.isMemberConnected(member))
-        )
-    );
-}
-
 
 // ________________________________________________________________
 // Pause

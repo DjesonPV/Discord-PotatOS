@@ -15,10 +15,10 @@ export default class channels{
                 (channel.type === DiscordJs.ChannelType.GuildText)
                 // Can only writes in normal TextChannels
             ){
-                this.text.set(channel.name, channel);
+                this.text.set(channel.id, channel);
             } else
             if (channel.isTextBased()){
-                this.voice.set(channel.name, channel);
+                this.voice.set(channel.id, channel);
             }
         });
     }
