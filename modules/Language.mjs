@@ -50,9 +50,12 @@ export const MUSICDISPLAYER_STOP_REQUEST_RECEIVED = `Requête prise en compte !`
 
 export const MUSICDISPLAYER_BOT_ICON = BOT_ICON;
 export const MUSICDISPLAYER_WEB_ICON = `https://media.discordapp.net/attachments/329613279204999170/975538715223003176/logoWWW.png`;
+export const MUSICDISPLAYER_RADIO_ICON = `https://radio.garden/icons/favicon.png`;
 export const MUSICDISPLAYER_BOT_COLOR = `#FFB46B`;
 export const MUSICDISPLAYER_WEB_COLOR = `#000000`;
+export const MUSICDISPLAYER_RADIO_COLOR = `#0FF388`;
 export const MUSICDISPLAYER_DEFAULT_THUMBNAIL = `https://cdn.discordapp.com/attachments/970417796729143316/1002583819683102770/PotatOS_black_and_white.png`;
+export const MUSICDISPLAYER_RADIO_THUMBNAIL = `https://media.discordapp.net/attachments/970417796729143316/1006689396805861427/unknown.png`
 
 export const MUSICDISPLAYER_LOADING_ASCII_ART = 
 `\`\`\`
@@ -106,9 +109,12 @@ export const _STOP_DESC = `${BOT_NAME} Music Player : STOP | Met fin au lecteur 
 export const _PAUSE_DESC = `${BOT_NAME} Music Player : PAUSE | Met en pause le lecteur de musique`;
 export const _PLAY_DESC = `${BOT_NAME} Music Player : PLAY | (Re)lance le lecteur de musique ou y ajoute une musique`;
 export const _PLAY_QUERY_DESC = `URL du média à jouer ou texte à chercher sur YouTube`;
+export const _RADIO_DESC = `${BOT_NAME} Music Player : RADIO | Ajoute une radio au lecteur de musique`;
+export const _RADIO_QUERY_DESC = `Recherche par nom de radio ou directement un lien de station sur Radio Garden`;
 
 export const _PLAY_SEARCH_NO_RESULT = (query) => `Aucune vidéo trouvée pour {${query}}`;
 export const _PLAY_SEARCH_ERROR = `Problème lors de la recherche`;
+export const _RADIO_LINK_NOT_VALID = (query) => `L'URL fournie n'est pas un lien de station de Radio Garden : ${query}`;
 
 export const _SASS_PC_CMDNAME = `pc`; // pc short for Personal Computer
 export const _SASS_PC_DESC = `Demande à Nathan quand est-ce qu'il reçoit son ordinateur.`; // Ask Nathan when will his computer will be delivered

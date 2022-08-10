@@ -8,7 +8,7 @@ import displayMusicDisplayer            from '../MusicDisplayer.mjs';
 import * as LANG from "../../Language.mjs";
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
-export async function streamVoice(interaction, url, volume){
+export async function streamVoice(interaction, url, volume, restartLive = false){
 
     let subscription = MusicSubscription.getSubscription(interaction.guild.id);
     if (!subscription) subscription = await connectVoice(interaction);
@@ -35,7 +35,7 @@ export async function streamVoice(interaction, url, volume){
 
         track.setVolume(volume);
 
-        if (track.metadata.isFile) subscription.enskip(track);
+        if (restartLive || track.metadata.isFile) subscription.enskip(track);
         else subscription.enqueue(track);
 
         displayMusicDisplayer(interaction.channel);

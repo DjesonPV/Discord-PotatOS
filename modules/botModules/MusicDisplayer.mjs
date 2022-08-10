@@ -27,7 +27,7 @@ export default function displayMusicDisplayer(channel){
                 .then((message) => {
                     subscription.setMessage(message);
                 })
-                .catch((error) => {;})
+                .catch((error) => {console.log(error);})
             ;
         }
         else {
@@ -97,19 +97,13 @@ function musicPlayerButtons(subscription, isLoading = false){
     return new DiscordJs.ActionRowBuilder()
         .addComponents(
             ButtonInteractions.musicPlayer.button,
-            ButtonInteractions.musicPlayerPlayPause.button(subscription.isPaused(), disablePlayPauseButton(subscription, isLoading)),
+            ButtonInteractions.musicPlayerPlayPause.button(subscription.isPaused(), subscription?.currentTrack?.metadata?.isLive, isLoading),
             ButtonInteractions.musicPlayerSkip.button(isLoading),
             ButtonInteractions.musicPlayerStop.button(isLoading || subscription.queue.length<=0),
         )
     ;
 }
 
-function disablePlayPauseButton(subscription, isLoading) {
-    return (
-        isLoading ||
-        subscription?.currentTrack?.metadata?.isLive === true
-    );
-}
 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // PLAYLIST ROW
@@ -131,6 +125,10 @@ function musicPlayerPlaylist(trackList){
         else if (track.metadata.isFile){
             playlistTitle = `${track.metadata.key}`;
             playlistDescription = LANG.MUSICDISPLAYER_THROUGH_COMMAND;
+        }
+        else if (track.metadata.isRadio){
+            playlistTitle = `🟢 ${track.metadata.name}`;
+            playlistDescription = `Radio Garden • ${track.metadata.place}, ${track.metadata.country}`;
         }
         else {
             playlistTitle = `${track.metadata.file}`;
@@ -161,7 +159,8 @@ async function dataToDisplay(metadata){
     let data = {};
 
     // Fetch coulour in less than half a second of use default
-    const colour = await new Promise((resolve) => {
+    const colour = (metadata.isYoutube|| metadataIsInternet(metadata))? 
+    await new Promise((resolve) => {
         setTimeout(() => {
             resolve(LANG.MUSICDISPLAYER_WEB_COLOR);
             return;
@@ -175,7 +174,7 @@ async function dataToDisplay(metadata){
             resolve(LANG.MUSICDISPLAYER_WEB_COLOR);
             return;
         } 
-    });
+    }):LANG.MUSICDISPLAYER_BOT_COLOR;
 
     // If metadata were fetch by yt-dlp
     if (metadata.isYoutube) {
@@ -199,6 +198,18 @@ async function dataToDisplay(metadata){
             name    : LANG.MUSICDISPLAYER_COMMAND_CALLED_SOUND(metadata.key),
             iconURL : LANG.MUSICDISPLAYER_BOT_ICON,
         };
+
+    } else if (metadata.isRadio) {
+        data.color          = LANG.MUSICDISPLAYER_RADIO_COLOR;
+        data.title          = `${metadata.name}`;
+        data.description    = `${metadata.place}, ${metadata.country}`;
+        data.author = {
+            name    : `Radio Garden`,
+            url     : `${metadata.url}`,
+            iconURL : LANG.MUSICDISPLAYER_RADIO_ICON,
+        };
+        data.url            = `${metadata.website}`;
+        data.thumbnail      = LANG.MUSICDISPLAYER_RADIO_THUMBNAIL;
 
     // if it's file is from Internet and not parsed by yt-dlp
     } else {
@@ -313,4 +324,8 @@ function YYYYMMDDToString(yyyymmdd){
     let [year, month, day] = yyyymmdd.match(/(\d{4})(\d{2})(\d{2})/).slice(1,4);
 
     return LANG.DATE_TEXT_FORMAT(year.replace(/^0+/, ''), (month.replace(/^0+/, ''))-1, day.replace(/^0+/, ''));
+}
+
+function metadataIsInternet(metadata){
+    return (!metadata.isYoutube && !metadata.isFile && !metadata.isRadio);
 }

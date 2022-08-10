@@ -1,8 +1,10 @@
 import * as DiscordJsVoice              from '@discordjs/voice';
 import * as DiscordJs                   from 'discord.js';
 import * as NodeUtil                    from 'node:util';
+import ExploreChannels                  from "../ExploreChannels.mjs";
 import MessageSafeDelete                from '../MessageSafeDelete.mjs';
 import Track from './Track.mjs';
+import * as Voice                       from "./Voice.mjs"
 
 const wait = NodeUtil.promisify(setTimeout);
 
@@ -32,6 +34,7 @@ export default class MusicSubscription{
        this.guildName = interaction.guild.name;
        /** @type {DiscordJs.Message} */
        this.message = undefined;
+       this.stopedForLive = false;
 
         // Voice Connection
         this.voiceConnection.on('stateChange', async (_, newState) => {
@@ -75,13 +78,15 @@ export default class MusicSubscription{
                 } finally {
                     this.readyLock = false;
                 }
+            } else if ( newState.subscription.connection.joinConfig.channelId !== this.voiceChannel.id){
+                this.updateVoiceChannel(newState.subscription.connection.joinConfig.channelId);
             }
 
         });
 
         // Audio Player
         this.audioPlayer.on('stateChange', async (oldState, newState) => {
-            if (newState.status === DiscordJsVoice.AudioPlayerStatus.Idle /*&& oldState.status !== DiscordJsVoice.AudioPlayerStatus.Idle*/){
+            if (newState.status === DiscordJsVoice.AudioPlayerStatus.Idle && !this.stopedForLive){
                 await oldState.resource.metadata.onFinish();
                 this.processQueue();
             } else if (newState.status === DiscordJsVoice.AudioPlayerStatus.Playing){
@@ -136,6 +141,20 @@ export default class MusicSubscription{
         this.audioPlayer.unpause();
     }
 
+    stopLive(){
+        this.queueLock = true;
+        this.stopedForLive = true;
+        this.audioPlayer.stop();
+        this.setSelfMute(true);
+    }
+
+    async restartLive(interaction){
+        this.setSelfMute(false);
+        this.queueLock = false;
+        this.stopedForLive = false;
+        await Voice.streamVoice(interaction, this.currentTrack.url, this.currentTrack.volume, true);
+    }
+
     setSelfMute(selfMute){
         return this.voiceConnection.rejoin({
             ...this.voiceConnection.joinConfig,
@@ -144,7 +163,11 @@ export default class MusicSubscription{
     }
 
     isPaused(){
-        return (this.audioPlayer.state.status === DiscordJsVoice.AudioPlayerStatus.Paused);
+        return ((this.audioPlayer.state.status === DiscordJsVoice.AudioPlayerStatus.Paused) || this.stopedForLive);
+    }
+
+    updateVoiceChannel(voiceChannelId){
+        this.voiceChannel = ExploreChannels.voice.get(voiceChannelId);
     }
 
     /** @param {DiscordJs.GuildMember} member */
@@ -155,6 +178,17 @@ export default class MusicSubscription{
             // And Member is connected to the right VoiceChannel
             (member?.voice?.channel?.id === this.voiceChannel?.id)
         );
+    }
+
+    /** @param {DiscordJs.GuildMember} member */
+    static goodMemberConnection(member){
+        const subscription = MusicSubscription.getSubscription(member?.guild?.id);
+
+        return ( (member.voice?.channel?.id !== undefined) && 
+        (
+            (subscription === undefined) ||
+            (subscription?.isMemberConnected(member)) 
+        ));
     }
 
     async processQueue() {

@@ -13,7 +13,7 @@ import * as LANG from "../Language.mjs";
  * @param {number} duration
  */
 export async function printOnChannel(channel, messageOptions, duration = 0){
-    if (channel == ExploreChannels.text.get(channel.name)){
+    if (channel == ExploreChannels.text.get(channel.id)){
 
         duration = Math.min(180, duration);
 
@@ -39,7 +39,7 @@ export async function printOnChannel(channel, messageOptions, duration = 0){
  * @param {DiscordJs.MessageOptions} messageOptions
  */
 function sendOnChannel(channel, messageOptions){
-    if (channel == ExploreChannels.text.get(channel.name)){
+    if (channel == ExploreChannels.text.get(channel.id)){
         return channel.send(messageOptions);
     }
     else {
@@ -64,15 +64,18 @@ export function printAlertOnChannel(channel, text, duration){
  * @param {DiscordJs.CommandInteraction} interaction 
  * @param {string} text 
  */
-export function replyAlertOnInterarction(interaction, text){
+export async function replyAlertOnInterarction(interaction, text){
     let messageOptions = getAlertMessageOptions(text);
     messageOptions.ephemeral = true;
     
     if (interaction.replied) {
-        interaction.followUp(messageOptions);
+        await interaction.followUp(messageOptions);
+    } else if (interaction.deferred){
+        await interaction.followUp('Alert !');
+        await interaction.followUp(messageOptions);
     }
     else {
-        interaction.reply(messageOptions);
+        await interaction.reply(messageOptions);
     }
 }
 
@@ -99,7 +102,7 @@ export function getAlertMessageOptions(text){
  * @param {string} text 
  * @param {number} duration 
  */
-export function replyToAnInteraction(interaction, text, duration = 0){
+export async function replyToAnInteraction(interaction, text, duration = 0){
 
     const durationButtonActionRow = MessageSafeDelete.durationButtonActionRowBuilder(duration);
 
@@ -110,7 +113,7 @@ export function replyToAnInteraction(interaction, text, duration = 0){
     if (text.length   != 0) messageOptions.content = text;
     if (duration > 0 ) messageOptions.components = [durationButtonActionRow];
 
-    interaction.reply(messageOptions)
+    await interaction.reply(messageOptions)
         .then((message) => {
             MessageSafeDelete.deleteMessageAfterDuration(message, duration);
         })

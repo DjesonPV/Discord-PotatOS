@@ -7,8 +7,8 @@ import * as LANG from "../../Language.mjs";
 // Reply hello
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
-export function cmdHello(interaction){
-    MessagePrintReply.replyToAnInteraction(interaction, LANG._HELLO_HI, 5);
+export async function cmdHello(interaction){
+    await MessagePrintReply.replyToAnInteraction(interaction, LANG._HELLO_HI, 5);
 }
 
 const slashHello = new DiscordJs.SlashCommandBuilder()

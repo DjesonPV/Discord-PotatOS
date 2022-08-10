@@ -45,8 +45,8 @@ export const pk = {slash: slashPk, command: cmdPk};
  * "PUTAIN" is refering the french interjection of rage
  * @param {DiscordJs.ChatInputCommandInteraction} interaction
  */
-function cmdPUTAIN(interaction){ 
-    MessagePrintReply.replyToAnInteraction(interaction, "https://c.tenor.com/Xk5yKpCr96sAAAAd/christmas-tree-hit.gif", 3);
+async function cmdPUTAIN(interaction){ 
+    await MessagePrintReply.replyToAnInteraction(interaction, "https://c.tenor.com/Xk5yKpCr96sAAAAd/christmas-tree-hit.gif", 3);
 }
 
 const slashPUTAIN = new DiscordJs.SlashCommandBuilder()
