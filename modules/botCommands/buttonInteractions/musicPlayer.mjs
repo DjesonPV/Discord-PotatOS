@@ -12,7 +12,11 @@ import * as LANG from "../../Language.mjs";
 /** @param {DiscordJs.ButtonInteraction} interaction */
 function commandMusicPlayerStop(interaction){
     const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
-    if (subscription?.isMemberConnected(interaction.member)) {
+    
+    if (subscription?.isMemberConnected(interaction.member) && subscription?.queue.length <= 0) {
+        subscription.skip();
+    }
+    else if (subscription?.isMemberConnected(interaction.member)) {
 
         let stopButtonsActionRow = new DiscordJs.ActionRowBuilder()
         .addComponents(
