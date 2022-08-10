@@ -49,6 +49,7 @@ async function cmdMaths(interaction) {
 
         case `one`:
             result = `${LANG._MATHS_CONSTANT__ONE} = 1`;
+            break;
 
         case `exp`:
             result = exp(interaction.options.getNumber(LANG._MATHS_NUMBER_NAME));

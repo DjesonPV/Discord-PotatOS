@@ -20,7 +20,7 @@ export async function streamVoice(interaction, url, volume, restartLive = false)
     try{
         const track = await Track.fetchData(url, {
             async onStart(){
-                displayMusicDisplayer(subscription.message.channel ?? interaction.channel);
+                displayMusicDisplayer(subscription?.message?.channel ?? interaction.channel);
                 subscription.setSelfMute(false);
             },
             async onFinish(){
