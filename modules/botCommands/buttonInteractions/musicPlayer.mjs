@@ -183,12 +183,14 @@ async function commandMusicPlayerPlayPause(interaction) {
     
     if (subscription?.isMemberConnected(interaction.member)) {
         
-        if (subscription.isPaused()) {
-            subscription.resume(); 
+        if (subscription.currentTrack?.metadata?.isLive) {
+            if (subscription.isPaused()) subscription.restartLive(interaction);
+            else subscription.stopLive();
+        } else {
+            if (subscription.isPaused()) subscription.resume();
+            else subscription.pause();
         }
-        else { 
-            subscription.pause();
-        }
+
         displayMusicDisplayer(interaction.message.channel);
     }
     interaction.deferUpdate();
@@ -196,12 +198,12 @@ async function commandMusicPlayerPlayPause(interaction) {
 
 const customIdPlayPause = 'PotatOSMusicPlayerPlayPause';
 
-const buttonMusicPlayerPlayPause = (isPaused, disable) => {
+const buttonMusicPlayerPlayPause = (isPaused, isLive, disable) => {
     return new DiscordJs.ButtonBuilder()
         .setCustomId(customIdPlayPause)
         .setLabel(`${isPaused?LANG.MUSICDISPLAYER_PLAY:LANG.MUSICDISPLAYER_PAUSE}`)
         .setStyle(`${isPaused?DiscordJs.ButtonStyle.Success:DiscordJs.ButtonStyle.Secondary}`)
-        .setEmoji(`${isPaused?'▶':'⏸'}`)
+        .setEmoji(`${isPaused?(isLive?'⏩':'▶'):'⏸'}`)
         .setDisabled(disable)
     ;
 }

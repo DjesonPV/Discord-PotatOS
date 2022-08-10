@@ -250,10 +250,11 @@ async function fromRadioGarden(url, methods) {
 
             // Data use in the MusicDisplayer Embed
             name: info.title,
-            url: `https://radio.garden${info.website}`,
+            url: `https://radio.garden${info.url}`,
             website: info.website,
             place: info.place.title,
             country: info.country.title,
+            isLive: true,
         };
 
         return define(url, methods, metadata);

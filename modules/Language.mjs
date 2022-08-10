@@ -53,7 +53,7 @@ export const MUSICDISPLAYER_WEB_ICON = `https://media.discordapp.net/attachments
 export const MUSICDISPLAYER_RADIO_ICON = `https://radio.garden/icons/favicon.png`;
 export const MUSICDISPLAYER_BOT_COLOR = `#FFB46B`;
 export const MUSICDISPLAYER_WEB_COLOR = `#000000`;
-export const MUSICDISPLAYER_RADIO_COLOR = `##0FF388`;
+export const MUSICDISPLAYER_RADIO_COLOR = `#0FF388`;
 export const MUSICDISPLAYER_DEFAULT_THUMBNAIL = `https://cdn.discordapp.com/attachments/970417796729143316/1002583819683102770/PotatOS_black_and_white.png`;
 export const MUSICDISPLAYER_RADIO_THUMBNAIL = `https://media.discordapp.net/attachments/970417796729143316/1006689396805861427/unknown.png`
 

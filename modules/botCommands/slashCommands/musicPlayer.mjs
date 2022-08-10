@@ -83,7 +83,7 @@ async function cmdPlay(interaction) {
         // query is an URL 
         else if (isItAnURL(query))
         {
-            await Voice.streamVoice(interaction, query, 0.2);
+            await Voice.streamVoice(interaction, query, 0.15);
         }
         // query is not an URL, so we search on YouTube
         else {
@@ -97,7 +97,7 @@ async function cmdPlay(interaction) {
             ;
 
             if (searchResult[0] && searchResult[0].url) {
-                await Voice.streamVoice(interaction, searchResult[0].url, 0.2);
+                await Voice.streamVoice(interaction, searchResult[0].url, 0.15);
             }
             else await MessagePrintReply.replyAlertOnInterarction(interaction, LANG._PLAY_SEARCH_NO_RESULT(query));
         }
@@ -167,7 +167,7 @@ async function cmdRadio (interaction) {
         // query is an URL 
         if (isItAnURL(query)) {
             if (RadioGarden.matchRadioChannelforId(query) != null) {
-                await Voice.streamVoice(interaction, query, 0.2);
+                await Voice.streamVoice(interaction, query, 0.15);
             } else {
                 await MessagePrintReply.replyAlertOnInterarction(interaction, LANG._RADIO_LINK_NOT_VALID(query));
             }
@@ -181,7 +181,7 @@ async function cmdRadio (interaction) {
             ;
 
             if (searchURL != undefined) {
-                await Voice.streamVoice(interaction, `http://radio.garden${searchURL}`, 0.2);
+                await Voice.streamVoice(interaction, `http://radio.garden${searchURL}`, 0.15);
             }
         }
 
