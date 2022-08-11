@@ -46,18 +46,17 @@ export default class MusicSubscription{
                     } catch (err){
                         this.voiceConnection.destroy();
                         // Probably removed from voice channel
-
                     }
 
                 } else if (this.voiceConnection.rejoinAttempts < 10){
-                        // The disconneced can be recoverable, and we didnt try to reconnect to much, so we'll reconnect
-                        await wait((this.voiceConnection.rejoinAttempts + 1)* 5000);
-                        this.voiceConnection.rejoin();
-                    }
-                    else {
-                        // can be recoverable, but we tried too many times
-                        this.voiceConnection.destroy();
-                    }
+                    // The disconneced can be recoverable, and we didnt try to reconnect too much, so we'll reconnect
+                    await wait((this.voiceConnection.rejoinAttempts + 1)* 5000);
+                    this.voiceConnection.rejoin();
+                }
+                else {
+                    // can be recoverable, but we tried too many times
+                    this.voiceConnection.destroy();
+                }
             
             } else if (newState.status === DiscordJsVoice.VoiceConnectionStatus.Destroyed){
                 this.stop();
@@ -125,7 +124,7 @@ export default class MusicSubscription{
     skip(){
         this.audioPlayer.stop();
         this.resume();
-     }
+    }
 
     setMessage(msg){
         this.message = msg;

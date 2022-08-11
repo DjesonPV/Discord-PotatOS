@@ -5,6 +5,7 @@ import MusicSubscription                from "../../botModules/voice/MusicSubscr
 import displayMusicDisplayer            from "../../botModules/MusicDisplayer.mjs";
 import MessageSafeDelete                from '../../botModules/MessageSafeDelete.mjs';
 import * as DiscordJs                   from 'discord.js';
+import * as UTILS                       from '../../botModules/Utils.mjs';
 import * as LANG                        from "../../Language.mjs";
 import * as RadioGarden                 from '../../botModules/RadioGarden.mjs';
 
@@ -81,7 +82,7 @@ async function cmdPlay(interaction) {
             await __playPause(interaction, false);
         }
         // query is an URL 
-        else if (isItAnURL(query))
+        else if (UTILS.isItAnURL(query))
         {
             await Voice.streamVoice(interaction, query, 0.15);
         }
@@ -118,15 +119,6 @@ const slashPlay = new DiscordJs.SlashCommandBuilder()
 ;
 
 export const play = { slash: slashPlay, command: cmdPlay };
-
-//
-// URL test
-
-function isItAnURL(text) {
-    return (typeof text == "string") &&
-    (text.match(/^https?:\/\/(?:[a-zA-Z0-9\-]{1,64}\.){0,}(?:[a-zA-Z0-9\-]{2,63})(?:\.(?:xn--)?[a-zA-Z0-9]{2,})(\:[0-9]{1,5})?(?:\/[^\s]*)?$/))
-    ;
-}
 
 // _____________________________________________________________________________________________________________________
 // Pause
@@ -165,7 +157,7 @@ async function cmdRadio (interaction) {
         const query = interaction.options.getString('query');
 
         // query is an URL 
-        if (isItAnURL(query)) {
+        if (UTILS.isItAnURL(query)) {
             if (RadioGarden.matchRadioChannelforId(query) != null) {
                 await Voice.streamVoice(interaction, query, 0.15);
             } else {

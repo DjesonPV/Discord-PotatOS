@@ -1,3 +1,5 @@
 // SelectMenuInteractions
 
-export { musicPlayerPlaylist } from './selectMenuInteractions/musicPlayer.mjs';
+export {
+    musicPlayerPlaylist,
+} from './selectMenuInteractions/musicPlayer.mjs';

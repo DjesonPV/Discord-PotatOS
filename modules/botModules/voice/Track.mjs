@@ -10,17 +10,24 @@ import * as LANG from '../../Language.mjs';
 import * as MP3Files from "./MP3Files.mjs";
 
 export default class Track {
-    constructor({ url, metadata, onStart, onFinish, onError }) {
+    constructor(url, metadata, methods) {
         /**@type {string} */
         this.url = url;
         this.metadata = metadata;
         this.volume = 1.0;
 
-        this.onStart = onStart;
-        this.onFinish = onFinish;
-        this.onError = onError;
+        this.onStart  = async () => { await methods.onStart();  this.onStart  = () => {;};};
+        this.onFinish = async () => { await methods.onFinish(); this.onFinish = () => {;};};
+        this.onError  = async () => { await methods.onError();  this.onError  = () => {;};};
         /** @type {string} */
         this.snowflake = null;
+    }
+
+    static Types = class TrackTypeEnum {
+        static YoutubeDL    = 'YouTube Download';
+        static MP3File      = 'PotatOS File';
+        static WebLink      = 'URL File';
+        static Radio        = 'Radio Garden';
     }
 
     // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -182,9 +189,7 @@ async function fromYTDLP(url, methods) {
 
     if (parsedInfo.extractor !== 'generic'){
         const metadata = {
-            isYoutube: true,    // !
-            isFile: false,      // !
-            isRadio: false,   // !
+            type: Track.Types.YoutubeDL,
 
             // Data use in the MusicDsiplayer Embed
             title: parsedInfo.fulltitle || parsedInfo.title,
@@ -199,7 +204,7 @@ async function fromYTDLP(url, methods) {
             isLive: parsedInfo.is_live,
         };
 
-        return define(url, methods, metadata);
+        return new Track(url, metadata, methods);
     }
     else return fromInternet(url, methods);
 }
@@ -207,12 +212,10 @@ async function fromYTDLP(url, methods) {
 /** Fetch data from the MP3Files */
 function fromFile(url, methods) {
 
-    const mp3Key = getMP3KeyFromURL(url);
+    const mp3Key = Object.keys(MP3Files.files).find(key => MP3Files.files[key].file === url.slice(MP3Files.path.length))[0];
 
     const metadata = {
-        isYoutube: false, // !
-        isFile: true,     // !
-        isRadio: false,   // !
+        type: Track.Types.MP3File,
 
         // Data use in the MusicDisplayer Embed
         title: MP3Files.files[mp3Key].title,
@@ -220,7 +223,7 @@ function fromFile(url, methods) {
         key: mp3Key,
     };
 
-    return define(url, methods, metadata);
+    return new Track(url, metadata, methods);
 }
 
 /** Try do to something for Internet Files */
@@ -229,9 +232,7 @@ function fromInternet(url, methods) {
     const uri = url.split('/').filter(Boolean); //Split an url and remove empty strings
 
     const metadata = {
-        isYoutube: false, // !
-        isFile: false,    // !
-        isRadio: false,   // !
+        type: Track.Types.WebLink,
 
         // Data use in the MusicDisplayer Embed
         source: uri[1],
@@ -240,7 +241,7 @@ function fromInternet(url, methods) {
         favicon: `https://s2.googleusercontent.com/s2/favicons?domain_url=${url}&sz=48`
     };
 
-    return define(url, methods, metadata);
+    return new Track(url, metadata, methods);
 }
 
 /** Fetch Data from Radio Garden */
@@ -251,9 +252,7 @@ async function fromRadioGarden(url, methods) {
     if (info) {
 
         const metadata = {
-            isYoutube: false, // !
-            isFile: false,    // !
-            isRadio: true,    // !
+            type: Track.Types.Radio,
 
             // Data use in the MusicDisplayer Embed
             name: info.title,
@@ -264,49 +263,7 @@ async function fromRadioGarden(url, methods) {
             isLive: true,
         };
 
-        return define(url, methods, metadata);
+        return new Track(url, metadata, methods);
     }
     else return fromInternet(url, methods);
-}
-
-
-// =====================================================================================================================
-// WRAPPED METHODS CONSTRUCTOR
-//
-function define(url, methods, metadata) {
-
-    const wrappedMethods = {
-        onStart() {
-            wrappedMethods.onStart = () => {;};
-            methods.onStart();
-        },
-        onFinish() {
-            wrappedMethods.onFinish = () => {;};
-            methods.onFinish();
-        },
-        onError(error) {
-            wrappedMethods.onError = () => {;};
-            methods.onError(error);
-        },
-    };
-
-    return new Track({
-        url,
-        metadata: metadata,
-        ...wrappedMethods,
-    }
-    )
-}
-
-
-// =====================================================================================================================
-// UTILITARY FUNCTIONS
-//
-
-function getMP3KeyFromURL(url) {
-    const key = Object.keys(MP3Files.files).filter(function (k) {
-        return MP3Files.files[k].file === url.slice(MP3Files.path.length);
-    })[0];
-
-    return key;
 }

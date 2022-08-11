@@ -68,3 +68,9 @@ export function YYYYMMDDToString(yyyymmdd){
     return LANG.DATE_TEXT_FORMAT(year.replace(/^0+/, ''), (month.replace(/^0+/, ''))-1, day.replace(/^0+/, ''));
 }
 
+/** @param {string} text */
+export function isItAnURL(text) {
+    return (typeof text == "string") &&
+    (text.match(/^https?:\/\/(?:[a-zA-Z0-9\-]{1,64}\.){0,}(?:[a-zA-Z0-9\-]{2,63})(?:\.(?:xn--)?[a-zA-Z0-9]{2,})(\:[0-9]{1,5})?(?:\/[^\s]*)?$/))
+    ;
+}

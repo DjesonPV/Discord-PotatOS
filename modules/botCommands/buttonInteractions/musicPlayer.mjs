@@ -18,17 +18,22 @@ function commandMusicPlayerStop(interaction){
     }
     else if (subscription?.isMemberConnected(interaction.member)) {
 
+        const StopButtonIDs = class {
+            static YesStopIt = 'PotatOSMusicPlayerStopYESSTOPIT';
+            static Dont = 'PotatOSMusicPlayerStopDONT';
+        }
+
         let stopButtonsActionRow = new DiscordJs.ActionRowBuilder()
         .addComponents(
             new DiscordJs.ButtonBuilder()
-            .setCustomId('PotatOSMusicPlayerStopYESSTOPIT')
+            .setCustomId(StopButtonIDs.YesStopIt)
             .setLabel(LANG.MUSICDISPLAYER_STOP_VALIDATION)
             .setStyle(DiscordJs.ButtonStyle.Danger)
             .setEmoji('❕')
         )
         .addComponents(
             new DiscordJs.ButtonBuilder()
-            .setCustomId('PotatOSMusicPlayerStopDONT')
+            .setCustomId(StopButtonIDs.Dont)
             .setLabel(LANG.MUSICDISPLAYER_STOP_KEEPPLAYING)
             .setStyle(DiscordJs.ButtonStyle.Secondary)
             .setEmoji('🎧')
@@ -45,10 +50,7 @@ function commandMusicPlayerStop(interaction){
         const filter = button => {
             return (
                 (button.user.id === interaction.member.id) &&
-                (
-                    (button.customId === 'PotatOSMusicPlayerStopYESSTOPIT') ||
-                    (button.customId === 'PotatOSMusicPlayerStopDONT')
-                )
+                ( Object.values(StopButtonIDs).find(id => id === button.customId) !== undefined )
             );
         };
         
@@ -58,7 +60,7 @@ function commandMusicPlayerStop(interaction){
             collectedInteraction.deferUpdate();
             
             if (subscription?.isMemberConnected(collectedInteraction.member)){
-                if (collectedInteraction.customId === 'PotatOSMusicPlayerStopYESSTOPIT') {
+                if (collectedInteraction.customId === StopButtonIDs.YesStopIt) {
                     YesStopIt(collectedInteraction.member);
                 }
                 

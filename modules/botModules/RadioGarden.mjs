@@ -7,9 +7,7 @@ export async function searchForRadioUrl(query) {
         /** @type {string} */
         const url = (await Axios.get(`https://radio.garden/api/search?q=${encodeURIComponent(query)}`))?.data
         ?.hits?.hits
-        ?.find((hit) => {
-            return (hit?._source?.type === 'channel');
-        })
+        ?.find((hit) => hit?._source?.type === 'channel')
         ?._source?.url;
 
         if (url !== undefined) return url;

@@ -3,6 +3,7 @@ import * as UTILS from '../../botModules/Utils.mjs';
 import * as LANG from '../../Language.mjs';
 import displayMusicDisplayer from "../../botModules/MusicDisplayer.mjs";
 import MusicSubscription from '../../botModules/voice/MusicSubscription.mjs';
+import Track from '../../botModules/voice/Track.mjs';
 
 /** @param {DiscordJs.SelectMenuInteraction} interaction */
 function commandPlaylist(interaction) {
@@ -18,7 +19,13 @@ function commandPlaylist(interaction) {
     const selectedTrack = trackList.find(track => track.snowflake === selected);
     const selectedIndex = trackList.indexOf(selectedTrack);
 
-    const [title, description] = getTitleAndDescription(selectedTrack);
+    const {title, description} = getTitleAndDescription(selectedTrack);
+
+    const PlaylistButtonIDs = class {
+        static DoNothing = 'PotatOSMusicPlayerPlaylistDoNothing';
+        static PlayNext = 'PotatOSMusicPlayerPlaylistPlayNext';
+        static Remove = 'PotatOSMusicPlayerPlaylistRemove';
+    };
 
     /** @type {DiscordJs.InteractionReplyOptions} */
     const messageOptions = {
@@ -33,19 +40,19 @@ function commandPlaylist(interaction) {
             new DiscordJs.ActionRowBuilder()
                 .addComponents(
                     new DiscordJs.ButtonBuilder()
-                        .setCustomId('PotatOSMusicPlayerPlaylistDoNothing')
+                        .setCustomId(PlaylistButtonIDs.DoNothing)
                         .setLabel(LANG.MUSICDISPLAYER_PLAYLIST_DO_NOTHING)
                         .setStyle(DiscordJs.ButtonStyle.Secondary)
                         .setEmoji('🔙')
                     ,
                     new DiscordJs.ButtonBuilder()
-                        .setCustomId('PotatOSMusicPlayerPlaylistPlayNext')
+                        .setCustomId(PlaylistButtonIDs.PlayNext)
                         .setLabel(LANG.MUSICDISPLAYER_PLAYLIST_PLAY_NEXT)
                         .setStyle(DiscordJs.ButtonStyle.Primary)
                         .setEmoji('🔝')
                     ,
                     new DiscordJs.ButtonBuilder()
-                        .setCustomId('PotatOSMusicPlayerPlaylistRemove')
+                        .setCustomId(PlaylistButtonIDs.Remove)
                         .setLabel(LANG.MUSICDISPLAYER_PLAYLIST_REMOVE)
                         .setStyle(DiscordJs.ButtonStyle.Danger)
                         .setEmoji('🗑')
@@ -62,11 +69,7 @@ function commandPlaylist(interaction) {
         const filter = button => {
             return (
                 (button.user.id === interaction.member.id) &&
-                (
-                    (button.customId === 'PotatOSMusicPlayerPlaylistDoNothing') ||
-                    (button.customId === 'PotatOSMusicPlayerPlaylistPlayNext') ||
-                    (button.customId === 'PotatOSMusicPlayerPlaylistRemove')
-                )
+                (Object.values(PlaylistButtonIDs).find(id => id === button.customId) !== undefined)
             );
         };
         
@@ -76,9 +79,9 @@ function commandPlaylist(interaction) {
             collectedInteraction.deferUpdate();
             
             if (subscription?.isMemberConnected(collectedInteraction.member)){
-                if (collectedInteraction.customId === 'PotatOSMusicPlayerPlaylistPlayNext') {
+                if (collectedInteraction.customId === PlaylistButtonIDs.PlayNext) {
                     subscription.moveTrackToFirstPosition(selectedTrack);
-                } else if (collectedInteraction.customId === 'PotatOSMusicPlayerPlaylistRemove') {
+                } else if (collectedInteraction.customId === PlaylistButtonIDs.Remove) {
                     subscription.removeTrack(selectedTrack);
                 }
 
@@ -132,7 +135,7 @@ function buildOptions(trackList) {
     let options = [];
 
     trackList.forEach((track, i) => {
-        const [title, description] = getTitleAndDescription(track);
+        const {title, description} = getTitleAndDescription(track);
         options.push({
             label : (`${title}`).substring(0, 100),
             description : (`${description}`).substring(0, 100),
@@ -146,21 +149,37 @@ function buildOptions(trackList) {
 
 function getTitleAndDescription(track) {
 
-    const title = 
-    track.metadata.isYoutube  ?  `${track.metadata.title}`
-    :( track.metadata.isFile  ? `${track.metadata.key}`
-    :( track.metadata.isRadio ? `🟢 ${track.metadata.name}` 
-    :/* else                 */ `${track.metadata.file ?? LANG.MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_TITLE}`
-    ));
+    switch (track.metadata.type) {
+        case Track.Types.YoutubeDL:
+            return {
+                title       : `${track.metadata.title}`,
+                description : `${track.metadata.author} • ${track.metadata.isLive?`⬤ LIVE`:UTILS.durationToString(track.metadata.duration)} • ${UTILS.viewsToString(track.metadata.viewCount)} • ${UTILS.YYYYMMDDToString(track.metadata.uploadDate)}`,
+            };
 
-    const description = 
-    track.metadata.isYoutube  ? `${track.metadata.author} • ${track.metadata.isLive?`⬤ LIVE`:UTILS.durationToString(track.metadata.duration)} • ${UTILS.viewsToString(track.metadata.viewCount)} • ${UTILS.YYYYMMDDToString(track.metadata.uploadDate)}`
-    :( track.metadata.isFile  ? LANG.MUSICDISPLAYER_THROUGH_COMMAND
-    :( track.metadata.isRadio ? `Radio Garden • ${track.metadata.place}, ${track.metadata.country}` 
-    :/* else                 */ `${track.metadata.url ?? LANG.MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_DESC}`
-    ));
+        case Track.Types.MP3File:
+            return {
+                title       : `${track.metadata.key}`,
+                description : LANG.MUSICDISPLAYER_THROUGH_COMMAND,
+            };
 
-    return [title, description];
+        case Track.Types.Radio:
+            return {
+                title       : `🟢 ${track.metadata.name}`,
+                description : `Radio Garden • ${track.metadata.place}, ${track.metadata.country}`,
+            };
+
+        case Track.Types.WebLink:
+            return {
+                title       : `${track.metadata.file}`,
+                description : `${track.metadata.url}`,
+            };
+    
+        default:
+            return {
+                title       : LANG.MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_TITLE,
+                description : LANG.MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_DESC,
+            };
+    }    
 }
 
 function getDisplayEmoji(i){

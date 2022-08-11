@@ -46,7 +46,7 @@ export const pk = {slash: slashPk, command: cmdPk};
  * @param {DiscordJs.ChatInputCommandInteraction} interaction
  */
 async function cmdPUTAIN(interaction){ 
-    await MessagePrintReply.replyToAnInteraction(interaction, "https://c.tenor.com/Xk5yKpCr96sAAAAd/christmas-tree-hit.gif", 3);
+    await MessagePrintReply.replyToAnInteraction(interaction, "https://c.tenor.com/Xk5yKpCr96sAAAAd/christmas-tree-hit.gif", 10);
 }
 
 const slashPUTAIN = new DiscordJs.SlashCommandBuilder()
