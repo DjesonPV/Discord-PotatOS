@@ -34,6 +34,7 @@ export async function streamVoice(interaction, url, volume, restartLive = false)
         });
 
         track.setVolume(volume);
+        track.setSnowflake(interaction.id);
 
         if (restartLive || track.metadata.isFile) subscription.enskip(track);
         else subscription.enqueue(track);

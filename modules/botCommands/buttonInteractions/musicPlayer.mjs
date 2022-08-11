@@ -55,6 +55,7 @@ function commandMusicPlayerStop(interaction){
         const collector = interaction.channel.createMessageComponentCollector({ filter, max : 1});
 
         collector.on('collect', collectedInteraction => {
+            collectedInteraction.deferUpdate();
             
             if (subscription?.isMemberConnected(collectedInteraction.member)){
                 if (collectedInteraction.customId === 'PotatOSMusicPlayerStopYESSTOPIT') {
@@ -65,7 +66,6 @@ function commandMusicPlayerStop(interaction){
                     content: LANG.MUSICDISPLAYER_STOP_REQUEST_RECEIVED, 
                     components : []
                 });
-                collectedInteraction.deferUpdate();
             }
             else {
                 const messageOptions = MessagePrintReply.getAlertMessageOptions(LANG._MUSICPLAYER_NOT_CONNECTED);
@@ -73,7 +73,6 @@ function commandMusicPlayerStop(interaction){
                 messageOptions.components = [];
 
                 interaction.editReply(messageOptions);
-                collectedInteraction.deferUpdate();
             }
            
         });

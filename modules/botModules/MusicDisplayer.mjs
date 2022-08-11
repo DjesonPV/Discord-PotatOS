@@ -4,6 +4,7 @@ import MusicSubscription                from "./voice/MusicSubscription.mjs";
 import MessageSafeDelete                from "./MessageSafeDelete.mjs";
 import * as ButtonInteractions          from "../botCommands/ButtonInteractions.mjs";
 import * as SelectMenuInteractions      from "../botCommands/SelectMenuInteractions.mjs";
+import * as UTILS from './Utils.mjs';
 import * as LANG from "../Language.mjs";
 import favcolor from "favcolor";
 
@@ -109,48 +110,11 @@ function musicPlayerButtons(subscription, isLoading = false){
 // PLAYLIST ROW
 
 function musicPlayerPlaylist(trackList){
-
-    let options = [];
-    const emojis = ['🎶', '⏭', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
-
-    trackList.forEach((track, i) => {
-        
-        let playlistTitle = LANG.MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_TITLE;
-        let playlistDescription = LANG.MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_TITLE;
-
-        if (track.metadata.isYoutube){
-            playlistTitle = `${track.metadata.title}`;
-            playlistDescription = `${track.metadata.author} • ${track.metadata.isLive?`⬤ LIVE`:durationToString(track.metadata.duration)} • ${viewsToString(track.metadata.viewCount)} • ${YYYYMMDDToString(track.metadata.uploadDate)}`;
-        }
-        else if (track.metadata.isFile){
-            playlistTitle = `${track.metadata.key}`;
-            playlistDescription = LANG.MUSICDISPLAYER_THROUGH_COMMAND;
-        }
-        else if (track.metadata.isRadio){
-            playlistTitle = `🟢 ${track.metadata.name}`;
-            playlistDescription = `Radio Garden • ${track.metadata.place}, ${track.metadata.country}`;
-        }
-        else {
-            playlistTitle = `${track.metadata.file}`;
-            playlistDescription = `${track.metadata.url}`
-        }
-
-        let option = {
-            label : (`${playlistTitle}`).substring(0, 100),
-            description : (`${playlistDescription}`).substring(0, 100),
-            value : `${i}`,
-            emoji : emojis[i] ?? '#️⃣',
-        };
-
-        options.push(option);
-    });
-
-    const playlistRow = new DiscordJs.ActionRowBuilder()
-    .addComponents(
-        SelectMenuInteractions.musicPlayerPlaylist.selectMenu(options, trackList.length-1),
-    );
-
-    return playlistRow;
+    return new DiscordJs.ActionRowBuilder()
+        .addComponents(
+            SelectMenuInteractions.musicPlayerPlaylist.selectMenu(trackList),
+        )
+    ;
 }
 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -180,7 +144,7 @@ async function dataToDisplay(metadata){
     if (metadata.isYoutube) {
         data.color          = `${colour}`;
         data.title          = `${metadata.title}`;
-        data.description    = `${metadata.isLive?`🔴 LIVE`:durationToString(metadata.duration)} • ${viewsToString(metadata.viewCount)} • ${YYYYMMDDToString(metadata.uploadDate)}`;
+        data.description    = `${metadata.isLive?`🔴 LIVE`:UTILS.durationToString(metadata.duration)} • ${UTILS.viewsToString(metadata.viewCount)} • ${UTILS.YYYYMMDDToString(metadata.uploadDate)}`;
         data.author = {
             name    : `${metadata.author}`,
             iconURL : `${metadata.favicon}`,
@@ -257,74 +221,6 @@ function WaitingMessageOptions(subscription){
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // DATA JUGGLING
-
-/** @param {number} duration */
-function durationToString(duration){
-    let seconds = Math.floor(duration%60);
-    let minutes = (Math.floor(duration/60))%60;
-    let hours   = Math.floor(duration/3600);
-
-    let string = "";
-    if (hours) string+=(`${hours}:`)
-    string+=(`${((hours>0)&&(minutes<10))?'0':''}${minutes}:`)
-    string+=(`${seconds<10?'0':''}${seconds}`)
-    return string;
-}
-
-/** @param {number} viewCount */
-function viewsToString(viewCount){
-    let string;
-    if (viewCount){
-        let views = [
-            viewCount % 1e3,
-            (Math.floor(viewCount/1e3))%1e3,
-            (Math.floor(viewCount/1e6))%1e3,
-            (Math.floor(viewCount/1e9)),
-        ];
-
-        let num = 0;
-        let dec = 0;
-        let suf = "";
-
-        if(views[3] > 0) {
-            num = views[3];
-            dec = Math.floor(views[2]/1e2);
-
-            if (num > 10) dec = false;
-            suf = LANG.MUSICDISPLAYER_VIEWS_BILLION;
-        } else if (views[2] > 0) {
-            num = views[2];
-            dec = Math.floor(views[1]/1e2);
-
-            if (num > 10) dec = false;
-            suf = LANG.MUSICDISPLAYER_VIEWS_MILLION;
-        } else if (views[1] > 0) {
-            num = views[1];
-            dec = Math.floor(views[0]/1e2);
-
-            if (num > 10) dec = false;
-            suf = LANG.MUSICDISPLAYER_VIEWS_THOUSAND;
-        } else {
-            num = views[0];
-            dec = false;
-            suf = LANG.MUSICDISPLAYER_VIEWS_UNIT;
-        }
-
-        string = `${num}`;
-        if (dec !== false) string+=`,${dec}`;
-        string+=`${suf}`;
-    } else string = LANG.MUSICDISPLAYER_VIEWS_UNKNOWN;
-
-    return string;
-}
-
-/** @param {string} yyyymmdd */
-function YYYYMMDDToString(yyyymmdd){
-
-    let [year, month, day] = yyyymmdd.match(/(\d{4})(\d{2})(\d{2})/).slice(1,4);
-
-    return LANG.DATE_TEXT_FORMAT(year.replace(/^0+/, ''), (month.replace(/^0+/, ''))-1, day.replace(/^0+/, ''));
-}
 
 function metadataIsInternet(metadata){
     return (!metadata.isYoutube && !metadata.isFile && !metadata.isRadio);

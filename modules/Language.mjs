@@ -76,7 +76,10 @@ export const MUSICDISPLAYER_LOADING_ASCII_ART =
 export const MUSICDISPLAYER_FOOTER = (guildName, channelName) => `__________________________________________\n${BOT_NAME} • ${guildName} > ${channelName}`;
 export const MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_TITLE = `Morceau Inconnu`;
 export const MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_DESC = `Une erreur est survenue`;
-
+export const MUSICDISPLAYER_PLAYLIST_ASK_WHAT_TO_DO = `Que veux tu faire avec cet élément de la playlist ?`;
+export const MUSICDISPLAYER_PLAYLIST_DO_NOTHING = `Annuler`;
+export const MUSICDISPLAYER_PLAYLIST_PLAY_NEXT = `Placer en tête de la playlist`;
+export const MUSICDISPLAYER_PLAYLIST_REMOVE = `Retirer de la playlist`;
 
 // ERRORS
 

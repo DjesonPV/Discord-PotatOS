@@ -19,6 +19,8 @@ export default class Track {
         this.onStart = onStart;
         this.onFinish = onFinish;
         this.onError = onError;
+        /** @type {string} */
+        this.snowflake = null;
     }
 
     // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -118,6 +120,11 @@ export default class Track {
 
     setVolume(volume) {
         this.volume = volume;
+    }
+
+    /** @param {string} snowflake */
+    setSnowflake(snowflake) {
+        this.snowflake = snowflake;
     }
 
     static async fetchData(url, methods) {

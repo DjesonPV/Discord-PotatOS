@@ -216,6 +216,27 @@ export default class MusicSubscription{
         }
     }
 
+    /** @param {Track} track */
+    removeTrack(track) {
+        this.queueLock = true;
+        const foundTrack = this.queue.find(queuedTrack => queuedTrack === track);
+        if (foundTrack !== undefined) {
+            this.queue.splice(this.queue.indexOf(foundTrack), 1);
+        }
+        this.queueLock = false;
+    }
+
+    /** @param {Track} track */
+    moveTrackToFirstPosition(track) {
+        this.queueLock = true;
+        const foundTrack = this.queue.find(queuedTrack => queuedTrack === track);
+        if (foundTrack !== undefined) {
+            this.queue.splice(this.queue.indexOf(foundTrack), 1);
+            this.queue.unshift(foundTrack);
+        }
+        this.queueLock = false;
+    }
+
     /** @returns {MusicSubscription} */
     static getNewSubscription(interaction){
         let subscription = this.getSubscription(interaction.guild.id);
