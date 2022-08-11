@@ -7,6 +7,7 @@ import * as SelectMenuInteractions      from "../botCommands/SelectMenuInteracti
 import * as UTILS from './Utils.mjs';
 import * as LANG from "../Language.mjs";
 import favcolor from "favcolor";
+import Track from "./voice/Track.mjs";
 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
@@ -45,7 +46,7 @@ export default function displayMusicDisplayer(channel){
 /** @param {MusicSubscription} subscription */
 function isItALonelyPlaysound(subscription) {
     return ( // the ? provide false is there is no subscription
-        (subscription?.currentTrack.metadata.isFile === true) && 
+        (subscription?.currentTrack.metadata.type === Track.Types.File) && 
         (subscription.queue.length === 0) &&
         (!subscription.message)
     )
@@ -120,75 +121,90 @@ function musicPlayerPlaylist(trackList){
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 async function dataToDisplay(metadata){
-    let data = {};
-
     // Fetch coulour in less than half a second of use default
-    const colour = (metadata.isYoutube|| metadataIsInternet(metadata))? 
-    await new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(LANG.MUSICDISPLAYER_WEB_COLOR);
-            return;
-        }, 500);
+    const colour = (metadata.type === Track.Types.YoutubeDL || metadata.type === Track.Types.WebLink) ? 
+        await new Promise((resolve) => {
+            setTimeout(() => {
+                resolve(LANG.MUSICDISPLAYER_WEB_COLOR);
+                return;
+            }, 500);
 
-        try {
-            favcolor.fromSiteFavicon(metadata.url.match(/(?:http|https):\/\/(?:[^\/])+\//)[0]).then(color => {
-                resolve(color.toHex());
-            });
-        } catch (error) {
-            resolve(LANG.MUSICDISPLAYER_WEB_COLOR);
-            return;
-        } 
-    }):LANG.MUSICDISPLAYER_BOT_COLOR;
+            try {
+                favcolor.fromSiteFavicon(metadata.url.match(/(?:http|https):\/\/(?:[^\/])+\//)[0]).then(color => {
+                    resolve(color.toHex());
+                });
+            } catch (error) {
+                resolve(LANG.MUSICDISPLAYER_WEB_COLOR);
+                return;
+            } 
+        })
+    : LANG.MUSICDISPLAYER_BOT_COLOR;
 
-    // If metadata were fetch by yt-dlp
-    if (metadata.isYoutube) {
-        data.color          = `${colour}`;
-        data.title          = `${metadata.title}`;
-        data.description    = `${metadata.isLive?`🔴 LIVE`:UTILS.durationToString(metadata.duration)} • ${UTILS.viewsToString(metadata.viewCount)} • ${UTILS.YYYYMMDDToString(metadata.uploadDate)}`;
-        data.author = {
-            name    : `${metadata.author}`,
-            iconURL : `${metadata.favicon}`,
-            url     : `${metadata.authorURL}`,
-        };
-        data.url            = `${metadata.url}`;
-        data.thumbnail      = `${metadata.thumbnail}`;
+    switch (metadata.type) {
+        case Track.Types.YoutubeDL:
+            return {
+                color          : `${colour}`,
+                title          : `${metadata.title}`,
+                description    : `${metadata.isLive?`🔴 LIVE`:UTILS.durationToString(metadata.duration)} • ${UTILS.viewsToString(metadata.viewCount)} • ${UTILS.YYYYMMDDToString(metadata.uploadDate)}`,
+                author : {
+                    name    : `${metadata.author}`,
+                    iconURL : `${metadata.favicon}`,
+                    url     : `${metadata.authorURL}`,
+                },
+                url            : `${metadata.url}`,
+                thumbnail      : `${metadata.thumbnail}`,
+            };
 
-    // If metadata if from PotatOS files
-    } else if (metadata.isFile) {
-        data.color          = LANG.MUSICDISPLAYER_BOT_COLOR;
-        data.title          = `${metadata.title}`;
-        data.description    = `${metadata.description}`;
-        data.author = {
-            name    : LANG.MUSICDISPLAYER_COMMAND_CALLED_SOUND(metadata.key),
-            iconURL : LANG.MUSICDISPLAYER_BOT_ICON,
-        };
+        case Track.Types.MP3File: 
+            return {
+                color          : LANG.MUSICDISPLAYER_BOT_COLOR,
+                title          : `${metadata.title}`,
+                description    : `${metadata.description}`,
+                author : {
+                    name    : LANG.MUSICDISPLAYER_COMMAND_CALLED_SOUND(metadata.key),
+                    iconURL : LANG.MUSICDISPLAYER_BOT_ICON,
+                },
+            };
 
-    } else if (metadata.isRadio) {
-        data.color          = LANG.MUSICDISPLAYER_RADIO_COLOR;
-        data.title          = `${metadata.name}`;
-        data.description    = `${metadata.place}, ${metadata.country}`;
-        data.author = {
-            name    : `Radio Garden`,
-            url     : `${metadata.url}`,
-            iconURL : LANG.MUSICDISPLAYER_RADIO_ICON,
-        };
-        data.url            = `${metadata.website}`;
-        data.thumbnail      = LANG.MUSICDISPLAYER_RADIO_THUMBNAIL;
+        case Track.Types.Radio: 
+            return {
+                color          : LANG.MUSICDISPLAYER_RADIO_COLOR,
+                title          : `${metadata.name}`,
+                description    : `${metadata.place}, ${metadata.country}`,
+                author : {
+                    name    : `Radio Garden`,
+                    url     : `${metadata.url}`,
+                    iconURL : LANG.MUSICDISPLAYER_RADIO_ICON,
+                },
+                url            : `${metadata.website}`,
+                thumbnail      : LANG.MUSICDISPLAYER_RADIO_THUMBNAIL,
+            };
 
-    // if it's file is from Internet and not parsed by yt-dlp
-    } else {
-        data.color          = `${colour}`;
-        data.title          = `${metadata.file}`;
-        data.description    = LANG.MUSICDISPLAYER_WEB_LINK;
-        data.author = {
-            name    : `${metadata.source}`,
-            url     : `https://${metadata.source}`,
-            iconURL : `${metadata.favicon}`, 
-        };
-        data.url        = `${metadata.url}`;
+        case Track.Types.WebLink:
+            return {
+                color          : `${colour}`,
+                title          : `${metadata.file}`,
+                description    : LANG.MUSICDISPLAYER_WEB_LINK,
+                author : {
+                    name    : `${metadata.source}`,
+                    url     : `https://${metadata.source}`,
+                    iconURL : `${metadata.favicon}`, 
+                },
+                url        : `${metadata.url}`,
+            };
+    
+        default:
+            return {
+                color: LANG.MUSICDISPLAYER_BOT_COLOR,
+                title: LANG.MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_TITLE,
+                description: LANG.MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_DESC,
+                author: {
+                    name: LANG.BOT_NAME,
+                    iconURL: LANG.BOT_ICON,
+                },
+                thumbnail: LANG.ERROR_ICON,
+            };
     }
-
-    return data;
 }
 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
@@ -215,13 +231,4 @@ function WaitingMessageOptions(subscription){
     const buttonRow = musicPlayerButtons(subscription, true);
 
     return {embeds: [loadingEmbed], components: [buttonRow]};
-}
-
-// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
-// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
-// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
-// DATA JUGGLING
-
-function metadataIsInternet(metadata){
-    return (!metadata.isYoutube && !metadata.isFile && !metadata.isRadio);
 }

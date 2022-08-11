@@ -1,3 +1,5 @@
 // ContextMenuCommands
 
-export { bruh } from "./contextMenuCommands/bruh.mjs";
+export {
+    bruh,
+} from "./contextMenuCommands/bruh.mjs";

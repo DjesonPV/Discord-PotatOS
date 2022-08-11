@@ -6,7 +6,7 @@ import * as LANG from "../../Language.mjs";
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 function cmdSoundSample(interaction){
-    const sampleKey = interaction.options.getString('sample');
+    const sampleKey = interaction.options.getString(LANG._PLAYSOUND_OPTION_NAME);
 
     MessageSafeDelete.noReply(interaction); 
     Voice.streamVoice(interaction, `${MP3Files.path}${MP3Files.files[sampleKey].file}`, MP3Files.files[sampleKey].volume);
