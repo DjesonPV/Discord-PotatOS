@@ -4,10 +4,7 @@ import MusicSubscription                from "./voice/MusicSubscription.mjs";
 import MessageSafeDelete                from "./MessageSafeDelete.mjs";
 import * as ButtonInteractions          from "../botCommands/ButtonInteractions.mjs";
 import * as SelectMenuInteractions      from "../botCommands/SelectMenuInteractions.mjs";
-import * as UTILS from './Utils.mjs';
 import * as LANG from "../Language.mjs";
-import favcolor from "favcolor";
-import Track from "./voice/Track.mjs";
 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
@@ -46,7 +43,7 @@ export default function displayMusicDisplayer(channel){
 /** @param {MusicSubscription} subscription */
 function isItALonelyPlaysound(subscription) {
     return ( // the ? provide false is there is no subscription
-        (subscription?.currentTrack.metadata.type === Track.Types.File) && 
+        (subscription?.currentTrack.metadata.isLocalFile) && 
         (subscription.queue.length === 0) &&
         (!subscription.message)
     )
@@ -73,20 +70,16 @@ async function MusicDiplayerMessageOptions(subscription) {
 /** @param {MusicSubscription} subscription */
 async function displayerEmbed(subscription){
     
-    let metadata = subscription.currentTrack.metadata;
-
-    let data = await dataToDisplay(metadata);
-
     const displayerEmbed = new DiscordJs.EmbedBuilder()
-        .setColor(data.color)
-        .setTitle(data.title)
-        .setDescription(data.description)
-        .setAuthor(data.author)
-        .setThumbnail(data.thumbnail ?? LANG.MUSICDISPLAYER_DEFAULT_THUMBNAIL)
+        .setColor(subscription.currentTrack.metadata.color)
+        .setTitle(subscription.currentTrack.metadata.title)
+        .setDescription(subscription.currentTrack.metadata.description)
+        .setAuthor(subscription.currentTrack.metadata.author)
+        .setThumbnail(subscription.currentTrack.metadata.thumbnail ?? LANG.MUSICDISPLAYER_DEFAULT_THUMBNAIL)
         .setFooter({text : LANG.MUSICDISPLAYER_FOOTER(subscription.guildName, subscription.voiceChannel.name)});
     ;
 
-    if (data.url) displayerEmbed.setURL(data.url);
+    if (subscription.currentTrack.metadata.url) displayerEmbed.setURL(subscription.currentTrack.metadata.url);
 
     return displayerEmbed;
 }
@@ -118,94 +111,6 @@ function musicPlayerPlaylist(trackList){
     ;
 }
 
-// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-
-async function dataToDisplay(metadata){
-    // Fetch coulour in less than half a second of use default
-    const colour = (metadata.type === Track.Types.YoutubeDL || metadata.type === Track.Types.WebLink) ? 
-        await new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(LANG.MUSICDISPLAYER_WEB_COLOR);
-                return;
-            }, 500);
-
-            try {
-                favcolor.fromSiteFavicon(metadata.url.match(/(?:http|https):\/\/(?:[^\/])+\//)[0]).then(color => {
-                    resolve(color.toHex());
-                });
-            } catch (error) {
-                resolve(LANG.MUSICDISPLAYER_WEB_COLOR);
-                return;
-            } 
-        })
-    : LANG.MUSICDISPLAYER_BOT_COLOR;
-
-    switch (metadata.type) {
-        case Track.Types.YoutubeDL:
-            return {
-                color          : `${colour}`,
-                title          : `${metadata.title}`,
-                description    : `${metadata.isLive?`🔴 LIVE`:UTILS.durationToString(metadata.duration)} • ${UTILS.viewsToString(metadata.viewCount)} • ${UTILS.YYYYMMDDToString(metadata.uploadDate)}`,
-                author : {
-                    name    : `${metadata.author}`,
-                    iconURL : `${metadata.favicon}`,
-                    url     : `${metadata.authorURL}`,
-                },
-                url            : `${metadata.url}`,
-                thumbnail      : `${metadata.thumbnail}`,
-            };
-
-        case Track.Types.MP3File: 
-            return {
-                color          : LANG.MUSICDISPLAYER_BOT_COLOR,
-                title          : `${metadata.title}`,
-                description    : `${metadata.description}`,
-                author : {
-                    name    : LANG.MUSICDISPLAYER_COMMAND_CALLED_SOUND(metadata.key),
-                    iconURL : LANG.MUSICDISPLAYER_BOT_ICON,
-                },
-            };
-
-        case Track.Types.Radio: 
-            return {
-                color          : LANG.MUSICDISPLAYER_RADIO_COLOR,
-                title          : `${metadata.name}`,
-                description    : `${metadata.place}, ${metadata.country}`,
-                author : {
-                    name    : `Radio Garden`,
-                    url     : `${metadata.url}`,
-                    iconURL : LANG.MUSICDISPLAYER_RADIO_ICON,
-                },
-                url            : `${metadata.website}`,
-                thumbnail      : LANG.MUSICDISPLAYER_RADIO_THUMBNAIL,
-            };
-
-        case Track.Types.WebLink:
-            return {
-                color          : `${colour}`,
-                title          : `${metadata.file}`,
-                description    : LANG.MUSICDISPLAYER_WEB_LINK,
-                author : {
-                    name    : `${metadata.source}`,
-                    url     : `https://${metadata.source}`,
-                    iconURL : `${metadata.favicon}`, 
-                },
-                url        : `${metadata.url}`,
-            };
-    
-        default:
-            return {
-                color: LANG.MUSICDISPLAYER_BOT_COLOR,
-                title: LANG.MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_TITLE,
-                description: LANG.MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_DESC,
-                author: {
-                    name: LANG.BOT_NAME,
-                    iconURL: LANG.BOT_ICON,
-                },
-                thumbnail: LANG.ERROR_ICON,
-            };
-    }
-}
 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  

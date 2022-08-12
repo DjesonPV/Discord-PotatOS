@@ -1,5 +1,4 @@
 import * as DiscordJs from 'discord.js';
-import * as UTILS from '../../botModules/Utils.mjs';
 import * as LANG from '../../Language.mjs';
 import displayMusicDisplayer from "../../botModules/MusicDisplayer.mjs";
 import MusicSubscription from '../../botModules/voice/MusicSubscription.mjs';
@@ -19,8 +18,6 @@ function commandPlaylist(interaction) {
     const selectedTrack = trackList.find(track => track.snowflake === selected);
     const selectedIndex = trackList.indexOf(selectedTrack);
 
-    const {title, description} = getTitleAndDescription(selectedTrack);
-
     const PlaylistButtonIDs = class {
         static DoNothing = 'PotatOSMusicPlayerPlaylistDoNothing';
         static PlayNext = 'PotatOSMusicPlayerPlaylistPlayNext';
@@ -32,8 +29,8 @@ function commandPlaylist(interaction) {
         content: LANG.MUSICDISPLAYER_PLAYLIST_ASK_WHAT_TO_DO,
         embeds: [
             new DiscordJs.EmbedBuilder()
-                .setTitle(`${getDisplayEmoji(selectedIndex)} ${title}`)
-                .setDescription(description)
+                .setTitle(`${getDisplayEmoji(selectedIndex)} ${selectedTrack.metadata.playlistTitle}`)
+                .setDescription(selectedTrack.metadata.playlistDescription)
             ,
         ],
         components: [
@@ -130,56 +127,21 @@ export const musicPlayerPlaylist = {
 // _____________________________________________________________________________________________________________________
 //
 
+/** @param {Track[]} trackList */
 function buildOptions(trackList) {
 
     let options = [];
 
     trackList.forEach((track, i) => {
-        const {title, description} = getTitleAndDescription(track);
         options.push({
-            label : (`${title}`).substring(0, 100),
-            description : (`${description}`).substring(0, 100),
+            label : track.metadata.playlistTitle.substring(0, 100),
+            description : track.metadata.playlistDescription.substring(0, 100),
             value : `${track.snowflake}`,
             emoji : getPlaylistEmoji(i),
         });
     });
 
     return options;
-}
-
-function getTitleAndDescription(track) {
-
-    switch (track.metadata.type) {
-        case Track.Types.YoutubeDL:
-            return {
-                title       : `${track.metadata.title}`,
-                description : `${track.metadata.author} • ${track.metadata.isLive?`⬤ LIVE`:UTILS.durationToString(track.metadata.duration)} • ${UTILS.viewsToString(track.metadata.viewCount)} • ${UTILS.YYYYMMDDToString(track.metadata.uploadDate)}`,
-            };
-
-        case Track.Types.MP3File:
-            return {
-                title       : `${track.metadata.key}`,
-                description : LANG.MUSICDISPLAYER_THROUGH_COMMAND,
-            };
-
-        case Track.Types.Radio:
-            return {
-                title       : `🟢 ${track.metadata.name}`,
-                description : `Radio Garden • ${track.metadata.place}, ${track.metadata.country}`,
-            };
-
-        case Track.Types.WebLink:
-            return {
-                title       : `${track.metadata.file}`,
-                description : `${track.metadata.url}`,
-            };
-    
-        default:
-            return {
-                title       : LANG.MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_TITLE,
-                description : LANG.MUSICDISPLAYER_PLAYLIST_UNKNOWN_TRACK_DESC,
-            };
-    }    
 }
 
 function getDisplayEmoji(i){
