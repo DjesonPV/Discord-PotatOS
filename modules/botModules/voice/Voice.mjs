@@ -36,7 +36,7 @@ export async function streamVoice(interaction, url, volume, restartLive = false)
         track.setVolume(volume);
         track.setSnowflake(interaction.id);
 
-        if (restartLive || track.metadata.type === Track.Types.MP3File) subscription.enskip(track);
+        if (restartLive || track.metadata.isLocalFile) subscription.enskip(track);
         else subscription.enqueue(track);
 
         displayMusicDisplayer(interaction.channel);

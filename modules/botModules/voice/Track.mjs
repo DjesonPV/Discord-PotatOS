@@ -1,15 +1,27 @@
 import * as DiscordJsVoice from '@discordjs/voice';
 import * as fs from 'fs';
 import * as ChildProcess from 'child_process';
+import * as DiscordJs from 'discord.js';
 
 import ytdl from 'youtube-dl-exec';
 import { YouTubeLiveStream } from 'ytls';
 import * as RadioGarden from '../RadioGarden.mjs';
+import favcolor from "favcolor";
 
+import * as UTILS from '../Utils.mjs';
 import * as LANG from '../../Language.mjs';
 import * as MP3Files from "./MP3Files.mjs";
 
 export default class Track {
+    /**
+     * @param {string} url 
+     * @param {TrackMetadata} metadata 
+     * @param {{
+     *      onStart: Promise<void>,
+     *      onFinish: Promise<void>,
+     *      onError: Promise<void>,
+     * }} methods 
+     */
     constructor(url, metadata, methods) {
         /**@type {string} */
         this.url = url;
@@ -23,7 +35,7 @@ export default class Track {
         this.snowflake = null;
     }
 
-    static Types = class TrackTypeEnum {
+    static Types = class TrackType {
         static YoutubeDL    = 'YouTube Download';
         static MP3File      = 'PotatOS File';
         static WebLink      = 'URL File';
@@ -160,6 +172,18 @@ async function probeAndCreateAudioResource(readableStream, thisTrack) {
 //  TRACK FROM SOURCES
 //
 
+/**
+ * @typedef {Object} TrackMetadataRequired
+ * @property {boolean} isLive
+ * @property {boolean} isLocalFile
+ * @property {string} playlistTitle
+ * @property {string} playlistDescription
+ * 
+ * @typedef {DiscordJs.EmbedData & TrackMetadataRequired } TrackMetadata
+ *  
+ */
+
+/** */
 async function fromYTDLP(url, methods) {
 
     // Fetch data from yt-dlp in less than 5 seconds or nothing
@@ -188,57 +212,101 @@ async function fromYTDLP(url, methods) {
     const parsedInfo = JSON.parse(info?.stdout ?? `{"extractor":"generic"}`);
 
     if (parsedInfo.extractor !== 'generic'){
-        const metadata = {
-            type: Track.Types.YoutubeDL,
 
-            // Data use in the MusicDsiplayer Embed
-            title: parsedInfo.fulltitle || parsedInfo.title,
-            author: `${parsedInfo.webpage_url_domain} • ${parsedInfo.channel ?? parsedInfo.artist ?? parsedInfo.uploader ?? parsedInfo.creator}`,
-            duration: parsedInfo.duration,
-            thumbnail: parsedInfo.thumbnail,
-            url: parsedInfo.webpage_url,
-            favicon: `https://s2.googleusercontent.com/s2/favicons?domain_url=${parsedInfo.webpage_url_domain}&sz=48`,
-            authorURL: parsedInfo.uploader_url ?? parsedInfo.channel_url ?? parsedInfo.webpage_url,
-            uploadDate: parsedInfo.upload_date,
-            viewCount: parsedInfo.view_count,
-            isLive: parsedInfo.is_live,
+        const title = parsedInfo.fulltitle || parsedInfo.title;
+        const isLive = parsedInfo.is_live;
+        const duration = parsedInfo.duration;
+        const viewCount = parsedInfo.view_count;
+        const uploadDate = parsedInfo.upload_date;
+        const authorName = `${parsedInfo.webpage_url_domain} • ${parsedInfo.channel ?? parsedInfo.artist ?? parsedInfo.uploader ?? parsedInfo.creator}`;
+        const authorURL = parsedInfo.uploader_url ?? parsedInfo.channel_url ?? parsedInfo.webpage_url;
+        const iconURL = `https://s2.googleusercontent.com/s2/favicons?domain_url=${parsedInfo.webpage_url_domain}&sz=48`;
+        const url = parsedInfo.webpage_url;
+        const thumbnail = parsedInfo.thumbnail ?? LANG.MUSICDISPLAYER_DEFAULT_THUMBNAIL;
+        
+        /** @type {TrackMetadata} */
+        const metadata = {
+            isLive: isLive,
+            isLocalFile: false,
+
+            // Data use in the MusicDisplayer Embed
+            color: await getColorFromURL(url),
+            title: title,
+            description: `${isLive? `🔴 LIVE`: UTILS.durationToString(duration)} • ${UTILS.viewsToString(viewCount)} • ${UTILS.YYYYMMDDToString(uploadDate)}`,
+            author: {
+                name: authorName,
+                iconURL: iconURL,
+                url: authorURL,
+            },
+            url: url,
+            thumbnail: thumbnail,
+
+            // Data used in the MusicDisplayer Playlist SelectMenu
+            playlistTitle: title,
+            playlistDescription: `${authorName} • ${isLive?`⬤ LIVE`:UTILS.durationToString(duration)} • ${UTILS.viewsToString(viewCount)} • ${UTILS.YYYYMMDDToString(uploadDate)}`,
         };
 
         return new Track(url, metadata, methods);
     }
-    else return fromInternet(url, methods);
+    else return await fromInternet(url, methods);
 }
 
 /** Fetch data from the MP3Files */
 function fromFile(url, methods) {
 
-    const mp3Key = Object.keys(MP3Files.files).find(key => MP3Files.files[key].file === url.slice(MP3Files.path.length))[0];
+    const mp3Key = Object.keys(MP3Files.files).find(key => MP3Files.files[key].file === url.slice(MP3Files.path.length));
+    const title = MP3Files.files[mp3Key].title;
+    const description = MP3Files.files[mp3Key].description;
 
+    /** @type {TrackMetadata} */
     const metadata = {
-        type: Track.Types.MP3File,
+        isLive: false,
+        isLocalFile: true,
 
-        // Data use in the MusicDisplayer Embed
-        title: MP3Files.files[mp3Key].title,
-        description: MP3Files.files[mp3Key].description,
-        key: mp3Key,
+        // Data used in the MusicDisplayer Embed
+        color: LANG.MUSICDISPLAYER_BOT_COLOR,
+        title: title,
+        description: description,
+        author: {
+            name: LANG.MUSICDISPLAYER_COMMAND_CALLED_SOUND(mp3Key),
+            iconURL: LANG.MUSICDISPLAYER_BOT_ICON,
+        },
+
+        // Data used in the MusicDisplayer Playlist SelectMenu
+        playlistTitle: mp3Key,
+        playlistDescription : LANG.MUSICDISPLAYER_THROUGH_COMMAND,
     };
 
     return new Track(url, metadata, methods);
 }
 
 /** Try do to something for Internet Files */
-function fromInternet(url, methods) {
+async function fromInternet(url, methods) {
 
     const uri = url.split('/').filter(Boolean); //Split an url and remove empty strings
+    const source = uri[1];
+    const file = uri[uri.length - 1];
+    const favicon = `https://s2.googleusercontent.com/s2/favicons?domain_url=${url}&sz=48`;
 
+    /** @type {TrackMetadata} */
     const metadata = {
-        type: Track.Types.WebLink,
+        isLive: false,
+        isLocalFile: false,
 
-        // Data use in the MusicDisplayer Embed
-        source: uri[1],
-        file: uri[uri.length - 1],
+        // Data used in the MusicDisplayer Embed
+        color: await getColorFromURL(uri),
+        title: file,
+        description: LANG.MUSICDISPLAYER_WEB_LINK,
+        author: {
+            name: source,
+            url: `https://${source}`,
+            iconURL: favicon,
+        },
         url: url,
-        favicon: `https://s2.googleusercontent.com/s2/favicons?domain_url=${url}&sz=48`
+
+        // Data used in the MusicDisplayer Playlist SelectMenu
+        playlistTitle: file,
+        playlistDescription : url,
     };
 
     return new Track(url, metadata, methods);
@@ -251,19 +319,52 @@ async function fromRadioGarden(url, methods) {
 
     if (info) {
 
+        /** @type {TrackMetadata} */
         const metadata = {
-            type: Track.Types.Radio,
-
-            // Data use in the MusicDisplayer Embed
-            name: info.title,
-            url: `https://radio.garden${info.url}`,
-            website: info.website,
-            place: info.place.title,
-            country: info.country.title,
             isLive: true,
+            isLocalFile: false,
+
+            // Data used in the MusicDisplayer Embed
+            color: LANG.MUSICDISPLAYER_RADIO_COLOR,
+            title: info.title,
+            description: `${info.place.title}, ${info.country.title}`,
+            author: {
+                name: `Radio Garden`,
+                url: `https://radio.garden${info.url}`,
+                iconURL: LANG.MUSICDISPLAYER_RADIO_ICON,
+            },
+            url: info.website,
+            thumbnail: LANG.MUSICDISPLAYER_RADIO_THUMBNAIL,
+
+            // Data used in the MusicDisplayer Playlist SelectMenu
+            playlistTitle: `🟢 ${info.title}`,
+            playlistDescription: `Radio Garden • ${info.place.title}, ${info.country.title}`,
         };
 
         return new Track(url, metadata, methods);
     }
-    else return fromInternet(url, methods);
+    else return await fromInternet(url, methods);
+}
+
+/**
+ * // Fetch coulour in less than half a second of use default
+ * @param {string} url 
+ * @returns {Promise<string>} Formatted like '#000000'
+ */
+function getColorFromURL(url) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(LANG.MUSICDISPLAYER_WEB_COLOR);
+            return;
+        }, 500);
+
+        try {
+            favcolor.fromSiteFavicon(url.match(/(?:http|https):\/\/(?:[^\/])+\//)[0]).then(color => {
+                resolve(color.toHex());
+            });
+        } catch (error) {
+            resolve(LANG.MUSICDISPLAYER_WEB_COLOR);
+            return;
+        } 
+    }) ?? LANG.MUSICDISPLAYER_WEB_COLOR;
 }
