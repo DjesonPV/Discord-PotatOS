@@ -97,7 +97,7 @@ export default class VoiceSubscription {
             } else if (isAudioPlayerPlayling(newState.status)) {
                 // When a track begins
                 if (this.#playedEnough === false) { 
-                    this.#playedEnoughCount = 10; 
+                    this.#playedEnoughCount = 30; 
                     this.#playedEnough = setTimeout(() =>{this.#playedEnough = true}, 100);
                 }
             }
@@ -197,6 +197,7 @@ export default class VoiceSubscription {
         try{
             if (this.playlist.current.live) {
                 this.playlist.fetchCurrentAudio();
+                this.#playedEnough = false;
                 return true;
             } else {
                 const unpaused = this.#audioPlayer.unpause();
