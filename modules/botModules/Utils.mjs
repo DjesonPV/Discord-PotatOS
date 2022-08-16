@@ -70,7 +70,9 @@ export function YYYYMMDDToString(yyyymmdd){
 
 /** @param {string} text */
 export function isItAnURL(text) {
-    return (typeof text == "string") &&
-    (text.match(/^https?:\/\/(?:[a-zA-Z0-9\-]{1,64}\.){0,}(?:[a-zA-Z0-9\-]{2,63})(?:\.(?:xn--)?[a-zA-Z0-9]{2,})(\:[0-9]{1,5})?(?:\/[^\s]*)?$/))
+    return (
+        (typeof text === "string") &&
+        (text.match(/^https?:\/\/(?:[a-zA-Z0-9\-]{1,64}\.){0,}(?:[a-zA-Z0-9\-]{2,63})(?:\.(?:xn--)?[a-zA-Z0-9]{2,})(\:[0-9]{1,5})?(?:\/[^\s]*)?$/) !== null)
+    )
     ;
 }

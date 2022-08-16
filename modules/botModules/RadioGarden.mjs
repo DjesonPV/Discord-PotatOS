@@ -21,7 +21,7 @@ export async function searchForRadioUrl(query) {
 /** @param {string} url */
 export async function getRadioData(url){
     const radioChannelId = matchRadioChannelforId(url)?.[1];
-    if (radioChannelId != undefined){
+    if (radioChannelId !== undefined){
         const channel = await Axios.get(`https://radio.garden/api/ara/content/channel/${radioChannelId}`);
         return channel?.data?.data;
     }
@@ -32,7 +32,11 @@ export async function getRadioData(url){
 
 /** @param {string} radioChannelId */
 export function getRadioFlux(radioChannelId){
-    return `https://radio.garden/api/ara/content/listen/${radioChannelId}/channel.mp3`
+    if (radioChannelId !== undefined) {
+        return `https://radio.garden/api/ara/content/listen/${radioChannelId}/channel.mp3`;
+    } else {
+        return undefined;
+    }
 }
 
 /** @param {string} url */

@@ -1,21 +1,19 @@
 import * as DiscordJs from 'discord.js';
 import * as LANG from '../../Language.mjs';
-import displayMusicDisplayer from "../../botModules/MusicDisplayer.mjs";
-import MusicSubscription from '../../botModules/voice/MusicSubscription.mjs';
-import Track from '../../botModules/voice/Track.mjs';
+import VoiceSubscription from '../../botModules/musicPlayer/VoiceSubscription.mjs';
 
 /** @param {DiscordJs.SelectMenuInteraction} interaction */
 function commandPlaylist(interaction) {
-    const subscription = MusicSubscription.getSubscription(interaction.guild.id);
+    const subscription = VoiceSubscription.get(interaction.guild.id);
     if (subscription === undefined) {
         interaction.deferUpdate();
         return;
     }
 
     const selected = interaction.values[0];
-    const trackList = [subscription.currentTrack, ...subscription.queue];
+    const trackList = subscription.playlist.getCuratedDataPlaylist();
 
-    const selectedTrack = trackList.find(track => track.snowflake === selected);
+    const selectedTrack = trackList.find(track => track.id === selected);
     const selectedIndex = trackList.indexOf(selectedTrack);
 
     const PlaylistButtonIDs = class {
@@ -24,90 +22,94 @@ function commandPlaylist(interaction) {
         static Remove = 'PotatOSMusicPlayerPlaylistRemove';
     };
 
-    /** @type {DiscordJs.InteractionReplyOptions} */
-    const messageOptions = {
-        content: LANG.MUSICDISPLAYER_PLAYLIST_ASK_WHAT_TO_DO,
-        embeds: [
-            new DiscordJs.EmbedBuilder()
-                .setTitle(`${getDisplayEmoji(selectedIndex)} ${selectedTrack.metadata.playlistTitle}`)
-                .setDescription(selectedTrack.metadata.playlistDescription)
-            ,
-        ],
-        components: [
-            new DiscordJs.ActionRowBuilder()
-                .addComponents(
-                    new DiscordJs.ButtonBuilder()
-                        .setCustomId(PlaylistButtonIDs.DoNothing)
-                        .setLabel(LANG.MUSICDISPLAYER_PLAYLIST_DO_NOTHING)
-                        .setStyle(DiscordJs.ButtonStyle.Secondary)
-                        .setEmoji('🔙')
-                    ,
-                    new DiscordJs.ButtonBuilder()
-                        .setCustomId(PlaylistButtonIDs.PlayNext)
-                        .setLabel(LANG.MUSICDISPLAYER_PLAYLIST_PLAY_NEXT)
-                        .setStyle(DiscordJs.ButtonStyle.Primary)
-                        .setEmoji('🔝')
-                    ,
-                    new DiscordJs.ButtonBuilder()
-                        .setCustomId(PlaylistButtonIDs.Remove)
-                        .setLabel(LANG.MUSICDISPLAYER_PLAYLIST_REMOVE)
-                        .setStyle(DiscordJs.ButtonStyle.Danger)
-                        .setEmoji('🗑')
-                    ,
-                )
-            ,
-        ],
-        ephemeral: true,
-    };
+    if (selectedTrack !== undefined) { 
 
-    if (selectedIndex > 0) {
-        interaction.reply(messageOptions);
-
-        const filter = button => {
-            return (
-                (button.user.id === interaction.member.id) &&
-                (Object.values(PlaylistButtonIDs).find(id => id === button.customId) !== undefined)
-            );
+        /** @type {DiscordJs.InteractionReplyOptions} */
+        const messageOptions = {
+            content: LANG.MUSICDISPLAYER_PLAYLIST_ASK_WHAT_TO_DO,
+            embeds: [
+                new DiscordJs.EmbedBuilder()
+                    .setTitle(`${getDisplayEmoji(selectedIndex)} ${selectedTrack.data.playlistTitle}`)
+                    .setDescription(selectedTrack.data.playlistDescription)
+                ,
+            ],
+            components: [
+                new DiscordJs.ActionRowBuilder()
+                    .addComponents(
+                        new DiscordJs.ButtonBuilder()
+                            .setCustomId(PlaylistButtonIDs.DoNothing)
+                            .setLabel(LANG.MUSICDISPLAYER_PLAYLIST_DO_NOTHING)
+                            .setStyle(DiscordJs.ButtonStyle.Secondary)
+                            .setEmoji('🔙')
+                        ,
+                        new DiscordJs.ButtonBuilder()
+                            .setCustomId(PlaylistButtonIDs.PlayNext)
+                            .setLabel(LANG.MUSICDISPLAYER_PLAYLIST_PLAY_NEXT)
+                            .setStyle(DiscordJs.ButtonStyle.Primary)
+                            .setEmoji('🔝')
+                        ,
+                        new DiscordJs.ButtonBuilder()
+                            .setCustomId(PlaylistButtonIDs.Remove)
+                            .setLabel(LANG.MUSICDISPLAYER_PLAYLIST_REMOVE)
+                            .setStyle(DiscordJs.ButtonStyle.Danger)
+                            .setEmoji('🗑')
+                        ,
+                    )
+                ,
+            ],
+            ephemeral: true,
         };
-        
-        const collector = interaction.channel.createMessageComponentCollector({filter, max : 1});
 
-        collector.on('collect', collectedInteraction => {
-            collectedInteraction.deferUpdate();
+        if (selectedIndex > 0) {
+            interaction.reply(messageOptions);
+
+            const filter = button => {
+                return (
+                    (button.user.id === interaction.member.id) &&
+                    (Object.values(PlaylistButtonIDs).find(id => id === button.customId) !== undefined)
+                );
+            };
             
-            if (subscription?.isMemberConnected(collectedInteraction.member)){
-                if (collectedInteraction.customId === PlaylistButtonIDs.PlayNext) {
-                    subscription.moveTrackToFirstPosition(selectedTrack);
-                } else if (collectedInteraction.customId === PlaylistButtonIDs.Remove) {
-                    subscription.removeTrack(selectedTrack);
+            const collector = interaction.channel.createMessageComponentCollector({filter, max : 1});
+
+            collector.on('collect', collectedInteraction => {
+                collectedInteraction.deferUpdate();
+                
+                if (subscription?.isMemberConnected(collectedInteraction.member)){
+                    if (collectedInteraction.customId === PlaylistButtonIDs.PlayNext) {
+                        subscription.playlist.moveTop(selectedTrack.id);
+                    } else if (collectedInteraction.customId === PlaylistButtonIDs.Remove) {
+                        subscription.playlist.remove(selectedTrack.id);
+                    }
+                    
+                    interaction.editReply({ 
+                        content: LANG.MUSICDISPLAYER_STOP_REQUEST_RECEIVED,
+                        embeds: [], 
+                        components : [],
+                    });
+                    
                 }
+                else {
+                    const messageOptions = MessagePrintReply.getAlertMessageOptions(LANG._MUSICPLAYER_NOT_CONNECTED);
+                    messageOptions.content = "";
+                    messageOptions.components = [];
 
-                displayMusicDisplayer(interaction.channel);
-                
-                interaction.editReply({ 
-                    content: LANG.MUSICDISPLAYER_STOP_REQUEST_RECEIVED,
-                    embeds: [], 
-                    components : [],
-                });
-                
-            }
-            else {
-                const messageOptions = MessagePrintReply.getAlertMessageOptions(LANG._MUSICPLAYER_NOT_CONNECTED);
-                messageOptions.content = "";
-                messageOptions.components = [];
-
-                interaction.editReply(messageOptions);
-            }
-        });
-    }
-    else {
+                    interaction.editReply(messageOptions);
+                }
+            });
+        }
+        else {
+            interaction.deferUpdate();
+            subscription.updateMusicDisplayerComponents();
+        }
+    } else {
         interaction.deferUpdate();
-        displayMusicDisplayer(interaction.channel);
     }
 }
 
 const customIdPlaylist = 'PotatOSMusicPlayerPlaylist';
 
+/** @param {Array<import('../../botModules/musicPlayer/SubscriptionPlaylist.mjs').CuratedTrackData>} trackList */
 const selectMenuPlaylist = (trackList) => {
     return new DiscordJs.SelectMenuBuilder()
         .setCustomId(customIdPlaylist)
@@ -127,16 +129,16 @@ export const musicPlayerPlaylist = {
 // _____________________________________________________________________________________________________________________
 //
 
-/** @param {Track[]} trackList */
+/** @param {Array<import('../../botModules/musicPlayer/SubscriptionPlaylist.mjs').CuratedTrackData>} trackList */
 function buildOptions(trackList) {
 
     let options = [];
 
     trackList.forEach((track, i) => {
         options.push({
-            label : track.metadata.playlistTitle.substring(0, 100),
-            description : track.metadata.playlistDescription.substring(0, 100),
-            value : `${track.snowflake}`,
+            label : track.data.playlistTitle.substring(0, 100),
+            description : track.data.playlistDescription.substring(0, 100),
+            value : `${track.id}`,
             emoji : getPlaylistEmoji(i),
         });
     });
