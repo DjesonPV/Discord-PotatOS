@@ -7,7 +7,7 @@
 export const BOT_NAME = `PotatOS`;
 export const BOT_ICON = `https://media.discordapp.net/attachments/329613279204999170/970392014296338432/PotatOS_logo.png`;
 export const BOT_IS_ONLINE = (botName) => `${botName} est en ligne`;// {} is online
-export const BOT_CHANNELS_FOUND = (nbTextChannels, nbVoiceChannels) => `${nbTextChannels} cannaux textuels et ${nbVoiceChannels} cannaux vocaux trouvés`; // Found {} TextChannels and {} VoiceChannels 
+export const BOT_CHANNELS_FOUND = (nbTextChannels, nbVoiceChannels, nbGuilds) => `${nbTextChannels} cannaux textuels et ${nbVoiceChannels} cannaux vocaux trouvés dans ${nbGuilds} serveurs`; // Found {} TextChannels and {} VoiceChannels 
 export const BOT_READY = `Prêt !`; // Ready!
 
 // SlashCommands _____________________
@@ -42,6 +42,8 @@ export const MUSICDISPLAYER_COMMAND_CALLED_SOUND = (commandName) => `Appelé ave
 export const MUSICDISPLAYER_THROUGH_COMMAND = `Via la commande`;
 export const MUSICDISPLAYER_WEB_LINK = `Lien Internet`;
 export const MUSICDISPLAYER_LOADING = `C h a r g e m e n t . . .`; // L o a d i n g . . .
+export const MUSICDISPLAYER_LOADING_PLEASE_WAIT = `\`\`\`fix\nVeuillez patientez.\nRécupération des données à afficher...\n\`\`\``;
+export const MUSICDISPLAYER_LOADING_PLAYLIST_DESC = `Récupération des données à afficher...`;
 
 export const MUSICDISPLAYER_STOP_VALIDATION = `Arrêter et supprimer la playlist en cours`;
 export const MUSICDISPLAYER_STOP_KEEPPLAYING = `Laisser la musique`;
@@ -56,7 +58,9 @@ export const MUSICDISPLAYER_WEB_COLOR = `#000000`;
 export const MUSICDISPLAYER_RADIO_COLOR = `#0FF388`;
 export const MUSICDISPLAYER_DEFAULT_THUMBNAIL = `https://cdn.discordapp.com/attachments/970417796729143316/1002583819683102770/PotatOS_black_and_white.png`;
 export const MUSICDISPLAYER_RADIO_THUMBNAIL = `https://media.discordapp.net/attachments/970417796729143316/1006689396805861427/unknown.png`
-
+export const MUSICDISPLAYER_PLAYING_ERROR = `\n\n\`\`\`diff
+- Impossible de jouer ce média, vérifie la source ou réessaie
+\`\`\``;
 export const MUSICDISPLAYER_LOADING_ASCII_ART = 
 `\`\`\`
                 !

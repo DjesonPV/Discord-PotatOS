@@ -1,8 +1,7 @@
 import * as DiscordJs                   from "discord.js";
 import MessageSafeDelete                from "../../botModules/MessageSafeDelete.mjs";
 import * as MessagePrintReply           from "../../botModules/MessagePrintReply.mjs"
-import displayMusicDisplayer            from "../../botModules/MusicDisplayer.mjs";
-import MusicSubscription                from "../../botModules/voice/MusicSubscription.mjs";
+import VoiceSubscription                from "../../botModules/musicPlayer/VoiceSubscription.mjs";
 import * as LANG from "../../Language.mjs";
 
 // _______________________________
@@ -11,9 +10,9 @@ import * as LANG from "../../Language.mjs";
 
 /** @param {DiscordJs.ButtonInteraction} interaction */
 function commandMusicPlayerStop(interaction){
-    const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
+    const subscription = VoiceSubscription.get(interaction.member.guild.id);
     
-    if (subscription?.isMemberConnected(interaction.member) && subscription?.queue.length <= 0) {
+    if (subscription?.isMemberConnected(interaction.member) && !subscription.playlist.hasQueue()) {
         subscription.skip();
     }
     else if (subscription?.isMemberConnected(interaction.member)) {
@@ -84,6 +83,7 @@ function commandMusicPlayerStop(interaction){
     }
 }
 
+/** @param {boolean} disable */
 const buttonMusicPlayerStop = (disable) => {
     return new DiscordJs.ButtonBuilder()
         .setCustomId(customIdStop)
@@ -107,10 +107,10 @@ export const musicPlayerStop = {
 
 /** @param {DiscordJs.GuildMember} member */
 function YesStopIt(member){
-    const subscription = MusicSubscription.getSubscription(member.guild.id);
+    const subscription = VoiceSubscription.get(member.guild.id);
 
     if (subscription?.isMemberConnected(member)) {
-        subscription.stop();
+        subscription.unsubscribe();
     }
 }
 
@@ -120,7 +120,7 @@ function YesStopIt(member){
 
 /** @param {DiscordJs.ButtonInteraction} interaction */
 async function commandMusicPlayerSkip(interaction) {
-    const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
+    const subscription = VoiceSubscription.get(interaction.member.guild.id);
 
     if (subscription?.isMemberConnected(interaction.member)) {
         subscription.skip();
@@ -130,6 +130,7 @@ async function commandMusicPlayerSkip(interaction) {
 
 const customIdSkip = 'PotatOSMusicPlayerSkip';
 
+/** @param {boolean} disable */
 const buttonMusicPlayerSkip = (disable) => {
     return new DiscordJs.ButtonBuilder()
         .setCustomId(customIdSkip)
@@ -153,12 +154,12 @@ export const musicPlayerSkip = {
 
 /** @param {DiscordJs.ButtonInteraction} interaction */
 function commandMusicPlayer(interaction) {
-    const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
+    const subscription = VoiceSubscription.get(interaction.member.guild.id);
     
     if (!subscription) {
         MessageSafeDelete.deleteMessage(interaction.message);
     } else {
-        displayMusicDisplayer(interaction.message.channel);
+        subscription.updateMusicDisplayer();
         interaction.deferUpdate(); 
     }
 }
@@ -184,31 +185,28 @@ export const musicPlayer = {
 
 /** @param {DiscordJs.ButtonInteraction} interaction */
 async function commandMusicPlayerPlayPause(interaction) {
-    const subscription = MusicSubscription.getSubscription(interaction.member.guild.id);
+    const subscription = VoiceSubscription.get(interaction.member.guild.id);
     
     if (subscription?.isMemberConnected(interaction.member)) {
-        
-        if (subscription.currentTrack?.metadata?.isLive) {
-            if (subscription.isPaused()) subscription.restartLive(interaction);
-            else subscription.stopLive();
-        } else {
-            if (subscription.isPaused()) subscription.resume();
-            else subscription.pause();
-        }
-
-        displayMusicDisplayer(interaction.message.channel);
+        if (subscription.isPaused) subscription.unpause();
+        else subscription.pause();
     }
     interaction.deferUpdate();
 }
 
 const customIdPlayPause = 'PotatOSMusicPlayerPlayPause';
 
+/**
+ * @param {boolean} isPaused 
+ * @param {boolean} isLive 
+ * @param {boolean} disable
+ */
 const buttonMusicPlayerPlayPause = (isPaused, isLive, disable) => {
     return new DiscordJs.ButtonBuilder()
         .setCustomId(customIdPlayPause)
         .setLabel(`${isPaused?LANG.MUSICDISPLAYER_PLAY:LANG.MUSICDISPLAYER_PAUSE}`)
         .setStyle(`${isPaused?DiscordJs.ButtonStyle.Success:DiscordJs.ButtonStyle.Secondary}`)
-        .setEmoji(`${isPaused?(isLive?'⏩':'▶'):'⏸'}`)
+        .setEmoji(`${isPaused?(isLive?'🔂':'▶'):(isLive?'⏏':'⏸')}`)
         .setDisabled(disable)
     ;
 }

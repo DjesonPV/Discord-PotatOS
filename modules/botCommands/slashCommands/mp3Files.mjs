@@ -1,15 +1,25 @@
-import * as Voice from "../../botModules/voice/Voice.mjs";
-import * as MP3Files from "../../botModules/voice/MP3Files.mjs";
+import VoiceSubscription from "../../botModules/musicPlayer/VoiceSubscription.mjs";
+import * as MP3Files from "../../botModules/MP3Files.mjs";
 import * as DiscordJs from 'discord.js';
 import MessageSafeDelete from '../../botModules/MessageSafeDelete.mjs';
+import * as MessagePrintReply from "../../botModules/MessagePrintReply.mjs";
 import * as LANG from "../../Language.mjs";
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
-function cmdSoundSample(interaction){
-    const sampleKey = interaction.options.getString(LANG._PLAYSOUND_OPTION_NAME);
+async function cmdSoundSample(interaction) {
+    const {subscription, isNew} = VoiceSubscription.create(interaction, true);
+    if (subscription?.isMemberConnected(interaction.member)) {
+        const thinkingMessage = await MessageSafeDelete.startThinking(interaction);
 
-    MessageSafeDelete.noReply(interaction); 
-    Voice.streamVoice(interaction, `${MP3Files.path}${MP3Files.files[sampleKey].file}`, MP3Files.files[sampleKey].volume);
+        const sampleKey = interaction.options.getString(LANG._PLAYSOUND_OPTION_NAME);
+        
+        subscription.playlist.replaceCurrent(`${MP3Files.path}${MP3Files.files[sampleKey].file}`, interaction.id, MP3Files.files[sampleKey].volume);
+        subscription.playlist.fetchCurrentAudio();
+
+        MessageSafeDelete.stopThinking(thinkingMessage); 
+    } else {
+        MessagePrintReply.replyAlertOnInterarction(interaction, LANG._MUSICPLAYER_NOT_CONNECTED);
+    }
 }
 
 const slashSoundSample = new DiscordJs.SlashCommandBuilder()

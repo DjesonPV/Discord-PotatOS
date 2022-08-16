@@ -8,7 +8,7 @@ export default class MessageSafeDelete{
     /** @param {DiscordJs.Message} message */
     static async deleteMessage(message) {
         if (this.isMessageMine(message) && message.deletable){
-            await message.delete().catch(console.log);
+            await message.delete().catch(console.error);
         }
     }
     
@@ -30,7 +30,7 @@ export default class MessageSafeDelete{
                 MessageSafeDelete.deleteMessage(message)
             )
             .catch((error)=>{
-                console.log(error)
+                console.error(error)
             })
         ;
     }
