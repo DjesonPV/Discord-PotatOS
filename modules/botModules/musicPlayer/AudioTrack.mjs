@@ -70,7 +70,7 @@ async function createAudioResource(url) {
                         reject(error);
                     }
                 }
-            }, reject);
+            }, () => { reject()});
         } else { // !UTLIS.isItAnURL()
             resolve(probeAndCreateAudioResource(fs.createReadStream(url)));
         }

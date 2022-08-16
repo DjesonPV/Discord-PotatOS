@@ -70,7 +70,7 @@ export default class VoiceSubscription {
                 } finally {
                     this.#voiceConnectionReadyLock = false;
                     if (oldState.subscription !== undefined) {
-                        this.#musicDisplayer.messageOptions(undefined, this.#voiceConnection.joinConfig, undefined); // force Channel Update
+                        this.#musicDisplayer?.messageOptions(undefined, this.#voiceConnection.joinConfig, undefined); // force Channel Update
                         this.updateMusicDisplayer();
                     }
                 }
@@ -80,19 +80,21 @@ export default class VoiceSubscription {
         this.#audioPlayer.on('stateChange', async (oldState, newState) => {
             if (isAudioPlayerIdled(newState.status) && !this.isPaused) { // this.isPaused take into account 'paused' livestreams
                 // When a track finishes
-                if (this.#playedEnough !== true && this.#playedEnoughCount > 0) {
-                    clearTimeout(this.#playedEnough);
-                    this.#playedEnough = false;
-                    this.#playedEnoughCount--;
-                    this.playlist.fetchCurrentAudio();
-                } else if (this.#playedEnoughCount <= 0) {
-                    this.playlist.current.failed = true;
-                    this.playlist.emit('audioPlay');
-                } else {
+                if (this.#playedEnough === true) {
                     this.skip();
+                } else {
+                    if (this.#playedEnoughCount > 0) {
+                        clearTimeout(this.#playedEnough);
+                        this.#playedEnough = false;
+                        this.#playedEnoughCount--;
+                        this.playlist.fetchCurrentAudio();
+                    } else {
+                        this.playlist.current.failed = true;
+                        this.playlist.emit('audioPlay');
+                    }
                 }
                  
-            } else if (isAudioPlayerPlayling(oldState.status, newState.status)) {
+            } else if (isAudioPlayerPlayling(newState.status)) {
                 // When a track begins
                 if (this.#playedEnough === false) { 
                     this.#playedEnoughCount = 10; 
@@ -325,6 +327,6 @@ const isVoiceConnectionDestroyed = (status) => (status === DiscordJsVoice.VoiceC
 const isVoiceConnectionConnecting = (readyLock, status) => (!readyLock && ( status === DiscordJsVoice.VoiceConnectionStatus.Connecting || status === DiscordJsVoice.VoiceConnectionStatus.Signalling));
 
 const isAudioPlayerIdled = (status) => (status === DiscordJsVoice.AudioPlayerStatus.Idle);
-const isAudioPlayerPlayling = (oldStatus, newStatus) => (oldStatus === DiscordJsVoice.AudioPlayerStatus.Paused && newStatus === DiscordJsVoice.AudioPlayerStatus.Playing);
+const isAudioPlayerPlayling = (newStatus) => (newStatus === DiscordJsVoice.AudioPlayerStatus.Playing);
 
 const isMemberConnectedToAVoiceChannel = (member) => (member.voice?.channel?.id !== undefined);

@@ -30,9 +30,9 @@ async function cmdPlay(interaction) {
         let queryString = query;
 
         
-        if (query === null && subscription.isPaused) {
+        if (query === null) {
             // No query so it's a Resume action
-            subscription.unpause();
+            if (subscription.isPaused) subscription.unpause();
         }
         else if (UTILS.isItAnURL(query)) {
             // Query is an URL
