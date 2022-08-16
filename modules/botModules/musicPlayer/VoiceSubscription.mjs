@@ -94,8 +94,10 @@ export default class VoiceSubscription {
                  
             } else if (isAudioPlayerPlayling(oldState.status, newState.status)) {
                 // When a track begins
-                if (this.#playedEnough === false) this.#playedEnoughCount = 10; 
-                this.#playedEnough = setTimeout(() =>{this.#playedEnough = true}, 100);
+                if (this.#playedEnough === false) { 
+                    this.#playedEnoughCount = 10; 
+                    this.#playedEnough = setTimeout(() =>{this.#playedEnough = true}, 100);
+                }
             }
         });
 
