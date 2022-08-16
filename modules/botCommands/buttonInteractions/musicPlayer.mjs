@@ -206,7 +206,7 @@ const buttonMusicPlayerPlayPause = (isPaused, isLive, disable) => {
         .setCustomId(customIdPlayPause)
         .setLabel(`${isPaused?LANG.MUSICDISPLAYER_PLAY:LANG.MUSICDISPLAYER_PAUSE}`)
         .setStyle(`${isPaused?DiscordJs.ButtonStyle.Success:DiscordJs.ButtonStyle.Secondary}`)
-        .setEmoji(`${isPaused?(isLive?'🔂':'▶'):(isLive?'⏏':'⏸')}`)
+        .setEmoji(`${isPaused?(isLive?'▶':'▶'):(isLive?'⏏':'⏸')}`)
         .setDisabled(disable)
     ;
 }
