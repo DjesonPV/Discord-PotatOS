@@ -117,7 +117,7 @@ export async function replyToAnInteraction(interaction, text, duration = 0){
         .then((message) => {
             MessageSafeDelete.deleteMessageAfterDuration(message, duration);
         })
-        .catch(console.log)
+        .catch(console.error)
     ;
 }
 

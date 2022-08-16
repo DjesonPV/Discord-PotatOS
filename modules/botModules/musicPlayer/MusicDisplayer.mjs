@@ -57,14 +57,15 @@ export default class MusicDisplayer {
      * @param {SubscriptionPlaylist | undefined} subscriptionPlaylist 
      * @param {DiscordJsVoice.JoinConfig | undefined} voiceJoinConfig 
      * @param {{isLive: boolean, isPaused: boolean, hasQueue: boolean,}} buttonOptions
+     * @param {boolean} displayFailedToPlayMessage
      * @returns 
      */
-    messageOptions (subscriptionPlaylist = undefined, voiceJoinConfig = undefined, buttonOptions = undefined) {
+    messageOptions (subscriptionPlaylist = undefined, voiceJoinConfig = undefined, buttonOptions = undefined, displayFailedToPlayMessage = false) {
 
         if (subscriptionPlaylist !== undefined) {
             const curatedDataPlaylist = subscriptionPlaylist.getCuratedDataPlaylist();
 
-            this.#updateEmbed(curatedDataPlaylist[0]);
+            this.#updateEmbed(curatedDataPlaylist[0], displayFailedToPlayMessage);
             this.#updatePlaylist(curatedDataPlaylist);
         }
         if (voiceJoinConfig !== undefined) {
@@ -103,17 +104,32 @@ export default class MusicDisplayer {
         return components;
     }
 
-    /** @param {import("./SubscriptionPlaylist.mjs").CuratedTrackData} curatedTrackData */
-    #updateEmbed(curatedTrackData) {
+    /** 
+     * @param {import("./SubscriptionPlaylist.mjs").CuratedTrackData} curatedTrackData 
+     * @param {boolean} displayFailedToPlayMessage
+     */
+    #updateEmbed(curatedTrackData, displayFailedToPlayMessage) {
+
+        let curatedAuthor = {
+            name: curatedTrackData.data.author.name.substring(0,256),
+        }
+        if (curatedTrackData.data.author.iconURL !== undefined) curatedAuthor.iconURL = curatedTrackData.data.author.iconURL;
+        if (curatedTrackData.data.author.url !== undefined) curatedAuthor.url = curatedTrackData.data.author.url;
+
         const displayerEmbed = new DiscordJs.EmbedBuilder()
             .setColor(curatedTrackData.data.color)
-            .setTitle(curatedTrackData.data.title)
-            .setDescription(curatedTrackData.data.description)
-            .setAuthor(curatedTrackData.data.author)
+            .setTitle(curatedTrackData.data.title.substring(0,256))
+            .setAuthor(curatedAuthor)
             .setThumbnail(curatedTrackData.data.thumbnail ?? LANG.MUSICDISPLAYER_DEFAULT_THUMBNAIL)
-            .setFooter({text : LANG.MUSICDISPLAYER_FOOTER(this.#currentGuildName, this.#currentVoiceChannelName)});
+            .setFooter({text : LANG.MUSICDISPLAYER_FOOTER(this.#currentGuildName, this.#currentVoiceChannelName).substring(0, 2048)});
         ;
         if (curatedTrackData.data.url !== undefined) displayerEmbed.setURL(curatedTrackData.data.url);
+        if (displayFailedToPlayMessage === false) displayerEmbed.setDescription(curatedTrackData.data.description.substring(0, 4096));
+        else displayerEmbed.setDescription(
+            curatedTrackData.data.description
+            .substring(0, 4096-LANG.MUSICDISPLAYER_PLAYING_ERROR.length)
+            .concat(LANG.MUSICDISPLAYER_PLAYING_ERROR)
+        );
 
         this.#displayerEmbed = displayerEmbed;
     }

@@ -3,7 +3,7 @@ import * as DiscordJs from 'discord.js';
 
 import * as MessagePrintReply from "../MessagePrintReply.mjs";
 import MessageSafeDelete from "../MessageSafeDelete.mjs";
-import * as LANG from "../../Language.mjs";
+
 import SubscriptionPlaylist from './SubscriptionPlaylist.mjs';
 
 import * as NodeUtil from 'node:util';
@@ -23,6 +23,9 @@ export default class VoiceSubscription {
     /** @type {DiscordJs.Message | null} */
     #message = null;
     #textChannel;
+    /** @type {boolean | NodeJS.Timeout} */
+    #playedEnough = false;
+    #playedEnoughCount = 1;
 
     /**
      * @param {DiscordJs.ChatInputCommandInteraction} interaction 
@@ -74,34 +77,45 @@ export default class VoiceSubscription {
             }
         });
 
-        /*this.#voiceConnection.on('changedVoiceChannel', () => {
-            console.log(this.#voiceConnection.joinConfig);
-            NodeUtil.promisify(setTimeout)(500).then( () => {this.updateMusicDisplayer();});
-        });*/
-
         this.#audioPlayer.on('stateChange', async (oldState, newState) => {
             if (isAudioPlayerIdled(newState.status) && !this.isPaused) { // this.isPaused take into account 'paused' livestreams
                 // When a track finishes
-
-                this.skip();
+                if (this.#playedEnough !== true && this.#playedEnoughCount > 0) {
+                    clearTimeout(this.#playedEnough);
+                    this.#playedEnough = false;
+                    this.#playedEnoughCount--;
+                    this.playlist.fetchCurrentAudio();
+                } else if (this.#playedEnoughCount <= 0) {
+                    this.playlist.current.failed = true;
+                    this.playlist.emit('audioPlay');
+                } else {
+                    this.skip();
+                }
                  
             } else if (isAudioPlayerPlayling(oldState.status, newState.status)) {
                 // When a track begins
-
+                if (this.#playedEnough === false) this.#playedEnoughCount = 10; 
+                this.#playedEnough = setTimeout(() =>{this.#playedEnough = true}, 100);
             }
         });
 
         this.#audioPlayer.on('error', async (error)=> {
-            console.log('une erreur est survenue');
+            console.error('---\nAudio Player\n\n');
+            console.error(error);
+            console.error('\n---');
             this.skip();
         });
 
         this.#voiceConnection.subscribe(this.#audioPlayer);
 
         this.playlist.on('audioPlay', () => {
-            this.#audioPlayer.play(this.playlist.current.audio);
-            this.#isPaused = false;
-            this.#selfMute(this.isPaused);
+            if (this.playlist.current.failed) {
+                setTimeout(() => {if (this.playlist.current.failed) this.skip()}, 5000);
+            } else {
+                this.#audioPlayer.play(this.playlist.current.audio);
+                this.#isPaused = false;
+                this.#selfMute(this.isPaused);
+            }
             this.updateMusicDisplayer();
         });
 
@@ -268,7 +282,8 @@ export default class VoiceSubscription {
                     isLive: this.playlist.current.live, 
                     isPaused: this.isPaused,
                     hasQueue: this.playlist.hasQueue(),
-                }
+                },
+                this.playlist.current.failed
             ))
                 .then(message => {
                     this.#message = message;

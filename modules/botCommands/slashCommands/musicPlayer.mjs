@@ -51,12 +51,13 @@ async function cmdPlay(interaction) {
 
             if (searchResult[0] && searchResult[0].url) {
                 url = searchResult[0].url;
+                queryString = query;
             }
             else await MessagePrintReply.replyAlertOnInterarction(interaction, LANG._PLAY_SEARCH_NO_RESULT(query));
         }
 
         if (url !== undefined) { 
-            subscription.playlist.add(url, interaction.id, 0.15, query);
+            subscription.playlist.add(url, interaction.id, 0.15, queryString);
             if (isNew) subscription.playlist.fetchCurrentAudio();
         }
 

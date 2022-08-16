@@ -25,6 +25,7 @@ import TrackData from './TrackData.mjs';
  * }} data Promise asynchronously resolved
  * @property {string | null} query
  * @property {boolean} live
+ * @property {boolean} failed
 */
 
 /**
@@ -41,7 +42,7 @@ import TrackData from './TrackData.mjs';
  *   playlistDescription: string,
  *   playlistTitle: string,
  * }} data
- * 
+ * @property {boolean} failed
 */
 
 export default class SubscriptionPlaylist extends NodeEvents.EventEmitter{
@@ -54,20 +55,19 @@ export default class SubscriptionPlaylist extends NodeEvents.EventEmitter{
     constructor() {
         super();
 
-        this.on('audioReady', (id, audio) => {
-            const track = trackInPlaylist(this.playlist, id);
-            if (track?.audio !== undefined) {
-                track.audio = audio;
-                track.audio.volume.setVolume(track.volume);
+        this.on('audioReady', (audio) => {
+            if (this.current?.audio !== undefined) {
+                this.current.audio = audio;
+                this.current.audio.volume.setVolume(this.current.volume);
             }
             this.emit('audioPlay');
         });
 
-        this.on('audioFailed', (id) => {
-            const track = trackInPlaylist(this.playlist, id);
-
-            this.emit('failedAudioBuild', id, track?.query);
-            this.remove(id);
+        this.on('audioFail', () => {
+            if (this.current?.audio !== undefined) {
+                this.current.failed = true;
+            }
+            this.emit('audioPlay');
         });
 
         this.on('dataReady', (id, data) => {
@@ -97,6 +97,7 @@ export default class SubscriptionPlaylist extends NodeEvents.EventEmitter{
             data: new TrackData(url).fetchData(this, snowflake, query),
             query: query,
             live: true,
+            failed: false,
         });
         this.emit('playlistChanged');
         this.unlock();
@@ -112,6 +113,7 @@ export default class SubscriptionPlaylist extends NodeEvents.EventEmitter{
             data: new TrackData(url).fetchData(this, snowflake, null),
             query: null,
             live: true,
+            failed: false,
         };
         this.emit('playlistChanged');
         this.unlock();
@@ -155,7 +157,7 @@ export default class SubscriptionPlaylist extends NodeEvents.EventEmitter{
     }
 
     fetchCurrentAudio() {
-        this.current.audio = new AudioTrack(this.current.url).fetchAudio(this, this.current.id);
+        this.current.audio = new AudioTrack(this.current.url).fetchAudio(this);
     }
 
     get current() {
@@ -199,6 +201,7 @@ export default class SubscriptionPlaylist extends NodeEvents.EventEmitter{
             curratedDataPlaylist.push({
                 id: track.id,
                 data: data,
+                failed: track.failed,
             })
         });
 

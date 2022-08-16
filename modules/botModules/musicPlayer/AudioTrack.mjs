@@ -20,20 +20,17 @@ export default class AudioTrack {
         this.url = url
     }
 
-    /** 
-     * @param {SubscriptionPlaylist} subscription 
-     * @param {DiscordJs.Snowflake} snowflake
-     */
-    fetchAudio(subscription, snowflake) {
+    /** @param {SubscriptionPlaylist} subscription */
+    fetchAudio(subscription) {
         return new Promise( (resolve) => {  // Here we will always resolve, but will emit a fail so the subscription will not 
             createAudioResource(this.url).then(
                 (audioRessource) => {
                     resolve(true);
-                    subscription.emit('audioReady', snowflake, audioRessource);
+                    subscription.emit('audioReady', audioRessource);
                 },
                 (reason) => {
                     resolve(true);
-                    subscription.emit('audioFail', snowflake, reason);
+                    subscription.emit('audioFail');
                 }
             );
         });
@@ -44,12 +41,9 @@ export default class AudioTrack {
 async function createAudioResource(url) {
     return new Promise(async (resolve, reject) => {
         if (UTILS.isItAnURL(url)) {
-
             fetchFileURL(url).then( fileURL => {
-
                 if (fileURL === undefined) {
                     reject(LANG.ERROR_NO_AUDIO_MEDIA)
-                    this.onFinish();
                     return;
                 }
 
@@ -63,7 +57,6 @@ async function createAudioResource(url) {
 
                     if (!stream) {
                         reject(LANG.ERROR_NO_STREAM);
-                        this.onFinish();
                         return;
                     }
 
@@ -77,9 +70,7 @@ async function createAudioResource(url) {
                         reject(error);
                     }
                 }
-
-            });
-
+            }, reject);
         } else { // !UTLIS.isItAnURL()
             resolve(probeAndCreateAudioResource(fs.createReadStream(url)));
         }
@@ -100,19 +91,31 @@ async function probeAndCreateAudioResource(readableStream) {
  * @returns {Promise<string | undefined>}
  */
 async function fetchFileURL(queryURL) {
-    return RadioGarden.getRadioFlux(RadioGarden.matchRadioChannelforId(queryURL)?.[1]) ??
-        (await ytdl.exec(
-            queryURL,
-            {
-                format: 'bestaudio.1/bestaudio*.2/best.2',
-                print: 'urls',
-                simulate: true,
+    return new Promise(async (resolve, reject) => {
+
+        const radioGardenURL = RadioGarden.getRadioFlux(RadioGarden.matchRadioChannelforId(queryURL)?.[1]);
+
+        if (radioGardenURL !== undefined) {
+            resolve (radioGardenURL)
+        } else {
+            let ytdlURL;
+            try {
+                ytdlURL = (await ytdl.exec(
+                    queryURL,
+                    {
+                        format: 'bestaudio.1/bestaudio*.2/best.2',
+                        print: 'urls',
+                        simulate: true,
+                    }
+                ))?.stdout;
+            } catch (error) {
+                reject('Unsuported URL');
             }
-        )
-            .catch((reason) => { })) // If catch : dont care about failure, will return undefined and move on
-            ?.stdout
-        ;
-    ;
+            
+            if (ytdlURL !== undefined) resolve(ytdlURL)
+            else reject('YTDLP returned no URL');
+        }
+    });
 } // fetchFileURL()
 
 /** @param {string} url */

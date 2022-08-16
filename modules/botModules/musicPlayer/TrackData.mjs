@@ -95,11 +95,12 @@ async function fetchMetadatafromYTDLP(url, searchQuery) {
 				} else {
 					resolve(metadata);
 				}
-			});
-		} catch (error) {
+			}, () => {onError()} );
+		} catch (error) {onError();}
+
+		function onError() {
 			clearTimeout(timeout);
-			reject();
-			return;
+			reject(url);
 		}
 	}).then( async metadata => { // Fetched metadata from YTDLP in time
 
@@ -136,7 +137,7 @@ async function fetchMetadatafromYTDLP(url, searchQuery) {
 
 	}, () => { // Failed to get metadata from YTDLP
 
-		if (searchQuery === undefined) {
+		if (searchQuery === null || searchQuery === undefined) {
 			return fetchMetadatafromInternet(url);
 		} else {
 			return failedYoutubeSearchFetch(url, searchQuery);

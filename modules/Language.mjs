@@ -58,7 +58,9 @@ export const MUSICDISPLAYER_WEB_COLOR = `#000000`;
 export const MUSICDISPLAYER_RADIO_COLOR = `#0FF388`;
 export const MUSICDISPLAYER_DEFAULT_THUMBNAIL = `https://cdn.discordapp.com/attachments/970417796729143316/1002583819683102770/PotatOS_black_and_white.png`;
 export const MUSICDISPLAYER_RADIO_THUMBNAIL = `https://media.discordapp.net/attachments/970417796729143316/1006689396805861427/unknown.png`
-
+export const MUSICDISPLAYER_PLAYING_ERROR = `\n\n\`\`\`diff
+- Impossible de jouer ce média, vérifie la source ou réessaie
+\`\`\``;
 export const MUSICDISPLAYER_LOADING_ASCII_ART = 
 `\`\`\`
                 !

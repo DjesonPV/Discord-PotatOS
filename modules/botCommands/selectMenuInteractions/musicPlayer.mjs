@@ -29,7 +29,7 @@ function commandPlaylist(interaction) {
             content: LANG.MUSICDISPLAYER_PLAYLIST_ASK_WHAT_TO_DO,
             embeds: [
                 new DiscordJs.EmbedBuilder()
-                    .setTitle(`${getDisplayEmoji(selectedIndex)} ${selectedTrack.data.playlistTitle}`)
+                    .setTitle(`${selectedTrack.failed?':x:':getDisplayEmoji(selectedIndex)} ${selectedTrack.data.playlistTitle}`)
                     .setDescription(selectedTrack.data.playlistDescription)
                 ,
             ],
@@ -139,7 +139,7 @@ function buildOptions(trackList) {
             label : track.data.playlistTitle.substring(0, 100),
             description : track.data.playlistDescription.substring(0, 100),
             value : `${track.id}`,
-            emoji : getPlaylistEmoji(i),
+            emoji : track.failed?'❌':getPlaylistEmoji(i),
         });
     });
 
