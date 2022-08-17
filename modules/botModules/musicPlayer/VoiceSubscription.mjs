@@ -98,8 +98,8 @@ export default class VoiceSubscription {
                 // When a track begins
                 if (this.#playedEnough === false) { 
                     this.#playedEnoughCount = 30; 
-                    this.#playedEnough = setTimeout(() =>{this.#playedEnough = true}, 100);
                 }
+                this.#playedEnough = setTimeout(() =>{this.#playedEnough = true}, 100);
             }
         });
 
