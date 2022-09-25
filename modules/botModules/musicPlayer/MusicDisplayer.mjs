@@ -27,14 +27,14 @@ export default class MusicDisplayer {
         this.#updateNames(voiceJoinConfig);
 
         this.#displayerEmbed = new DiscordJs.EmbedBuilder()
-            .setColor(LANG.MUSICDISPLAYER_BOT_COLOR)
-            .setTitle(LANG.MUSICDISPLAYER_LOADING)
-            .setDescription(LANG.MUSICDISPLAYER_LOADING_ASCII_ART)
+            .setColor(LANG.musicdisplayerBotColor)
+            .setTitle(LANG.musicdisplayerLoading)
+            .setDescription(LANG.musicdisplayerLoadingAsciiArt)
             .setAuthor({
-                name : LANG.BOT_NAME,
-                iconURL : LANG.BOT_ICON,
+                name : LANG.botName,
+                iconURL : LANG.botIcon,
             })
-            .setFooter({text : LANG.MUSICDISPLAYER_FOOTER(this.#currentGuildName, this.#currentVoiceChannelName)});
+            .setFooter({text : LANG.musicdisplayerFooter(this.#currentGuildName, this.#currentVoiceChannelName)});
         ;
 
         this.#displayerButtonRow = new DiscordJs.ActionRowBuilder()
@@ -120,15 +120,15 @@ export default class MusicDisplayer {
             .setColor(curatedTrackData.data.color)
             .setTitle(curatedTrackData.data.title.substring(0,256))
             .setAuthor(curatedAuthor)
-            .setThumbnail(curatedTrackData.data.thumbnail ?? LANG.MUSICDISPLAYER_DEFAULT_THUMBNAIL)
-            .setFooter({text : LANG.MUSICDISPLAYER_FOOTER(this.#currentGuildName, this.#currentVoiceChannelName).substring(0, 2048)});
+            .setThumbnail(curatedTrackData.data.thumbnail ?? LANG.musicdisplayerDefaultThumbnail)
+            .setFooter({text : LANG.musicdisplayerFooter(this.#currentGuildName, this.#currentVoiceChannelName).substring(0, 2048)});
         ;
         if (curatedTrackData.data.url !== undefined) displayerEmbed.setURL(curatedTrackData.data.url);
         if (displayFailedToPlayMessage === false) displayerEmbed.setDescription(curatedTrackData.data.description.substring(0, 4096));
         else displayerEmbed.setDescription(
             curatedTrackData.data.description
-            .substring(0, 4096-LANG.MUSICDISPLAYER_PLAYING_ERROR.length)
-            .concat(LANG.MUSICDISPLAYER_PLAYING_ERROR)
+            .substring(0, 4096-LANG.musicdisplayerPlayingError.length)
+            .concat(LANG.musicdisplayerPlayingError)
         );
 
         this.#displayerEmbed = displayerEmbed;

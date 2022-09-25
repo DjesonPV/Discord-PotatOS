@@ -50,7 +50,7 @@ async function cmdMaths(interaction) {
     /** @type {string} */
     let result = undefined;
 
-    switch (interaction.options.getString(LANG._MATHS_CONSTANT_NAME)) {
+    switch (interaction.options.getString(LANG.maths_InputName)) {
         case MathChoices.Pi:
             result = `π = ${Math.PI}`;
             break;
@@ -60,19 +60,19 @@ async function cmdMaths(interaction) {
             break;
 
         case MathChoices.One:
-            result = `${LANG._MATHS_CONSTANT__ONE} = 1`;
+            result = `${LANG.maths_InputOne} = 1`;
             break;
 
         case MathChoices.Exp:
-            result = exp(interaction.options.getNumber(LANG._MATHS_NUMBER_NAME));
+            result = exp(interaction.options.getNumber(LANG.maths_OptionName));
             break;
 
         case MathChoices.Ln:
-            result = ln(interaction.options.getNumber(LANG._MATHS_NUMBER_NAME));
+            result = ln(interaction.options.getNumber(LANG.maths_OptionName));
             break;
 
         case MathChoices.Phi:
-            result = phi(interaction.options.getNumber(LANG._MATHS_NUMBER_NAME));
+            result = phi(interaction.options.getNumber(LANG.maths_OptionName));
             break;
 
         default:
@@ -82,29 +82,29 @@ async function cmdMaths(interaction) {
     if (result !== undefined){
        await MessagePrintReply.replyToAnInteraction(interaction, result);
     } else {
-        await MessagePrintReply.replyAlertOnInterarction(interaction, LANG._MATHS_ERROR);
+        await MessagePrintReply.replyAlertOnInterarction(interaction, LANG.maths_Error);
     }
 }
 
 const slashMaths = new DiscordJs.SlashCommandBuilder()
-    .setName(LANG._MATHS_CMDNAME)
-    .setDescription(LANG._MATHS_DESC)
+    .setName(LANG.maths_CommandName)
+    .setDescription(LANG.maths_CommandDescription)
     .addStringOption(option => option
-        .setName(LANG._MATHS_CONSTANT_NAME)
-        .setDescription(LANG._MATHS_CONSTANT_DESC)
+        .setName(LANG.maths_InputName)
+        .setDescription(LANG.maths_InputDescription)
         .addChoices(
-            { name: LANG._MATHS_CONSTANT__PI,    value: MathChoices.Pi  },
-            { name: LANG._MATHS_CONSTANT__TAU,   value: MathChoices.Tau },
-            { name: LANG._MATHS_CONSTANT__EXP,   value: MathChoices.Exp },
-            { name: LANG._MATHS_CONSTANT__LOG_E, value: MathChoices.Ln  },
-            { name: LANG._MATHS_CONSTANT__PHI,   value: MathChoices.Phi },
-            { name: LANG._MATHS_CONSTANT__ONE,   value: MathChoices.One }
+            { name: LANG.maths_InputPi,    value: MathChoices.Pi  },
+            { name: LANG.maths_InputTau,   value: MathChoices.Tau },
+            { name: LANG.maths_InputExp,   value: MathChoices.Exp },
+            { name: LANG.maths_InputLogE, value: MathChoices.Ln  },
+            { name: LANG.maths_InputPhi,   value: MathChoices.Phi },
+            { name: LANG.maths_InputOne,   value: MathChoices.One }
         )
         .setRequired(true)
     )
     .addNumberOption(option => option
-        .setName(LANG._MATHS_NUMBER_NAME)
-        .setDescription(LANG._MATHS_NUMBER_DESC)
+        .setName(LANG.maths_OptionName)
+        .setDescription(LANG.maths_OptionDescription)
     )
 ;
 

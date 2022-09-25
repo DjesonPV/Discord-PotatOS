@@ -33,29 +33,29 @@ export function viewsToString(viewCount){
             dec = Math.floor(views[2]/1e2);
 
             if (num > 10) dec = false;
-            suf = LANG.MUSICDISPLAYER_VIEWS_BILLION;
+            suf = LANG.musicdisplayerViewsBillion;
         } else if (views[2] > 0) {
             num = views[2];
             dec = Math.floor(views[1]/1e2);
 
             if (num > 10) dec = false;
-            suf = LANG.MUSICDISPLAYER_VIEWS_MILLION;
+            suf = LANG.musicdisplayerViewsMillion;
         } else if (views[1] > 0) {
             num = views[1];
             dec = Math.floor(views[0]/1e2);
 
             if (num > 10) dec = false;
-            suf = LANG.MUSICDISPLAYER_VIEWS_THOUSAND;
+            suf = LANG.musicdisplayerViewsThousand;
         } else {
             num = views[0];
             dec = false;
-            suf = LANG.MUSICDISPLAYER_VIEWS_UNIT;
+            suf = LANG.musicdisplayerViewsUnits;
         }
 
         string = `${num}`;
         if (dec !== false) string+=`,${dec}`;
         string+=`${suf}`;
-    } else string = LANG.MUSICDISPLAYER_VIEWS_UNKNOWN;
+    } else string = LANG.musicdisplayerViewsUnknown;
 
     return string;
 }
@@ -65,7 +65,7 @@ export function YYYYMMDDToString(yyyymmdd){
 
     let [year, month, day] = yyyymmdd.match(/(\d{4})(\d{2})(\d{2})/).slice(1,4);
 
-    return LANG.DATE_TEXT_FORMAT(year.replace(/^0+/, ''), (month.replace(/^0+/, ''))-1, day.replace(/^0+/, ''));
+    return LANG.dateToText(year.replace(/^0+/, ''), (month.replace(/^0+/, ''))-1, day.replace(/^0+/, ''));
 }
 
 /** @param {string} text */

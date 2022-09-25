@@ -12,6 +12,7 @@ export {
 export {
     pc,
     pk,
+    pd,
     putain,
 } from "./slashCommands/sassy.mjs";
 

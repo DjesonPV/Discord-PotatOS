@@ -9,9 +9,9 @@ const emojisMove = [":fist:", ":raised_hand:", ":v:"];
 const emojisResult = [":arrow_right:",":regional_indicator_i:",":arrow_left:"];
 
 const snReply = [
-    LANG._SHIFUMI_DEFEAT_SENTENCES,
-    LANG._SHIFUMI_DRAW_SENTENCES,
-    LANG._SHIFUMI_VICTORY_SENTENCES
+    LANG.shifumi_SentencesDefeat,
+    LANG.shifumi_SentencesDraw,
+    LANG.shifumi_SentencesVictory
 ];
 
 /**
@@ -30,20 +30,20 @@ async function command(interaction){
 
     let result = tableMath[(3*playerMove+botMove)]; // Evaluate win
 
-    await MessagePrintReply.replyToAnInteraction(interaction, `:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} ${LANG._SHIFUMI_BOT_EMOJI}  ${snReply[result][botResponse]}`);
+    await MessagePrintReply.replyToAnInteraction(interaction, `:bust_in_silhouette: ${emojisMove[playerMove]}   ${emojisResult[result]}   ${emojisMove[botMove]} ${LANG.shifumi_Emoji}  ${snReply[result][botResponse]}`);
 }
 
 const slash = new DiscordJs.SlashCommandBuilder()
-    .setName(LANG._SHIFUMI_CMDNAME)
-    .setDescription(LANG._SHIFUMI_DESC)
+    .setName(LANG.shifumi_CommandName)
+    .setDescription(LANG.shifumi_CommandDescription)
     .addIntegerOption(option => option
         .setName('play')
-        .setDescription(LANG._SHIFUMI_PLAY_DESC)
+        .setDescription(LANG.shifumi_InputDescription)
         .setRequired(true)
         .addChoices(
-            { name: LANG._SHIFUMI_PLAY_ROCK, value: 0 },
-            { name: LANG._SHIFUMI_PLAY_PAPER, value: 1 },
-            { name: LANG._SHIFUMI_PLAY_SCISSORS, value: 2}
+            { name: LANG.shifumi_InputRock, value: 0 },
+            { name: LANG.shifumi_InputPaper, value: 1 },
+            { name: LANG.shifumi_InputScissors, value: 2}
         )
         .setMinValue(0)
         .setMaxValue(2)   

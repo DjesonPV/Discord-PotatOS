@@ -18,16 +18,16 @@ async function cmdSoundSample(interaction) {
 
         MessageSafeDelete.stopThinking(thinkingMessage); 
     } else {
-        MessagePrintReply.replyAlertOnInterarction(interaction, LANG._MUSICPLAYER_NOT_CONNECTED);
+        MessagePrintReply.replyAlertOnInterarction(interaction, LANG.musicplayerFailedToExecuteCommand);
     }
 }
 
 const slashSoundSample = new DiscordJs.SlashCommandBuilder()
-    .setName(LANG._PLAYSOUND_CMDNAME)
-    .setDescription(LANG._PLAYSOUND_DESC)
+    .setName(LANG.playsound_CommandName)
+    .setDescription(LANG.playsound_CommandDescription)
     .addStringOption(option => option
-        .setName(LANG._PLAYSOUND_OPTION_NAME)
-        .setDescription(LANG._PLAYSOUND_DESC)
+        .setName(LANG.playsound_InputName)
+        .setDescription(LANG.playsound_InputDescription)
         .addChoices(...getSampleChoices())
         .setRequired(true)
     )

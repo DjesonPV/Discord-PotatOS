@@ -26,20 +26,20 @@ function commandMusicPlayerStop(interaction){
         .addComponents(
             new DiscordJs.ButtonBuilder()
             .setCustomId(StopButtonIDs.YesStopIt)
-            .setLabel(LANG.MUSICDISPLAYER_STOP_VALIDATION)
+            .setLabel(LANG.musicdisplayerStopValidation)
             .setStyle(DiscordJs.ButtonStyle.Danger)
             .setEmoji('❕')
         )
         .addComponents(
             new DiscordJs.ButtonBuilder()
             .setCustomId(StopButtonIDs.Dont)
-            .setLabel(LANG.MUSICDISPLAYER_STOP_KEEPPLAYING)
+            .setLabel(LANG.musicdisplayerStopKeepPlaying)
             .setStyle(DiscordJs.ButtonStyle.Secondary)
             .setEmoji('🎧')
         );
 
         const toSend = {
-            content: LANG.MUSICDISPLAYER_STOP_QUESTION,
+            content: LANG.musicdisplayerStopQuestion,
             components: [stopButtonsActionRow],
             ephemeral: true,
         };
@@ -64,12 +64,12 @@ function commandMusicPlayerStop(interaction){
                 }
                 
                 interaction.editReply({ 
-                    content: LANG.MUSICDISPLAYER_STOP_REQUEST_RECEIVED, 
+                    content: LANG.musicdisplayerStopReceivedAnwser, 
                     components : []
                 });
             }
             else {
-                const messageOptions = MessagePrintReply.getAlertMessageOptions(LANG._MUSICPLAYER_NOT_CONNECTED);
+                const messageOptions = MessagePrintReply.getAlertMessageOptions(LANG.musicplayerFailedToExecuteCommand);
                 messageOptions.content = "";
                 messageOptions.components = [];
 
@@ -87,7 +87,7 @@ function commandMusicPlayerStop(interaction){
 const buttonMusicPlayerStop = (disable) => {
     return new DiscordJs.ButtonBuilder()
         .setCustomId(customIdStop)
-        .setLabel(LANG.MUSICDISPLAYER_STOP)
+        .setLabel(LANG.musicdisplayerStop)
         .setStyle(DiscordJs.ButtonStyle.Danger)
         .setEmoji('◻')
         .setDisabled(disable)
@@ -134,7 +134,7 @@ const customIdSkip = 'PotatOSMusicPlayerSkip';
 const buttonMusicPlayerSkip = (disable) => {
     return new DiscordJs.ButtonBuilder()
         .setCustomId(customIdSkip)
-        .setLabel(LANG.MUSICDISPLAYER_SKIP)
+        .setLabel(LANG.musicdisplayerSkip)
         .setStyle(DiscordJs.ButtonStyle.Primary)
         //.setStyle(`${subscription.queue.length>0?DiscordJs.ButtonStyle.Primary:DiscordJs.ButtonStyle.Danger}`)
         .setEmoji('⏭')
@@ -168,7 +168,7 @@ const customIdMusicPlayer = 'PotatOSMusicPlayer';
 
 const buttonMusicPlayer =  new DiscordJs.ButtonBuilder()
     .setCustomId(customIdMusicPlayer)
-    .setLabel(LANG.MUSICDISPLAYER_NAME)
+    .setLabel(LANG.musicdisplayerName)
     .setStyle(DiscordJs.ButtonStyle.Secondary)
     .setEmoji('🎧')
 ;
@@ -204,7 +204,7 @@ const customIdPlayPause = 'PotatOSMusicPlayerPlayPause';
 const buttonMusicPlayerPlayPause = (isPaused, isLive, disable) => {
     return new DiscordJs.ButtonBuilder()
         .setCustomId(customIdPlayPause)
-        .setLabel(`${isPaused?LANG.MUSICDISPLAYER_PLAY:LANG.MUSICDISPLAYER_PAUSE}`)
+        .setLabel(`${isPaused?LANG.musicdisplayerPlay:LANG.musicdisplayerPause}`)
         .setStyle(`${isPaused?DiscordJs.ButtonStyle.Success:DiscordJs.ButtonStyle.Secondary}`)
         .setEmoji(`${isPaused?(isLive?'▶':'▶'):(isLive?'⏏':'⏸')}`)
         .setDisabled(disable)

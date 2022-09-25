@@ -13,7 +13,7 @@ import * as RadioGarden from '../../botModules/RadioGarden.mjs';
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 function replyYourNotConnected(interaction) {
-    MessagePrintReply.replyAlertOnInterarction(interaction, LANG._MUSICPLAYER_NOT_CONNECTED);
+    MessagePrintReply.replyAlertOnInterarction(interaction, LANG.musicplayerFailedToExecuteCommand);
 }
 
 //______________________________________________________________________________________________________________________
@@ -45,7 +45,7 @@ async function cmdPlay(interaction) {
                 {showVideos: true, showLives: true, showShorts: true, location: 'FR', language: 'fr'}
             )
                 .catch(async (error)=>{
-                    await MessagePrintReply.replyAlertOnInterarction(interaction, LANG._PLAY_SEARCH_ERROR)
+                    await MessagePrintReply.replyAlertOnInterarction(interaction, LANG.play_SearchingError)
                 })
             ;
 
@@ -53,7 +53,7 @@ async function cmdPlay(interaction) {
                 url = searchResult[0].url;
                 queryString = query;
             }
-            else await MessagePrintReply.replyAlertOnInterarction(interaction, LANG._PLAY_SEARCH_NO_RESULT(query));
+            else await MessagePrintReply.replyAlertOnInterarction(interaction, LANG.play_SearchYieldedNoResult(query));
         }
 
         if (url !== undefined) { 
@@ -69,10 +69,10 @@ async function cmdPlay(interaction) {
 
 const slashPlay = new DiscordJs.SlashCommandBuilder()
     .setName('play')
-    .setDescription(LANG._PLAY_DESC)
+    .setDescription(LANG.play_CommandDescription)
     .addStringOption(option => option
         .setName('query')
-        .setDescription(LANG._PLAY_QUERY_DESC)
+        .setDescription(LANG.play_OptionDescription)
     )
 ;
 
@@ -97,7 +97,7 @@ async function cmdSkip(interaction) {
 
 const slashSkip = new DiscordJs.SlashCommandBuilder()
     .setName('skip')
-    .setDescription('fonction de test d\'un nouveau systeme audio')
+    .setDescription(LANG.skip_CommandDescription)
 ;
 
 export const skip = {slash: slashSkip, command: cmdSkip};
@@ -121,7 +121,7 @@ async function cmdPause(interaction) {
 
 const slashPause = new DiscordJs.SlashCommandBuilder()
     .setName('pause')
-    .setDescription(LANG._PAUSE_DESC)
+    .setDescription(LANG.pause_CommandDescription)
 ;
 
 export const pause = { slash: slashPause, command: cmdPause };
@@ -145,7 +145,7 @@ async function cmdStop(interaction) {
 
 const slashStop = new DiscordJs.SlashCommandBuilder()
     .setName('stop')
-    .setDescription(LANG._STOP_DESC)
+    .setDescription(LANG.stop_CommandDescription)
 ;
 
 export const stop = {slash: slashStop, command: cmdStop};
@@ -169,13 +169,13 @@ async function cmdRadio(interaction) {
                 url = query;
                 queryString = null;
             } else {
-                MessagePrintReply.replyAlertOnInterarction(interaction, LANG._RADIO_LINK_NOT_VALID(query));
+                MessagePrintReply.replyAlertOnInterarction(interaction, LANG.radio_NotValidLink(query));
             }
         } else {
             // Query is a string
             let searchURL = await RadioGarden.searchForRadioUrl(query)
                 .catch(async (error)=>{
-                    await MessagePrintReply.replyAlertOnInterarction(interaction, LANG._PLAY_SEARCH_NO_RESULT(query));
+                    await MessagePrintReply.replyAlertOnInterarction(interaction, LANG.play_SearchYieldedNoResult(query));
                 })
             ;
 
@@ -197,10 +197,10 @@ async function cmdRadio(interaction) {
 
 const slashRadio = new DiscordJs.SlashCommandBuilder()
     .setName('radio')
-    .setDescription(LANG._RADIO_DESC)
+    .setDescription(LANG.radio_CommandDescription)
     .addStringOption(option => option
         .setName('query')
-        .setDescription(LANG._RADIO_QUERY_DESC)
+        .setDescription(LANG.radio_InputDescription)
         .setRequired(true)  
     )
 ;

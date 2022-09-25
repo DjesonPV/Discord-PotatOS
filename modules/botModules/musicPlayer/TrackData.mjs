@@ -38,16 +38,16 @@ export default class TrackData {
 
 		// Data used in the MusicDisplayer Embed
 		author: {
-			name: LANG.MUSICDISPLAYER_LOADING,
-			iconURL: LANG.MUSICDISPLAYER_BOT_ICON,
+			name: LANG.musicdisplayerLoading,
+			iconURL: LANG.musicdisplayerBotIcon,
 		},
-		color: LANG.MUSICDISPLAYER_BOT_COLOR,
-		description: LANG.MUSICDISPLAYER_LOADING_PLEASE_WAIT,
+		color: LANG.musicdisplayerBotColor,
+		description: LANG.musicdisplayerPleaseWait,
 		title: ` `,
 
 		// Data used in the MusicDisplayer Playlist SelectMenu
-		playlistDescription: LANG.MUSICDISPLAYER_LOADING_PLAYLIST_DESC,
-		playlistTitle: LANG.MUSICDISPLAYER_LOADING,
+		playlistDescription: LANG.musicdisplayerPlaylistDescriptionLoading,
+		playlistTitle: LANG.musicdisplayerLoading,
 	};
 
 } // class TrackData
@@ -110,7 +110,7 @@ async function fetchMetadatafromYTDLP(url, searchQuery) {
 		const iconURL = `https://s2.googleusercontent.com/s2/favicons?domain_url=${metadata.webpage_url_domain}&sz=48`;
 		const isLive = metadata.is_live;
 		const title = metadata.fulltitle || metadata.title;
-		const thumbnail = metadata.thumbnail ?? LANG.MUSICDISPLAYER_DEFAULT_THUMBNAIL;
+		const thumbnail = metadata.thumbnail ?? LANG.musicdisplayerDefaultThumbnail;
 		const uploadDate = metadata.upload_date;
 		const url = metadata.webpage_url;
 		const viewCount = metadata.view_count;
@@ -164,15 +164,15 @@ function fetchMetadatafromFile(url) {
 
 		// Data used in the MusicDisplayer Embed
 		author: {
-			name: LANG.MUSICDISPLAYER_COMMAND_CALLED_SOUND(mp3Key),
-			iconURL: LANG.MUSICDISPLAYER_BOT_ICON,
+			name: LANG.musicdisplayerCommandCalledSoundsample(mp3Key),
+			iconURL: LANG.musicdisplayerBotIcon,
 		},
-		color: LANG.MUSICDISPLAYER_BOT_COLOR,
+		color: LANG.musicdisplayerBotColor,
 		description: description,
 		title: title,
 
 		// Data used in the MusicDisplayer Playlist SelectMenu
-		playlistDescription: LANG.MUSICDISPLAYER_THROUGH_COMMAND,
+		playlistDescription: LANG.musicdisplayerThroughCommand,
 		playlistTitle: mp3Key,
 	};
 } // fetchMetadatafromFile()
@@ -198,7 +198,7 @@ async function fetchMetadatafromInternet(url) {
 			iconURL: favicon,
 		},
 		color: await getColorFromURL(uri),
-		description: LANG.MUSICDISPLAYER_WEB_LINK,
+		description: LANG.musicdisplayerWebLink,
 		title: file,
 		url: url,
 
@@ -220,12 +220,12 @@ async function fetchMetadatafromRadioGarden(url, searchQuery) {
 			author: {
 				name: `Radio Garden`,
 				url: `https://radio.garden${info.url}`,
-				iconURL: LANG.MUSICDISPLAYER_RADIO_ICON,
+				iconURL: LANG.musicdisplayerRadioIcon,
 			},
-			color: LANG.MUSICDISPLAYER_RADIO_COLOR,
+			color: LANG.musicdisplayerRadioColor,
 			description: `${info.place.title}, ${info.country.title}`,
 			title: info.title,
-			thumbnail: LANG.MUSICDISPLAYER_RADIO_THUMBNAIL,
+			thumbnail: LANG.musicdisplayerRadioThumbnail,
 			url: info.website,
 
 			// Data used in the MusicDisplayer Playlist SelectMenu
@@ -278,9 +278,9 @@ function failedRadioGardenFetch(url, searchQuery) {
 		author: {
 			name: `Radio Garden`,
 			url: `https://radio.garden/`,
-			iconURL: LANG.MUSICDISPLAYER_RADIO_ICON,
+			iconURL: LANG.musicdisplayerRadioIcon,
 		},
-		color: LANG.MUSICDISPLAYER_RADIO_COLOR,
+		color: LANG.musicdisplayerRadioColor,
 		description: searchQuery,
 		title: url,
 		url: url,
@@ -301,7 +301,7 @@ function failedRadioGardenFetch(url, searchQuery) {
 function getColorFromURL(url) {
 	return new Promise((resolve) => {
 		const timeout = setTimeout(() => {
-			resolve(LANG.MUSICDISPLAYER_WEB_COLOR);
+			resolve(LANG.musicdisplayerNoColor);
 			return;
 		}, 500);
 
@@ -313,7 +313,7 @@ function getColorFromURL(url) {
 			});
 		} catch (error) {
 			clearTimeout(timeout);
-			resolve(LANG.MUSICDISPLAYER_WEB_COLOR);
+			resolve(LANG.musicdisplayerNoColor);
 			return;
 		}
 	});

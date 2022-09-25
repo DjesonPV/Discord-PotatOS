@@ -8,13 +8,13 @@ import * as LANG from "../../Language.mjs";
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 export async function cmdHello(interaction){
-    await MessagePrintReply.replyToAnInteraction(interaction, LANG._HELLO_HI, 5);
+    await MessagePrintReply.replyToAnInteraction(interaction, LANG.hello_Hi, 5);
 }
 
 const slashHello = new DiscordJs.SlashCommandBuilder()
     .setName('hello')
     .setNameLocalization('fr','salut')
-    .setDescription(LANG._HELLO_DESC)
+    .setDescription(LANG.hello_CommandDescription)
 ;
 
 export const hello = {slash: slashHello, command: cmdHello};
@@ -31,7 +31,7 @@ function cmdPing(interaction){
 
 const slashPing = new DiscordJs.SlashCommandBuilder()
     .setName('ping')
-    .setDescription(LANG._PING_DESC)
+    .setDescription(LANG.ping_CommandDescription)
 ;
 
 export const ping = {slash: slashPing, command: cmdPing};

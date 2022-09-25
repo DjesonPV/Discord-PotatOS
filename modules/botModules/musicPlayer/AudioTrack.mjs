@@ -43,7 +43,7 @@ async function createAudioResource(url) {
         if (UTILS.isItAnURL(url)) {
             fetchFileURL(url).then( fileURL => {
                 if (fileURL === undefined) {
-                    reject(LANG.ERROR_NO_AUDIO_MEDIA)
+                    reject(LANG.musicplayerErrorNoMediaFound)
                     return;
                 }
 
@@ -56,7 +56,7 @@ async function createAudioResource(url) {
                     const stream = process.stdout;
 
                     if (!stream) {
-                        reject(LANG.ERROR_NO_STREAM);
+                        reject(LANG.musicplayerErrorNoMediaStream);
                         return;
                     }
 

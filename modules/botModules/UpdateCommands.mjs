@@ -25,7 +25,7 @@ export async function updateSlashCommands() {
     }
 
     try {
-        console.log(LANG.SLASHCOMMANDS_REFRESH_START);
+        console.log(LANG.logCommandsRefreshStart);
 
         for (let guildName in secret.guildsID){
 
@@ -35,7 +35,7 @@ export async function updateSlashCommands() {
             );                
         };
         
-        console.log(LANG.SLASHCOMMANDS_REFRESH_SUCCESS);
+        console.log(LANG.logCommandsRefreshSuccess);
     } catch (error) {
         console.error(error);
     }
