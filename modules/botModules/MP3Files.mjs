@@ -64,6 +64,13 @@ export const files = {
         volume : 0.9,
     },
 
+    neige: {
+        file: "lasalle-neige.mp3",
+        title: "Salut à tous c'est Lasalle",
+        description: "Effectivement elle est là",
+        volume: 1.0,
+    },
+
     paris : {
         file : "paris.mp3",                         // French politics meme about JL Melenchon hologram : 
         title : "Alors où suis-je ? À Lyon...",     // Well, where am I? In Lyon...
