@@ -1,5 +1,5 @@
 import {REST} from '@discordjs/rest';
-import {Routes} from 'discord-api-types/v10';
+import {Routes} from 'discord.js/node_modules/discord-api-types/v10.mjs';
 
 import {createRequire} from 'module';
 
