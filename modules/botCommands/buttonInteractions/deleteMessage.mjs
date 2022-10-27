@@ -11,7 +11,7 @@ const customIdDelete = 'PotatOSDeleteMessage';
 const buttonDelete = (duration) => { 
     return new DiscordJs.ButtonBuilder()
         .setCustomId(customIdDelete)
-        .setLabel(LANG.MSG_AUTODESTRUCT(duration))
+        .setLabel(LANG.messageAutodelete(duration))
         .setStyle(DiscordJs.ButtonStyle.Secondary)
         .setEmoji('🚮')
     ;

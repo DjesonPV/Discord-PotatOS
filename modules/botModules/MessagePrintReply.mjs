@@ -43,7 +43,7 @@ function sendOnChannel(channel, messageOptions){
         return channel.send(messageOptions);
     }
     else {
-        return Promise.reject(LANG.MSG_CHANNEL_NOT_SUPPORTED(channel.name, channel.guild.name));
+        return Promise.reject(LANG.messageUnsupportedChannel(channel.name, channel.guild.name));
     }
 }
 
@@ -71,7 +71,7 @@ export async function replyAlertOnInterarction(interaction, text){
     if (interaction.replied) {
         await interaction.followUp(messageOptions);
     } else if (interaction.deferred){
-        await interaction.followUp('Alert !');
+        await interaction.followUp('Alert!');
         await interaction.followUp(messageOptions);
     }
     else {
@@ -90,7 +90,7 @@ export function getAlertMessageOptions(text){
             .setColor('#FF006E')
             .setAuthor({
                 name: `${text}`,
-                iconURL : LANG.ERROR_ICON,
+                iconURL : LANG.errorIcon,
             })
         ,
         ],
@@ -110,7 +110,7 @@ export async function replyToAnInteraction(interaction, text, duration = 0){
     let messageOptions = {
         fetchReply: true,
     };
-    if (text.length   != 0) messageOptions.content = text;
+    if (text.length != 0) messageOptions.content = text;
     if (duration > 0 ) messageOptions.components = [durationButtonActionRow];
 
     await interaction.reply(messageOptions)

@@ -26,7 +26,7 @@ function commandPlaylist(interaction) {
 
         /** @type {DiscordJs.InteractionReplyOptions} */
         const messageOptions = {
-            content: LANG.MUSICDISPLAYER_PLAYLIST_ASK_WHAT_TO_DO,
+            content: LANG.musicdisplayerPlaylistSelectionAskAction,
             embeds: [
                 new DiscordJs.EmbedBuilder()
                     .setTitle(`${selectedTrack.failed?':x:':getDisplayEmoji(selectedIndex)} ${selectedTrack.data.playlistTitle}`)
@@ -38,19 +38,19 @@ function commandPlaylist(interaction) {
                     .addComponents(
                         new DiscordJs.ButtonBuilder()
                             .setCustomId(PlaylistButtonIDs.DoNothing)
-                            .setLabel(LANG.MUSICDISPLAYER_PLAYLIST_DO_NOTHING)
+                            .setLabel(LANG.musicdisplayerPlaylistSelectionDoNothing)
                             .setStyle(DiscordJs.ButtonStyle.Secondary)
                             .setEmoji('🔙')
                         ,
                         new DiscordJs.ButtonBuilder()
                             .setCustomId(PlaylistButtonIDs.PlayNext)
-                            .setLabel(LANG.MUSICDISPLAYER_PLAYLIST_PLAY_NEXT)
+                            .setLabel(LANG.musicdisplayerPlaylistSelectionOnTop)
                             .setStyle(DiscordJs.ButtonStyle.Primary)
                             .setEmoji('🔝')
                         ,
                         new DiscordJs.ButtonBuilder()
                             .setCustomId(PlaylistButtonIDs.Remove)
-                            .setLabel(LANG.MUSICDISPLAYER_PLAYLIST_REMOVE)
+                            .setLabel(LANG.musicdisplayerPlaylistSelectionRemove)
                             .setStyle(DiscordJs.ButtonStyle.Danger)
                             .setEmoji('🗑')
                         ,
@@ -83,14 +83,14 @@ function commandPlaylist(interaction) {
                     }
                     
                     interaction.editReply({ 
-                        content: LANG.MUSICDISPLAYER_STOP_REQUEST_RECEIVED,
+                        content: LANG.musicdisplayerStopReceivedAnwser,
                         embeds: [], 
                         components : [],
                     });
                     
                 }
                 else {
-                    const messageOptions = MessagePrintReply.getAlertMessageOptions(LANG._MUSICPLAYER_NOT_CONNECTED);
+                    const messageOptions = MessagePrintReply.getAlertMessageOptions(LANG.musicplayerFailedToExecuteCommand);
                     messageOptions.content = "";
                     messageOptions.components = [];
 
@@ -113,7 +113,7 @@ const customIdPlaylist = 'PotatOSMusicPlayerPlaylist';
 const selectMenuPlaylist = (trackList) => {
     return new DiscordJs.SelectMenuBuilder()
         .setCustomId(customIdPlaylist)
-        .setPlaceholder(LANG.MUSICDISPLAYER_SHOW_PLAYLIST(trackList.length-1))
+        .setPlaceholder(LANG.musicdisplayerShowPlaylist(trackList.length-1))
         .setMaxValues(1)
         .setMinValues(1)
         .addOptions(buildOptions(trackList))

@@ -45,10 +45,10 @@ export function start() {
     return new Promise(async (resolve) => {
         client.on("ready", async () => {
             if (client?.user && client?.application) {
-                console.log(LANG.BOT_IS_ONLINE(client.user.username));
+                console.log(LANG.botIsOnline(client.user.username));
 
                 ExploreChannels.explore(client);
-                console.log(LANG.BOT_CHANNELS_FOUND(ExploreChannels.text.size, ExploreChannels.voice.size, ExploreChannels.guilds.size));
+                console.log(LANG.logChannelsFound(ExploreChannels.text.size, ExploreChannels.voice.size, ExploreChannels.guilds.size));
 
                 MessageSafeDelete.botUserId = client.user.id;
 
@@ -67,7 +67,7 @@ export function start() {
 
             await SlashCommandsUpdate.updateSlashCommands();
 
-            console.log(LANG.BOT_READY);
+            console.log(LANG.logReady);
         })
     });
 }
