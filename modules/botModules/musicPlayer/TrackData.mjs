@@ -165,11 +165,12 @@ function fetchMetadatafromFile(url) {
 		// Data used in the MusicDisplayer Embed
 		author: {
 			name: LANG.musicdisplayerCommandCalledSoundsample(mp3Key),
-			iconURL: LANG.musicdisplayerBotIcon,
+			iconURL: LANG.botIcon,
 		},
 		color: LANG.musicdisplayerBotColor,
 		description: description,
 		title: title,
+		thumbnail: mp3Key==="fortnite"?LANG.musicdisplayerFortniteGIF:LANG.musicdisplayerDefaultThumbnail,
 
 		// Data used in the MusicDisplayer Playlist SelectMenu
 		playlistDescription: LANG.musicdisplayerThroughCommand,

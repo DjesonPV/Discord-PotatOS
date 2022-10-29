@@ -25,10 +25,10 @@
   "dependencies": {
     "@discordjs/opus": "^0.9.0",
     "@discordjs/voice": "^0.11.0",
-    "axios": "^1.1.3",
     "discord.js": "^14.6.0",
     "favcolor": "^0.2.0",
     "libsodium-wrappers": "^0.7.10",
+    "node-fetch": "^3.2.10",
     "surfyt-api": "^0.1.2",
     "youtube-dl-exec": "^2.1.6",
     "ytls": "^1.0.6"

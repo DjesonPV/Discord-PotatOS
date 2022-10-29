@@ -1,12 +1,12 @@
 //
 // BOT
-export const botName = `PotatOS`;
-export const botIcon = `https://media.discordapp.net/attachments/329613279204999170/970392014296338432/PotatOS_logo.png`;
+export const botName = `GLaDOS`;
+export const botIcon = `https://cdn.discordapp.com/attachments/329613279204999170/1035569018620362802/GLaDOS_de_base.png`;
 export const errorIcon = `https://cdn.discordapp.com/attachments/329613279204999170/970413892792623204/Error_icon.png`;
 
 // - - -
 // CONSOLE LOG
-export const botIsOnline = (botName) => `${botName} est en ligne`;// {} is online
+export const botIsOnline = (botName) => `${botName} est en ligne`; // {} is online
 export const logChannelsFound = (nbTextChannels, nbVoiceChannels, nbGuilds) => `${nbTextChannels} cannaux textuels et ${nbVoiceChannels} cannaux vocaux trouvés dans ${nbGuilds} serveurs`; // Found {} TextChannels and {} VoiceChannels 
 export const logReady = `Prêt !`; // Ready!
 export const logCommandsRefreshStart = `Mise à jour des commandes (/)...`; // Started refreshing application (/) commands.
@@ -49,11 +49,12 @@ export const musicdisplayerStopQuestion = `Es-tu sûr de vouloir arrêter le lec
 export const musicdisplayerStopReceivedAnwser = `Requête prise en compte !`;
 
 export const musicdisplayerRadioIcon = `https://radio.garden/icons/favicon.png`;
-export const musicdisplayerBotColor = `#FFB46B`;
+export const musicdisplayerBotColor = `#28ACE3`;
 export const musicdisplayerNoColor = `#000000`;
 export const musicdisplayerRadioColor = `#0FF388`;
-export const musicdisplayerDefaultThumbnail = `https://cdn.discordapp.com/attachments/970417796729143316/1002583819683102770/PotatOS_black_and_white.png`;
-export const musicdisplayerRadioThumbnail = `https://media.discordapp.net/attachments/970417796729143316/1006689396805861427/unknown.png`
+export const musicdisplayerDefaultThumbnail = `https://cdn.discordapp.com/attachments/329613279204999170/1035569019027206165/GLaDOS_de_base_black_and_white.png`;
+export const musicdisplayerFortniteGIF = `https://cdn.discordapp.com/attachments/329613279204999170/1035977076827771081/dva_default_dance.gif`;
+export const musicdisplayerRadioThumbnail = `https://media.discordapp.net/attachments/970417796729143316/1006689396805861427/unknown.png`;
 export const musicdisplayerPlayingError = `\n\n\`\`\`diff\n- Impossible de jouer ce média, vérifie la source ou réessaie\n\`\`\``;
 export const musicdisplayerLoadingAsciiArt = `\`\`\`\n                !\n                |\n                |    |~/\n                |   _|~\n  .============.|  (_|   |~/\n.-;____________;|.      _|~\n| [_________I__] |     (_|\n|  """"" (_) (_) |\n| .=====..=====. |\n| |:::::||:::::| |\n| '=====''=====' |\n'----------------'\n\`\`\``;
 export const musicdisplayerFooter = (guildName, channelName) => `__________________________________________\n${botName} • ${guildName} > ${channelName}`;
@@ -86,8 +87,8 @@ export const ping_CommandDescription = `Pong (envoie un message en privé)`;
 // > SoundSample
 export const playsound_CommandName = `son`;
 export const playsound_CommandDescription = `Joue un son dans le Salon Vocal auquel tu es connecté`;
-export const playsound_InputName = `sample`;
-export const playsound_InputDescription = `Nom du son à jouer`;
+export const playsound_OptionName = `sample`;
+export const playsound_OptionDescription = `Nom du son à jouer`;
 
 // > MusicDisplayer
 export const musicplayerFailedToExecuteCommand = `Tu dois rejoindre un Salon Vocal (ou le même que ${botName}) sur ce Serveur pour utiliser cette commande`;
@@ -106,27 +107,42 @@ export const radio_NotValidLink = (query) => `L'URL fournie n'est pas un lien de
 
 // > Shifumi
 export const shifumi_SentencesVictory = [
-    `Aucun aléatoire, que du talent.`,              // Nothing random, skils.
-    `Moins d'energie et poutant plus efficace.`,    // Smart power and smarter logic.
-    `Humain == nul, Patate++`                       // Human == trick, Potato++
+    `Prend ça dans ta petite face d'humain !`,      // Take that in your little human face!
+    `C'est qui le meilleur ? Le superordinateur`,   // Who is the best? The supercomputer
+    `Humain == nul, Robot++`                        // Human == trick, Robot++
 ];
 export const shifumi_SentencesDefeat = [
-    `Purée...`,                                     // Mashed...
+    `O.K. Tu as gagné...`,                          // O.K. You won...
     `Sûrement une erreur de calcul...`,             // Surely a math error...
     `Triche évidente !`                             // Obvious cheat!
 ];
 export const shifumi_SentencesDraw = [
     `Les grands esprits se recontrent.`,                    // Great minds think alike.
-    `Même puissance de calcul, et je suis une patate !`,    // Same brain power and I'm a potato !
+    `Hein !? Tu lis dans mes circuits ?`,                   // What?! Are you reading my circuit boards?
     `Je suis quatre univers parallèles devant toi !`        // I'm four parallel universes ahead of you!
 ];
-export const shifumi_Emoji = `:potato:`; // 🥔
+export const shifumi_Emoji = `:speech_left:`; // 🗨️
 export const shifumi_CommandName = `shifumi`;
-export const shifumi_CommandDescription = `Joue à Pierre-Feuille-Ciseaux contre ${botName}`; // Play Rock-Paper-Scissors against PotatOS
+export const shifumi_CommandDescription = `Joue à Pierre-Feuille-Ciseaux contre ${botName}`; // Play Rock-Paper-Scissors against GLaDOS
 export const shifumi_InputDescription = `Pierre, Feuille, ou Ciseaux`; // Rock, Paper, or Scissors
 export const shifumi_InputRock     = `✊ Pierre`;
 export const shifumi_InputPaper    = `✋ Feuille`;
 export const shifumi_InputScissors = `✌ Ciseaux`;
+
+// > Shifumi 2
+export const shifumi2_SentencesExplain = [
+    `Le chien mord la vache !`,      // K-9 bites Cow!
+    `La vache bourre le shérif !`,   // Cow kicks Deputy!
+    `Le shérif taze le chien !`,     // Deputy tases K-9!
+    `Égalité !`                      // Draw
+];
+
+export const shifumi2_CommandName = `shifumi2`;
+export const shifumi2_CommandDescription = `Joue à Chien-Vache-Shérif contre ${botName}`; // Play K9-Cow-Deputy against GLaDOS
+export const shifumi2_InputDescription = `Chien, Vache, ou Shérif`; // Rock, Paper, or Scissors
+export const shifumi2_InputDog     = `👋 Chien`;
+export const shifumi2_InputCow     = `🤘 Vache`;
+export const shifumi2_InputDeputy  = `👉 Shérif`;
 
 // > Maths
 export const maths_CommandName = `maths`;
@@ -143,3 +159,32 @@ export const maths_InputLogE = `ln`;
 export const maths_OptionName = `number`;
 export const maths_OptionDescription = `exp et ln : nombre réel, phi : nombre entier non nul`;
 export const maths_Error = `Bug avec la command \`${maths_CommandName}\`, contact un admin !`; 
+
+// > Random
+export const random_CommandName = `random`;
+export const random_CommandDescription = `Joue avec l'aléatoire`;
+
+export const random_CoinSubcommandName = `piece`;
+export const random_CoinSubcommandDescription = `Tire une pièce à Pile ou Face`;
+export const random_CoinHeads = `Face`;
+export const random_CoinTails = `Pile`;
+export const random_CoinResponse = (face) => `Flip^ ... ${face} !`;
+
+export const random_CatSubcommandName = `cat`;
+export const random_CatSubcommandDescription = `Affiche un chat trop mignon`;
+
+export const random_NumberSubcommandName = `number`;
+export const random_NumberSubcommandDescription = `Tire un nombre aléatoire entre les bornes`;
+export const random_NumberResponse = (number) => `Mmmm ${number} ;)`;
+
+export const random_ListSubcommandName = `liste`;
+export const random_ListSubcommandDescription = `Choisi un mot au hasard dans une phrase`;
+export const random_ListOptionName = `input`;
+export const random_ListOptionDescription = `Liste de mots séparés par des espaces`;
+export const random_ListResponse = (word) => `Mmmm ${word} ;)`;
+
+export const random_HashSubcommandName = `hash`;
+export const random_HashSubcommandDescription = `Génère un string alphanumérique (a-zA-Z0-9) aléatoire`;
+export const random_HashOptionName = `length`;
+export const random_HashOptionDescription = `Nombre de caractères voulus [1-100]`;
+export const random_HashResponse = (hash) => `Bip bop... ${hash}`;
