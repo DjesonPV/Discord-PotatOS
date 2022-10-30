@@ -65,7 +65,7 @@ export default class VoiceSubscription {
                     await DiscordJsVoice.entersState(this.#voiceConnection, DiscordJsVoice.VoiceConnectionStatus.Ready, 20000);
                 } catch (err) {
                     if (isVoiceConnectionDestroyed(this.#voiceConnection.state.status)) {
-                        this.#voiceConnection.destroy();
+                        this.#unsubscribeFinish();
                     }
                 } finally {
                     this.#voiceConnectionReadyLock = false;

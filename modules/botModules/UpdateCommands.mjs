@@ -1,21 +1,17 @@
 import {REST} from '@discordjs/rest';
 import {Routes} from 'discord.js/node_modules/discord-api-types/v10.mjs';
 
-import {createRequire} from 'module';
-
 import * as SlashCommands from '../botCommands/SlashCommands.mjs';
 import * as ContextMenuCommands from '../botCommands/ContextMenuCommands.mjs';
 import * as LANG from "../Language.mjs";
 
-export async function updateSlashCommands() {
-    const require = createRequire(import.meta.url);
+export async function updateSlashCommands(botToken, botID , guildsID) {
 
-    const secret = require("../../secret.json");
-
-    const rest = new REST({ version: '10' }).setToken(secret.botToken);
+    const rest = new REST({ version: '10' }).setToken(botToken);
 
     const commandList = [];
 
+//* Comment bloc to remove commands from API
     for (let commandName in SlashCommands){
         commandList.push(SlashCommands[commandName].slash.toJSON());
     }
@@ -23,14 +19,15 @@ export async function updateSlashCommands() {
     for (let commandName in ContextMenuCommands){
         commandList.push(ContextMenuCommands[commandName].menu.toJSON());
     }
+//*/
 
     try {
         console.log(LANG.logCommandsRefreshStart);
 
-        for (let guildName in secret.guildsID){
+        for (let guildName in guildsID){
 
             await rest.put(
-                Routes.applicationGuildCommands(secret.botID, (secret.guildsID[guildName])),
+                Routes.applicationGuildCommands(botID, (guildsID[guildName])),
                 { body: commandList },
             );                
         };

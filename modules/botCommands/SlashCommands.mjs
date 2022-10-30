@@ -39,3 +39,7 @@ export {
 export {
     random
 } from "./slashCommands/random.mjs";
+
+export {
+    hide
+} from "./slashCommands/hide.mjs"

@@ -158,6 +158,7 @@ function fetchMetadatafromFile(url) {
 
 	/** @type {string} */ const title = MP3Files.files[mp3Key].title;
 	/** @type {string} */ const description = MP3Files.files[mp3Key].description;
+	/** @type {string} */ const thumbnail = MP3Files.files[mp3Key].thumbnail ?? LANG.musicdisplayerDefaultThumbnail;
 
 	return {
 		isLive: false,
@@ -170,7 +171,7 @@ function fetchMetadatafromFile(url) {
 		color: LANG.musicdisplayerBotColor,
 		description: description,
 		title: title,
-		thumbnail: mp3Key==="fortnite"?LANG.musicdisplayerFortniteGIF:LANG.musicdisplayerDefaultThumbnail,
+		thumbnail: thumbnail,
 
 		// Data used in the MusicDisplayer Playlist SelectMenu
 		playlistDescription: LANG.musicdisplayerThroughCommand,

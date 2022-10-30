@@ -53,7 +53,6 @@ export const musicdisplayerBotColor = `#28ACE3`;
 export const musicdisplayerNoColor = `#000000`;
 export const musicdisplayerRadioColor = `#0FF388`;
 export const musicdisplayerDefaultThumbnail = `https://cdn.discordapp.com/attachments/329613279204999170/1035569019027206165/GLaDOS_de_base_black_and_white.png`;
-export const musicdisplayerFortniteGIF = `https://cdn.discordapp.com/attachments/329613279204999170/1035977076827771081/dva_default_dance.gif`;
 export const musicdisplayerRadioThumbnail = `https://media.discordapp.net/attachments/970417796729143316/1006689396805861427/unknown.png`;
 export const musicdisplayerPlayingError = `\n\n\`\`\`diff\n- Impossible de jouer ce média, vérifie la source ou réessaie\n\`\`\``;
 export const musicdisplayerLoadingAsciiArt = `\`\`\`\n                !\n                |\n                |    |~/\n                |   _|~\n  .============.|  (_|   |~/\n.-;____________;|.      _|~\n| [_________I__] |     (_|\n|  """"" (_) (_) |\n| .=====..=====. |\n| |:::::||:::::| |\n| '=====''=====' |\n'----------------'\n\`\`\``;
@@ -188,3 +187,5 @@ export const random_HashSubcommandDescription = `Génère un string alphanuméri
 export const random_HashOptionName = `length`;
 export const random_HashOptionDescription = `Nombre de caractères voulus [1-100]`;
 export const random_HashResponse = (hash) => `Bip bop... ${hash}`;
+
+export const hide_CommandDescription = `Te déplace dans le Salon Vocal caché`;
