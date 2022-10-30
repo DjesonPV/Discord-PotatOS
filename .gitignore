@@ -1,5 +1,7 @@
 /node_modules
 secret.json
+secret-glados.json
+secret-potatos.json
 *.bak
 /.github
 package-lock.json

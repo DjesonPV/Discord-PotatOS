@@ -8,7 +8,7 @@ import * as DiscordJS from 'discord.js';
  * @param {DiscordJS.Snowflake} userID 
  */
 export async function init (client, guildID, userID) {
-    const file = fs.readFileSync("../../assets/tikilist.txt", "utf-8");
+    const file = fs.readFileSync("./assets/tikilist.txt", "utf-8");
     const nicknameList = file.split('\n');
 
     const changeName = () => {           // 24 hours in ms
