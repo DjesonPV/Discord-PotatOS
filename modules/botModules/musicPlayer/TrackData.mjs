@@ -158,6 +158,7 @@ function fetchMetadatafromFile(url) {
 
 	/** @type {string} */ const title = MP3Files.files[mp3Key].title;
 	/** @type {string} */ const description = MP3Files.files[mp3Key].description;
+	/** @type {string} */ const thumbnail = MP3Files.files[mp3Key].thumbnail ?? LANG.musicdisplayerDefaultThumbnail;
 
 	return {
 		isLive: false,
@@ -165,11 +166,12 @@ function fetchMetadatafromFile(url) {
 		// Data used in the MusicDisplayer Embed
 		author: {
 			name: LANG.musicdisplayerCommandCalledSoundsample(mp3Key),
-			iconURL: LANG.musicdisplayerBotIcon,
+			iconURL: LANG.botIcon,
 		},
 		color: LANG.musicdisplayerBotColor,
 		description: description,
 		title: title,
+		thumbnail: thumbnail,
 
 		// Data used in the MusicDisplayer Playlist SelectMenu
 		playlistDescription: LANG.musicdisplayerThroughCommand,

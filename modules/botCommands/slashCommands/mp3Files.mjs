@@ -7,11 +7,12 @@ import * as LANG from "../../Language.mjs";
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 async function cmdSoundSample(interaction) {
-    const {subscription, isNew} = VoiceSubscription.create(interaction, true);
+
+    const sampleKey = interaction.options.getString(LANG.playsound_OptionName);
+
+    const {subscription, isNew} = VoiceSubscription.create(interaction, sampleKey!=="fortnite");
     if (subscription?.isMemberConnected(interaction.member)) {
         const thinkingMessage = await MessageSafeDelete.startThinking(interaction);
-
-        const sampleKey = interaction.options.getString(LANG._PLAYSOUND_OPTION_NAME);
         
         subscription.playlist.replaceCurrent(`${MP3Files.path}${MP3Files.files[sampleKey].file}`, interaction.id, MP3Files.files[sampleKey].volume);
         subscription.playlist.fetchCurrentAudio();
@@ -26,8 +27,8 @@ const slashSoundSample = new DiscordJs.SlashCommandBuilder()
     .setName(LANG.playsound_CommandName)
     .setDescription(LANG.playsound_CommandDescription)
     .addStringOption(option => option
-        .setName(LANG.playsound_InputName)
-        .setDescription(LANG.playsound_InputDescription)
+        .setName(LANG.playsound_OptionName)
+        .setDescription(LANG.playsound_OptionDescription)
         .addChoices(...getSampleChoices())
         .setRequired(true)
     )

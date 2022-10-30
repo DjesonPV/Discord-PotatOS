@@ -1,4 +1,3 @@
-//PotatOS - Commands
 // > ROCK PAPER SCISSORS / SHIFUMI / ROSHAMBO
 //  • • • • • • • • • • • • • • • • • • • • • • • •
 import * as DiscordJs from 'discord.js';

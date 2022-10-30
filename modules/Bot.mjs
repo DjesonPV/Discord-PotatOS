@@ -10,6 +10,7 @@ import * as SelectMenuInteractions from "./botCommands/SelectMenuInteractions.mj
 
 import * as LANG from "./Language.mjs";
 import * as SlashCommandsUpdate from "./botModules/UpdateCommands.mjs";
+import * as Tikilist from "./botModules/Tikilist.mjs";
 
 import ExploreChannels from "./botModules/ExploreChannels.mjs";
 import MessageSafeDelete from './botModules/MessageSafeDelete.mjs';
@@ -22,11 +23,12 @@ import MessageSafeDelete from './botModules/MessageSafeDelete.mjs';
 */
 const client = new DiscordJs.Client({
     intents: [
-        DiscordJs.GatewayIntentBits.Guilds,
-        DiscordJs.GatewayIntentBits.GuildMessages,
-        DiscordJs.GatewayIntentBits.GuildMessageReactions,
-        DiscordJs.GatewayIntentBits.GuildVoiceStates,
-        DiscordJs.GatewayIntentBits.MessageContent
+        DiscordJs.GatewayIntentBits.Guilds, // Commands
+        //DiscordJs.GatewayIntentBits.GuildMessages,
+        DiscordJs.GatewayIntentBits.GuildMessageReactions, // BRUH
+        DiscordJs.GatewayIntentBits.GuildVoiceStates,   // Music Player
+        DiscordJs.GatewayIntentBits.GuildMembers // Tikilist and Hidden VoiceChannel
+        //DiscordJs.GatewayIntentBits.MessageContent
     ]
 });
 
@@ -65,7 +67,8 @@ export function start() {
                 if (memberMe) memberMe.voice.disconnect();
             });
 
-            await SlashCommandsUpdate.updateSlashCommands();
+            await SlashCommandsUpdate.updateSlashCommands(secret.botToken, secret.botID, secret.guildsID);
+            await Tikilist.init(client, secret.guildsID['Le Tout Kastanie'], secret.usersID['Tikitik']);
 
             console.log(LANG.logReady);
         })

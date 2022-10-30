@@ -43,11 +43,19 @@ export const files = {
         volume : 0.2,
     },
 
+    factchecking : {
+        file  : "la-redaction-de-bfmtv.mp3",
+        title : "La rédaction de BFMTV est évidement mobilisée ce soir.",
+        description : "Nous somme dix journalistes, chacun dans sa spécialité.",
+        volume : 1.0,
+    },
+
     fortnite : {
         file  : "fortnite-default-dance-sound.mp3",
         title : "Default Dance",
         description : "Scrub - Turk Dance",
         volume : 0.4,
+        thumbnail : "https://cdn.discordapp.com/attachments/329613279204999170/1035977076827771081/dva_default_dance.gif",
     },
 
     ine : {
@@ -57,22 +65,29 @@ export const files = {
         volume : 1.0,
     },
 
-    kfc :{
+    kfc : {
         file  : "11-tenders-kfc-pour-seulement-695eur-le-mardi.mp3",    // Transcript of a TV Ad :
         title : "Le mardi dégustez onze délicieux tenders !",           // Eat eleven tasty teneder every Tuesdays
         description : "Pour seulement 6€95 chez KFC",                   // For only €6.95, KFC
         volume : 0.9,
     },
 
-    neige: {
-        file: "lasalle-neige.mp3",
-        title: "Salut à tous c'est Lasalle",
+    maxfortich : {
+        file  : "salut-tout-le-monde-c-est-max-fortich.mp3",
+        title : "Salut tout le monde",
+        description : "c'est Max Fortich",
+        volume : 1.0,
+    },
+
+    neige : {
+        file  : "lasalle-neige.mp3",
+        title : "Salut à tous c'est Lasalle",
         description: "Effectivement elle est là",
         volume: 1.0,
     },
 
     paris : {
-        file : "paris.mp3",                         // French politics meme about JL Melenchon hologram : 
+        file  : "paris.mp3",                         // French politics meme about JL Melenchon hologram : 
         title : "Alors où suis-je ? À Lyon...",     // Well, where am I? In Lyon...
         description : "Et maintenant à Paris !",    // And now in Paris!
         volume : 1.0,
@@ -92,11 +107,25 @@ export const files = {
         volume : 0.8,
     },
 
+    rlah : {
+        file  : "rlah.mp3",
+        title : "Mais comment tu t'appelles mon gros ?",
+        description : "Je m'appelle Bourletos",
+        volume : 1.2,
+    },
+
     somaj : {
         file  : "somaj.mp3",    // Joke about Romanians asking for Unemployent money in France: 
         title : "somaj",        // money pls
         description : "🙏",
         volume : 2.0,
+    },
+
+    stonks : {
+        file  : "stonks.mp3",
+        title : "STONKS",
+        description : "📈",
+        volume : 1.0,
     },
 
     ununun : {

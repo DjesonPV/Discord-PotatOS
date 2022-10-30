@@ -1,11 +1,11 @@
-import Axios from 'axios';
+import fetch from "node-fetch";
 import * as LANG from '../Language.mjs';
 
 /** @param {string} query */
 export async function searchForRadioUrl(query) {
     try {
         /** @type {string} */
-        const url = (await Axios.get(`https://radio.garden/api/search?q=${encodeURIComponent(query)}`))?.data
+        const url = (await (await fetch(`https://radio.garden/api/search?q=${encodeURIComponent(query)}`)).json())
         ?.hits?.hits
         ?.find((hit) => hit?._source?.type === 'channel')
         ?._source?.url;
@@ -22,8 +22,8 @@ export async function searchForRadioUrl(query) {
 export async function getRadioData(url){
     const radioChannelId = matchRadioChannelforId(url)?.[1];
     if (radioChannelId !== undefined){
-        const channel = await Axios.get(`https://radio.garden/api/ara/content/channel/${radioChannelId}`);
-        return channel?.data?.data;
+        const channel = await (await fetch(`https://radio.garden/api/ara/content/channel/${radioChannelId}`)).json()
+        return channel.data;
     }
     else {
         return Promise.reject(`RadioGarden: Invalid URL`);

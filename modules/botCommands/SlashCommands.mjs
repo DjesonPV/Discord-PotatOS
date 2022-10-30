@@ -10,6 +10,10 @@ export {
 } from "./slashCommands/shifumi.mjs";
 
 export {
+    shifumi2
+} from "./slashCommands/shifumi2.mjs";
+
+export {
     pc,
     pk,
     pd,
@@ -31,3 +35,11 @@ export {
     pause,
     radio,
 } from "./slashCommands/musicPlayer.mjs";
+
+export {
+    random
+} from "./slashCommands/random.mjs";
+
+export {
+    hide
+} from "./slashCommands/hide.mjs"
