@@ -1,5 +1,12 @@
 export const path = "./assets/mp3voice/";
 export const files = {
+    aaaaaugh : {
+        file  : "aaaaaugh.mp3",
+        title : "AAAAUGH",
+        description : "🤣",
+        volume : 0.4,
+
+    },
 
     bang : {
         file  : "bang.mp3",
@@ -36,11 +43,25 @@ export const files = {
         volume : 0.9,
     },
 
+    certified_hood_classic : {
+        file  : "this-is-a-certified-hood-classic.mp3",
+        title : "This is a Certified Hood Classic",
+        description : "https://www.youtube.com/watch?v=-tvs8a_hOQo",
+        volume : 1.0,
+    },
+
     cum : {
         file  : "keanu-reeves-says-why-do-you-cum.mp3",
         title : "Wake up Samuraï",
         description : "In 2077 what makes someone a criminal ?",
         volume : 0.2,
+    },
+
+    deez_nuts : {
+        file  : "deez-nuts.mp3",
+        title : "DEEZ NUTS",
+        description: "Inspiré de : Dr. Dre and Dat Nigga Daz - Deeez Nuuuts",
+        volume : 0.7,
     },
 
     factchecking : {
@@ -112,6 +133,13 @@ export const files = {
         title : "Mais comment tu t'appelles mon gros ?",
         description : "Je m'appelle Bourletos",
         volume : 1.2,
+    },
+
+    skibidi_bop_mm_dada :  {
+        file  : "skibidi-bop-mm-dada.mp3",
+        title : "Skibidi Bop Mm Dada",
+        description : "Intro de ReviewTechUSA",
+        volume  : 0.8,
     },
 
     somaj : {
