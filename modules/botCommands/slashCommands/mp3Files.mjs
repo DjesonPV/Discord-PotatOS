@@ -1,5 +1,5 @@
 import VoiceSubscription from "../../botModules/musicPlayer/VoiceSubscription.mjs";
-import * as MP3Files from "../../botModules/MP3Files.mjs";
+import * as MP3Files from "../../../assets/mp3FileList.mjs";
 import * as DiscordJs from 'discord.js';
 import MessageSafeDelete from '../../botModules/MessageSafeDelete.mjs';
 import * as MessagePrintReply from "../../botModules/MessagePrintReply.mjs";
@@ -14,7 +14,7 @@ async function cmdSoundSample(interaction) {
     if (subscription?.isMemberConnected(interaction.member)) {
         const thinkingMessage = await MessageSafeDelete.startThinking(interaction);
         
-        subscription.playlist.replaceCurrent(`${MP3Files.path}${MP3Files.files[sampleKey].file}`, interaction.id, MP3Files.files[sampleKey].volume);
+        subscription.playlist.replaceCurrent(`${MP3Files.path}${MP3Files.files[sampleKey].file}`, interaction.id, MP3Files.files[sampleKey].volume, "MP3Sample", sampleKey);
         subscription.playlist.fetchCurrentAudio();
 
         MessageSafeDelete.stopThinking(thinkingMessage); 

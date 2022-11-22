@@ -34,6 +34,7 @@ export {
     skip,
     pause,
     radio,
+    localRadio,
 } from "./slashCommands/musicPlayer.mjs";
 
 export {

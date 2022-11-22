@@ -87,14 +87,14 @@ export default class SubscriptionPlaylist extends NodeEvents.EventEmitter{
     unlock() { this.#lock = false; }
     isLocked(){ return this.#lock; }
 
-    add(url, snowflake, volume, query = null) {
+    add(url, snowflake, volume, source, query = null) {
         this.lock();
         this.playlist.push({
             id: snowflake, 
             url: url,
             volume: volume,
             audio: null,
-            data: new TrackData(url).fetchData(this, snowflake, query),
+            data: new TrackData(url, source, query).fetchData(this, snowflake),
             query: query,
             live: true,
             failed: false,
@@ -103,14 +103,14 @@ export default class SubscriptionPlaylist extends NodeEvents.EventEmitter{
         this.unlock();
     }
 
-    replaceCurrent(url, snowflake, volume) {
+    replaceCurrent(url, snowflake, volume, source, query) {
         this.lock();
         this.current = {
             id: snowflake, 
             url: url,
             volume: volume,
             audio: null,
-            data: new TrackData(url).fetchData(this, snowflake, null),
+            data: new TrackData(url, source, query).fetchData(this, snowflake),
             query: null,
             live: true,
             failed: false,

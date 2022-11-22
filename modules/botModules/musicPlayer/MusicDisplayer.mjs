@@ -5,6 +5,7 @@ import * as SelectMenuInteractions      from "../../botCommands/SelectMenuIntera
 import ExploreChannel from '../ExploreChannels.mjs';
 
 import * as LANG from "../../Language.mjs";
+import * as UTILS from "../Utils.mjs";
 import SubscriptionPlaylist from "./SubscriptionPlaylist.mjs";
 
 export default class MusicDisplayer {
@@ -123,7 +124,7 @@ export default class MusicDisplayer {
             .setThumbnail(curatedTrackData.data.thumbnail ?? LANG.musicdisplayerDefaultThumbnail)
             .setFooter({text : LANG.musicdisplayerFooter(this.#currentGuildName, this.#currentVoiceChannelName).substring(0, 2048)});
         ;
-        if (curatedTrackData.data.url !== undefined) displayerEmbed.setURL(curatedTrackData.data.url);
+        if (curatedTrackData.data.url !== undefined && UTILS.isItAnURL(curatedTrackData.data.url)) displayerEmbed.setURL(curatedTrackData.data.url);
         if (displayFailedToPlayMessage === false) displayerEmbed.setDescription(curatedTrackData.data.description.substring(0, 4096));
         else displayerEmbed.setDescription(
             curatedTrackData.data.description
