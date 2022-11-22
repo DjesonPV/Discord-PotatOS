@@ -4,7 +4,8 @@ import SubscriptionPlaylist from "./SubscriptionPlaylist.mjs";
 
 import * as UTILS from '../Utils.mjs';
 import * as LANG from '../../Language.mjs';
-import * as MP3Files from "../MP3Files.mjs";
+import * as MP3Files from "../../../assets/mp3FileList.mjs";
+import * as LocalRadio from "../../../assets/localRadioList.mjs";
 
 import ytdl from 'youtube-dl-exec';
 import * as RadioGarden from '../RadioGarden.mjs';
@@ -12,19 +13,24 @@ import favcolor from 'favcolor';
 
 export default class TrackData {
 
-	/** @param {string} url */
-	constructor(url) {
-		this.url = url
+	/** 
+	 * @param {string} url
+	 * @param {DiscordJs.Snowflake} snowflake
+	 * @param {string} source 
+	 * @param {string} query
+	 */
+	constructor(url, source, query) {
+		this.url = url, 
+		this.source = source;
+		this.query = query;
 	}
 
 	/** 
 	 * @param {SubscriptionPlaylist} subscription 
-	 * @param {DiscordJs.Snowflake} snowflake
-	 * @param {string} searchQuery
 	 */
-	fetchData(subscription, snowflake, searchQuery) {
+	fetchData(subscription, snowflake) {
 		return new Promise( (resolve) => {  // Here we will always resolve, should not fail
-			fetchMetadata(this.url, searchQuery).then(
+			fetchMetadata(this.url, this.source, this.query).then(
 				(metadata) => {
 					resolve(true);
 					subscription.emit('dataReady', snowflake, metadata);
@@ -52,16 +58,28 @@ export default class TrackData {
 
 } // class TrackData
 
-function fetchMetadata(url, searchQuery) {
-	return new Promise ( async (resolve) => { // will always return something
-		if (url.startsWith(MP3Files.path)) { // it is LocalFile
-			resolve(fetchMetadatafromFile(url));
-		} else if (RadioGarden.matchRadioChannelforId(url) != null) {
-			resolve(await fetchMetadatafromRadioGarden(url, searchQuery));
-		} else {
-			resolve(await fetchMetadatafromYTDLP(url, searchQuery));
-		} // fi
+
+function fetchMetadata(url, source, query) {
+	return new Promise ( async (resolve) => {
+		//console.log(`URL : ${url}\n Source : ${source} \nQuery : ${query}\n\n`);
+		switch (source) {
+			case "MP3Sample":
+				resolve(fetchMetadataFromFile(query));
+			break;
+			case "LocalRadio":
+				resolve(fetchMetadataFromLocalRadio(url, query));
+			break;
+			case "RadioGarden":
+				resolve(await fetchMetadataFromRadioGarden(url, query));
+			break;
+			case "YTDLP":
+			default:
+				resolve(await fetchMetadataFromYTDLP(url, query));
+			break;
+		};
+
 	});
+
 } // fetchMetadata()
 // _____________________________________________________________________________________________________________________
 
@@ -70,7 +88,7 @@ function fetchMetadata(url, searchQuery) {
  * @param {string} url 
  * @returns 
  */
-async function fetchMetadatafromYTDLP(url, searchQuery) {
+async function fetchMetadataFromYTDLP(url, searchQuery) {
 	return await new Promise((resolve, reject) => {
 		const timeout = setTimeout(() => {
 			reject();
@@ -138,52 +156,77 @@ async function fetchMetadatafromYTDLP(url, searchQuery) {
 	}, () => { // Failed to get metadata from YTDLP
 
 		if (searchQuery === null || searchQuery === undefined) {
-			return fetchMetadatafromInternet(url);
+			return fetchMetadataFromInternet(url);
 		} else {
 			return failedYoutubeSearchFetch(url, searchQuery);
 		}
 	});
-} // fetchMetadatafromYTDLP()
+} // fetchMetadataFromYTDLP()
 // _____________________________________________________________________________________________________________________
 
 /** Fetch data from the MP3Files */
-function fetchMetadatafromFile(url) {
+function fetchMetadataFromFile(key) {
 
-	const mp3Key = Object.keys(MP3Files.files).find(key => MP3Files.files[key].file === url.slice(MP3Files.path.length));
+	const file = MP3Files.files[key];
 
-	if(mp3Key === undefined) {
-		throw 'mp3Key undefined';;
+	if (file === undefined) {
+		throw 'mp3Key undefined';
 	}
-	
-
-	/** @type {string} */ const title = MP3Files.files[mp3Key].title;
-	/** @type {string} */ const description = MP3Files.files[mp3Key].description;
-	/** @type {string} */ const thumbnail = MP3Files.files[mp3Key].thumbnail ?? LANG.musicdisplayerDefaultThumbnail;
 
 	return {
 		isLive: false,
 
 		// Data used in the MusicDisplayer Embed
 		author: {
-			name: LANG.musicdisplayerCommandCalledSoundsample(mp3Key),
+			name: LANG.musicdisplayerCommandCalledSoundsample(key),
 			iconURL: LANG.botIcon,
 		},
 		color: LANG.musicdisplayerBotColor,
-		description: description,
-		title: title,
-		thumbnail: thumbnail,
+		description: file.description,
+		title: file.title,
+		thumbnail: file.thumbnail ?? LANG.musicdisplayerDefaultThumbnail,
 
 		// Data used in the MusicDisplayer Playlist SelectMenu
 		playlistDescription: LANG.musicdisplayerThroughCommand,
-		playlistTitle: mp3Key,
+		playlistTitle: key,
 	};
-} // fetchMetadatafromFile()
+} // fetchMetadataFromFile()
+// _____________________________________________________________________________________________________________________
+
+/** Fetch data from the filed info from the LocalRadioList */
+function fetchMetadataFromLocalRadio(url, key) {
+
+	const radio = LocalRadio.radios[key];
+
+	if (radio === undefined) return fetchMetadataFromInternet(url);
+
+	return {
+		isLive: true,
+
+		// Data used in the MusicDisplayer Embed
+		author: {
+			name: radio.name,
+			url: radio.web,
+			iconURL: LANG.musicdisplayerRadioIcon,
+		},
+		color: LANG.musicdisplayerRadioColor,
+		description: radio.description,
+		title: radio.title,
+		url: radio.url,
+		thumbnail: radio.thumbnail ?? LANG.musicdisplayerRadioThumbnail,
+
+		// Data used in the MusicDisplayer Playlist SelectMenu
+		playlistDescription: radio.title,
+		playlistTitle: `🟢 ${radio.name}`,
+	};
+} // fetchMetadataFromLocalRadio()
+
 // _____________________________________________________________________________________________________________________
 
 /** Try do to something for Internet Files
  * @param {string} url 
  */
-async function fetchMetadatafromInternet(url) {
+async function fetchMetadataFromInternet(url) {
 
 	/** @type {string} */ const uri = url.split('/').filter(Boolean); //Split an url and remove empty strings
 	/** @type {string} */ const source = uri[1];
@@ -208,11 +251,11 @@ async function fetchMetadatafromInternet(url) {
 		playlistDescription: url,
 		playlistTitle: file,
 	};
-} // fetchMetadatafromInternet()
+} // fetchMetadataFromInternet()
 // _____________________________________________________________________________________________________________________
 
 /** Fetch Data from Radio Garden */
-async function fetchMetadatafromRadioGarden(url, searchQuery) {
+async function fetchMetadataFromRadioGarden(url, searchQuery) {
 
 	return await RadioGarden.getRadioData(url).then( info => {
 		return {
@@ -238,7 +281,7 @@ async function fetchMetadatafromRadioGarden(url, searchQuery) {
 	}, () => {
 		return failedRadioGardenFetch(url, searchQuery);
 	});
-} // fetchMetadatafromRadioGarden()
+} // fetchMetadataFromRadioGarden()
 // _____________________________________________________________________________________________________________________
 
 /**

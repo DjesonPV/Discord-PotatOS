@@ -99,6 +99,8 @@ export const play_CommandDescription    = `${botName} Music Player : PLAY | (Re)
 export const play_OptionDescription     = `URL du média à jouer ou texte à chercher sur YouTube`;
 export const radio_CommandDescription   = `${botName} Music Player : RADIO | Ajoute une radio au lecteur de musique`;
 export const radio_InputDescription    = `Recherche par nom de radio ou directement un lien de station sur Radio Garden`;
+export const localradio_CommandDescription   = `${botName} Music Player : RADIO | Ajoute une radio au lecteur de musique`;
+export const localradio_InputDescription    = `Sélectionne une station parmi les options affichées`;
 
 export const play_SearchYieldedNoResult = (query) => `Aucune vidéo trouvée pour {${query}}`;
 export const play_SearchingError = `Problème lors de la recherche`;

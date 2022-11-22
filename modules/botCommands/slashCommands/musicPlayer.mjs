@@ -9,7 +9,7 @@ import * as LANG from '../../Language.mjs';
 
 import * as SurfYT from "surfyt-api";
 import * as RadioGarden from '../../botModules/RadioGarden.mjs';
-
+import * as LocalRadios from "../../../assets/localRadioList.mjs";
 
 /** @param {DiscordJs.ChatInputCommandInteraction} interaction */
 function replyYourNotConnected(interaction) {
@@ -57,7 +57,7 @@ async function cmdPlay(interaction) {
         }
 
         if (url !== undefined) { 
-            subscription.playlist.add(url, interaction.id, 0.15, queryString);
+            subscription.playlist.add(url, interaction.id, 0.15, "YTDLP", queryString);
             if (isNew) subscription.playlist.fetchCurrentAudio();
         }
 
@@ -185,7 +185,7 @@ async function cmdRadio(interaction) {
         }
 
         if (url !== undefined) { 
-            subscription.playlist.add(url, interaction.id, 0.15, query);
+            subscription.playlist.add(url, interaction.id, 0.15, "RadioGarden", query);
             if (isNew) subscription.playlist.fetchCurrentAudio();
         }
 
@@ -206,3 +206,51 @@ const slashRadio = new DiscordJs.SlashCommandBuilder()
 ;
 
 export const radio = { slash: slashRadio, command: cmdRadio };
+
+//______________________________________________________________________________________________________________________
+// Local Radios
+
+/** @param {DiscordJs.ChatInputCommandInteraction} interaction */
+async function cmdLocalRadio(interaction) {
+    const {subscription, isNew} = VoiceSubscription.create(interaction);
+    if (subscription?.isMemberConnected(interaction.member)) {
+        const thinkingMessage = await MessageSafeDelete.startThinking(interaction);
+
+        const query = interaction.options.getString('query');
+
+        const url = LocalRadios.radios[query]?.url;
+
+        if (url !== undefined) { 
+            subscription.playlist.add(url, interaction.id, 0.15, "LocalRadio", query);
+            if (isNew) subscription.playlist.fetchCurrentAudio();
+        }
+
+        MessageSafeDelete.stopThinking(thinkingMessage); 
+    } else {
+        replyYourNotConnected(interaction);
+    }
+}
+
+const slashLocalRadio = new DiscordJs.SlashCommandBuilder()
+    .setName('localradio')
+    .setDescription(LANG.localradio_CommandDescription)
+    .addStringOption(option => option
+        .setName('query')
+        .setDescription(LANG.localradio_InputDescription)
+        .setRequired(true)  
+        .addChoices(...getLocalRadioChoices())
+    )
+;
+
+export const localRadio = { slash: slashLocalRadio, command: cmdLocalRadio };
+
+function getLocalRadioChoices(){
+    const choices = [];
+
+    for (const key in LocalRadios.radios) {
+        if (Object.hasOwnProperty.call(LocalRadios.radios, key)) {
+            choices.push({name : `${LocalRadios.radios[key].title}`, value: `${key}`});
+        }
+    }
+    return choices;
+}
