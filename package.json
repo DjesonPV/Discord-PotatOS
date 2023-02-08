@@ -31,7 +31,7 @@
     "node-fetch": "^3.2.10",
     "node-schedule": "^2.1.0",
     "surfyt-api": "^0.1.2",
-    "youtube-dl-exec": "^2.1.6",
+    "youtube-dl-exec": "^2.2.3",
     "ytls": "^1.0.6"
   }
 }
