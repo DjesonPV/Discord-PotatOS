@@ -12,7 +12,7 @@ export default class MusicDisplayer {
 
     /** @type {DiscordJs.EmbedBuilder} */
     #displayerEmbed;
-    /** @type {DiscordJs.ActionRowBuilder<DiscordJs.SelectMenuBuilder> | null} */
+    /** @type {DiscordJs.ActionRowBuilder<DiscordJs.StringSelectMenuBuilder> | null} */
     #displayerPlaylistRow = null;
     /** @type {DiscordJs.ActionRowBuilder<DiscordJs.ButtonBuilder>} */
     #displayerButtonRow;

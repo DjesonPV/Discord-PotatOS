@@ -94,7 +94,7 @@ async function interactionHandler(interaction) {
         if (buttonInteraction) await buttonInteraction.command(interaction);
     }
     // DiscordJs.SelectMenuInteraction
-    else if (interaction.isSelectMenu() && isMessageFromBot(interaction.message)) {
+    else if (interaction.isStringSelectMenu() && isMessageFromBot(interaction.message)) {
         const selectMenuInteraction = Object.values(SelectMenuInteractions)
             .find(command => command.customId === interaction.customId)
             ;
