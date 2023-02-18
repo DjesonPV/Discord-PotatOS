@@ -2,7 +2,7 @@ import * as DiscordJs from 'discord.js';
 import * as LANG from '../../Language.mjs';
 import VoiceSubscription from '../../botModules/musicPlayer/VoiceSubscription.mjs';
 
-/** @param {DiscordJs.SelectMenuInteraction} interaction */
+/** @param {DiscordJs.StringSelectMenuInteraction} interaction */
 function commandPlaylist(interaction) {
     const subscription = VoiceSubscription.get(interaction.guild.id);
     if (subscription === undefined) {
@@ -111,7 +111,7 @@ const customIdPlaylist = 'PotatOSMusicPlayerPlaylist';
 
 /** @param {Array<import('../../botModules/musicPlayer/SubscriptionPlaylist.mjs').CuratedTrackData>} trackList */
 const selectMenuPlaylist = (trackList) => {
-    return new DiscordJs.SelectMenuBuilder()
+    return new DiscordJs.StringSelectMenuBuilder()
         .setCustomId(customIdPlaylist)
         .setPlaceholder(LANG.musicdisplayerShowPlaylist(trackList.length-1))
         .setMaxValues(1)

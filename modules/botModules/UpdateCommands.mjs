@@ -1,5 +1,4 @@
-import {REST} from '@discordjs/rest';
-import {Routes} from 'discord.js/node_modules/discord-api-types/v10.mjs';
+import {REST, Routes} from 'discord.js';
 
 import * as SlashCommands from '../botCommands/SlashCommands.mjs';
 import * as ContextMenuCommands from '../botCommands/ContextMenuCommands.mjs';
